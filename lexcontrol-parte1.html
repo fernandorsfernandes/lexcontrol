@@ -1247,6 +1247,9 @@ const titles = {
 };
 
 function navigate(view, el) {
+  if(window.parent && window.parent.lexNavigate && view !== 'dashboard'){
+    window.parent.lexNavigate(view); return;
+  }
   document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
   document.getElementById('view-' + view).classList.add('active');
   document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));

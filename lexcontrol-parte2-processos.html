@@ -854,9 +854,7 @@ function showToast(msg,type='') {
   setTimeout(()=>t.remove(),3200);
 }
 
-function goTo(view) {
-  showToast('Navegue para o arquivo da Parte 1 — '+view,'');
-}
+function goTo(v){ if(window.parent && window.parent.lexNavigate){ window.parent.lexNavigate(v); } else { showToast('Abra pelo index.html',''); } }
 
 // ============================================================
 // THEME

@@ -718,7 +718,7 @@ function showToast(msg,type=''){
   document.getElementById('toast-wrap').appendChild(t);
   setTimeout(()=>t.remove(),3200);
 }
-function goTo(v){showToast('Navegue para o arquivo da Parte 1 — '+v,'');}
+function goTo(v){ if(window.parent && window.parent.lexNavigate){ window.parent.lexNavigate(v); } else { showToast('Abra pelo index.html',''); } }
 
 function initTheme(){
   const btn=document.querySelector('[data-theme-toggle]');

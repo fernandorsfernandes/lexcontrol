@@ -141,6 +141,18 @@ button{cursor:pointer;background:none;border:none;font:inherit;color:inherit}
 
 @media(max-width:800px){.modules-grid{grid-template-columns:repeat(2,1fr)}.topbar-date{display:none}}
 @media(max-width:480px){.modules-grid{grid-template-columns:repeat(2,1fr)}.logo-sub{display:none}}
+
+/* USER MODAL */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.45);backdrop-filter:blur(4px);z-index:600;display:none;align-items:center;justify-content:center}
+.modal-overlay.open{display:flex}
+.modal-box{background:var(--surf);border-radius:var(--rx);box-shadow:var(--shl);width:100%;max-width:380px;overflow:hidden}
+.modal-header{padding:var(--s5);border-bottom:1px solid var(--div);display:flex;align-items:center;justify-content:space-between}
+.modal-header h3{font-family:var(--fd);font-size:var(--lg);font-style:italic}
+.modal-body{padding:var(--s5);display:flex;flex-direction:column;gap:var(--s4)}
+.modal-label{font-size:var(--xs);font-weight:700;color:var(--txm);text-transform:uppercase;letter-spacing:.06em;margin-bottom:var(--s2)}
+.modal-input{width:100%;padding:var(--s3) var(--s4);border:1px solid var(--bord);border-radius:var(--rm);background:var(--surf2);font-size:var(--sm);color:var(--tx);outline:none;transition:border-color var(--tr)}
+.modal-input:focus{border-color:var(--pri)}
+.modal-footer{padding:var(--s4) var(--s5);border-top:1px solid var(--div);display:flex;justify-content:flex-end;gap:var(--s3)}
 </style>
 </head>
 <body>
@@ -192,7 +204,7 @@ button{cursor:pointer;background:none;border:none;font:inherit;color:inherit}
     <span class="topbar-date" id="topbar-date"></span>
     <button class="icon-btn" onclick="openPalette()" title="Busca rápida (Ctrl+K)"><i data-lucide="search"></i></button>
     <button class="icon-btn" id="theme-btn" onclick="toggleTheme()" title="Alternar tema"><i data-lucide="sun"></i></button>
-    <div class="user-chip">
+    <div class="user-chip" onclick="openUserModal()" title="Personalizar perfil">
       <div class="u-av">DR</div>
       <span class="u-name">Dr. Advogado</span>
     </div>
@@ -299,6 +311,31 @@ button{cursor:pointer;background:none;border:none;font:inherit;color:inherit}
   </div>
 </div>
 
+
+<!-- USER MODAL -->
+<div class="modal-overlay" id="user-modal">
+  <div class="modal-box">
+    <div class="modal-header">
+      <h3>Perfil do Usuário</h3>
+      <button class="icon-btn" onclick="closeUserModal()"><i data-lucide="x"></i></button>
+    </div>
+    <div class="modal-body">
+      <div>
+        <div class="modal-label">Nome completo</div>
+        <input class="modal-input" id="input-username" placeholder="Ex: Dr. João Silva" maxlength="40">
+      </div>
+      <div>
+        <div class="modal-label">Cargo / Função</div>
+        <input class="modal-input" id="input-userrole" placeholder="Ex: Sócio Titular" maxlength="30">
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeUserModal()">Cancelar</button>
+      <button class="btn btn-primary" onclick="saveUser()">Salvar</button>
+    </div>
+  </div>
+</div>
+
 <div class="toast-wrap" id="toast-wrap"></div>
 
 <script>
@@ -323,11 +360,15 @@ let paletteFiltered = [...MODULES];
 // ============================================================
 // INIT
 // ============================================================
+// Expose navigation to iframes
+window.lexNavigate = function(id){ navigate(id); };
+
 document.addEventListener('DOMContentLoaded',()=>{
   lucide.createIcons();
   document.getElementById('topbar-date').textContent = new Date().toLocaleDateString('pt-BR',{weekday:'short',day:'numeric',month:'short',year:'numeric'});
   applyTheme();
   renderPaletteResults('');
+  loadUser();
 
   // Keyboard shortcuts
   document.addEventListener('keydown', e=>{
@@ -463,6 +504,35 @@ function showToast(msg,type=''){
   document.getElementById('toast-wrap').appendChild(t);
   setTimeout(()=>t.remove(),2500);
 }
+
+// ============================================================
+// USER PERSONALIZATION
+// ============================================================
+function loadUser(){
+  const name = localStorage.getItem('lex_username') || 'Dr. Advogado';
+  const role = localStorage.getItem('lex_userrole') || 'Sócio Titular';
+  const initials = name.replace('Dr. ','').replace('Dra. ','').split(' ').map(w=>w[0]).join('').substring(0,2).toUpperCase();
+  document.querySelector('.u-name').textContent = name;
+  document.querySelector('.u-av').textContent = initials;
+}
+function openUserModal(){
+  document.getElementById('input-username').value = localStorage.getItem('lex_username')||'';
+  document.getElementById('input-userrole').value = localStorage.getItem('lex_userrole')||'';
+  document.getElementById('user-modal').classList.add('open');
+  lucide.createIcons();
+  setTimeout(()=>document.getElementById('input-username').focus(),80);
+}
+function closeUserModal(){ document.getElementById('user-modal').classList.remove('open'); }
+function saveUser(){
+  const name = document.getElementById('input-username').value.trim() || 'Dr. Advogado';
+  const role = document.getElementById('input-userrole').value.trim() || 'Sócio Titular';
+  localStorage.setItem('lex_username', name);
+  localStorage.setItem('lex_userrole', role);
+  loadUser();
+  closeUserModal();
+  showToast('Perfil atualizado!','success');
+}
+
 </script>
 </body>
 </html>
