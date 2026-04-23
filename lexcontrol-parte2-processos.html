@@ -1,0 +1,879 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LexControl — Módulo Processos</title>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter:wght@300..700&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+<style>
+:root {
+  --color-bg:#f4f5f7; --color-surface:#fff; --color-surface-2:#f9fafb;
+  --color-surface-offset:#eef0f3; --color-divider:#d8dce4; --color-border:#cdd2db;
+  --color-text:#1a1f2e; --color-text-muted:#6b7280; --color-text-faint:#b0b7c3;
+  --color-primary:#1e3a5f; --color-primary-hover:#162d4a; --color-primary-highlight:#dce6f0;
+  --color-accent:#b8860b; --color-accent-hover:#9a6f08; --color-accent-highlight:#fdf3d7;
+  --color-success:#166534; --color-success-bg:#dcfce7;
+  --color-warning:#92400e; --color-warning-bg:#fef3c7;
+  --color-error:#991b1b; --color-error-bg:#fee2e2;
+  --color-info:#1e40af; --color-info-bg:#dbeafe;
+  --color-sidebar-bg:#1a2744; --color-sidebar-text:#c8d3e8;
+  --color-sidebar-muted:#7888aa; --color-sidebar-active:#2d4a80;
+  --color-sidebar-hover:#243256; --color-sidebar-border:#253360;
+  --font-display:'Instrument Serif',Georgia,serif;
+  --font-body:'Inter',system-ui,sans-serif;
+  --text-xs:.8rem; --text-sm:.9rem; --text-base:1rem; --text-lg:1.3rem; --text-xl:1.8rem;
+  --space-1:.25rem; --space-2:.5rem; --space-3:.75rem; --space-4:1rem;
+  --space-5:1.25rem; --space-6:1.5rem; --space-8:2rem;
+  --radius-sm:.375rem; --radius-md:.5rem; --radius-lg:.75rem; --radius-full:9999px;
+  --shadow-sm:0 1px 3px rgba(0,0,0,.08); --shadow-md:0 4px 12px rgba(0,0,0,.10);
+  --shadow-lg:0 12px 32px rgba(0,0,0,.13);
+  --sidebar-w:240px; --header-h:60px; --transition:180ms cubic-bezier(.16,1,.3,1);
+}
+[data-theme="dark"] {
+  --color-bg:#0f1322; --color-surface:#161c31; --color-surface-2:#1c2440;
+  --color-surface-offset:#1a2038; --color-divider:#2a3454; --color-border:#334070;
+  --color-text:#e2e8f5; --color-text-muted:#8896b8; --color-text-faint:#4a5680;
+  --color-primary:#6b93d4; --color-primary-hover:#89aadf; --color-primary-highlight:#1e2e50;
+  --color-accent:#e6aa2a; --color-accent-hover:#f0bf52; --color-accent-highlight:#2d2410;
+  --color-success:#4ade80; --color-success-bg:#14532d;
+  --color-warning:#fbbf24; --color-warning-bg:#451a03;
+  --color-error:#f87171; --color-error-bg:#450a0a;
+  --color-info:#60a5fa; --color-info-bg:#1e3a8a;
+  --color-sidebar-bg:#0d1220; --color-sidebar-text:#b0bdd8;
+  --color-sidebar-muted:#5a6888; --color-sidebar-active:#1e2e50;
+  --color-sidebar-hover:#141c35; --color-sidebar-border:#1e2840;
+  --shadow-sm:0 1px 3px rgba(0,0,0,.3); --shadow-md:0 4px 12px rgba(0,0,0,.4);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{-webkit-font-smoothing:antialiased}
+body{font-family:var(--font-body);font-size:var(--text-base);color:var(--color-text);background:var(--color-bg);min-height:100dvh;display:flex;overflow:hidden}
+button{cursor:pointer;background:none;border:none;font:inherit;color:inherit}
+input,select,textarea{font:inherit;color:inherit}
+a{color:inherit;text-decoration:none}
+table{border-collapse:collapse;width:100%}
+
+/* SIDEBAR */
+.sidebar{width:var(--sidebar-w);min-height:100dvh;background:var(--color-sidebar-bg);display:flex;flex-direction:column;flex-shrink:0;position:fixed;left:0;top:0;bottom:0;z-index:100;border-right:1px solid var(--color-sidebar-border)}
+.sidebar-logo{padding:var(--space-5);border-bottom:1px solid var(--color-sidebar-border);display:flex;align-items:center;gap:var(--space-3)}
+.sidebar-logo svg{color:var(--color-accent);flex-shrink:0}
+.logo-name{font-family:var(--font-display);font-size:1.2rem;color:#fff;line-height:1.1}
+.logo-sub{font-size:.68rem;color:var(--color-sidebar-muted);letter-spacing:.05em;text-transform:uppercase}
+.sidebar-nav{flex:1;overflow-y:auto;padding:var(--space-4) var(--space-3);display:flex;flex-direction:column;gap:var(--space-1)}
+.nav-section-label{font-size:.68rem;font-weight:600;color:var(--color-sidebar-muted);text-transform:uppercase;letter-spacing:.1em;padding:var(--space-3) var(--space-3) var(--space-2);margin-top:var(--space-2)}
+.nav-item{display:flex;align-items:center;gap:var(--space-3);padding:var(--space-2) var(--space-3);border-radius:var(--radius-md);color:var(--color-sidebar-text);font-size:var(--text-sm);font-weight:450;transition:background var(--transition),color var(--transition);cursor:pointer;position:relative}
+.nav-item:hover{background:var(--color-sidebar-hover);color:#fff}
+.nav-item.active{background:var(--color-sidebar-active);color:#fff;font-weight:600}
+.nav-item.active::before{content:'';position:absolute;left:0;top:20%;bottom:20%;width:3px;background:var(--color-accent);border-radius:0 var(--radius-full) var(--radius-full) 0}
+.nav-item i{width:18px;height:18px;flex-shrink:0}
+.nav-badge{margin-left:auto;background:var(--color-accent);color:#1a1000;font-size:.65rem;font-weight:700;padding:2px 7px;border-radius:var(--radius-full)}
+.sidebar-footer{padding:var(--space-4) var(--space-3);border-top:1px solid var(--color-sidebar-border)}
+.sidebar-user{display:flex;align-items:center;gap:var(--space-3);padding:var(--space-2) var(--space-3);border-radius:var(--radius-md);cursor:pointer}
+.sidebar-user:hover{background:var(--color-sidebar-hover)}
+.user-avatar{width:32px;height:32px;border-radius:var(--radius-full);background:var(--color-sidebar-active);border:2px solid var(--color-accent);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.75rem;color:#fff;flex-shrink:0}
+.user-name{font-size:var(--text-sm);color:#fff;font-weight:600}
+.user-role{font-size:var(--text-xs);color:var(--color-sidebar-muted)}
+
+/* MAIN */
+.main-wrap{margin-left:var(--sidebar-w);flex:1;display:flex;flex-direction:column;min-height:100dvh;overflow-x:hidden}
+.topbar{height:var(--header-h);background:var(--color-surface);border-bottom:1px solid var(--color-divider);display:flex;align-items:center;padding:0 var(--space-6);gap:var(--space-4);position:sticky;top:0;z-index:50;box-shadow:var(--shadow-sm)}
+.topbar-title{font-family:var(--font-display);font-size:var(--text-lg);color:var(--color-text);font-style:italic;flex:1}
+.topbar-actions{display:flex;align-items:center;gap:var(--space-3)}
+.topbar-date{font-size:var(--text-xs);color:var(--color-text-muted);background:var(--color-surface-2);border:1px solid var(--color-border);border-radius:var(--radius-full);padding:var(--space-1) var(--space-3)}
+.icon-btn{width:36px;height:36px;border-radius:var(--radius-md);display:flex;align-items:center;justify-content:center;color:var(--color-text-muted);transition:background var(--transition),color var(--transition)}
+.icon-btn:hover{background:var(--color-surface-offset);color:var(--color-text)}
+.page-content{flex:1;overflow-y:auto;padding:var(--space-6) var(--space-8)}
+
+/* PAGE HEADER */
+.page-header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:var(--space-6);gap:var(--space-4);flex-wrap:wrap}
+.page-header-left h1{font-family:var(--font-display);font-size:var(--text-xl);color:var(--color-text);font-style:italic}
+.page-header-left p{font-size:var(--text-sm);color:var(--color-text-muted);margin-top:var(--space-1)}
+.header-actions{display:flex;gap:var(--space-3);flex-wrap:wrap}
+
+/* BUTTONS */
+.btn{display:inline-flex;align-items:center;gap:var(--space-2);padding:var(--space-2) var(--space-5);border-radius:var(--radius-md);font-size:var(--text-sm);font-weight:600;cursor:pointer;border:none;transition:background var(--transition),box-shadow var(--transition),transform var(--transition)}
+.btn:active{transform:translateY(1px)}
+.btn-primary{background:var(--color-primary);color:#fff}
+.btn-primary:hover{background:var(--color-primary-hover);box-shadow:var(--shadow-sm)}
+.btn-gold{background:var(--color-accent);color:#1a1000}
+.btn-gold:hover{background:var(--color-accent-hover)}
+.btn-ghost{background:transparent;color:var(--color-text-muted);border:1px solid var(--color-border)}
+.btn-ghost:hover{background:var(--color-surface-offset);color:var(--color-text)}
+.btn-danger{background:var(--color-error-bg);color:var(--color-error);border:1px solid var(--color-error)}
+.btn-danger:hover{background:var(--color-error);color:#fff}
+.btn-sm{padding:var(--space-1) var(--space-3);font-size:var(--text-xs)}
+.btn i{width:16px;height:16px}
+
+/* CARD */
+.card{background:var(--color-surface);border-radius:var(--radius-lg);border:1px solid var(--color-border);box-shadow:var(--shadow-sm);overflow:hidden}
+.card-header{display:flex;align-items:center;justify-content:space-between;padding:var(--space-4) var(--space-5);border-bottom:1px solid var(--color-divider)}
+.card-title{font-size:var(--text-sm);font-weight:700;color:var(--color-text);display:flex;align-items:center;gap:var(--space-2)}
+.card-title i{width:16px;height:16px;color:var(--color-primary)}
+.card-body{padding:var(--space-5)}
+
+/* STATS ROW */
+.stats-row{display:grid;grid-template-columns:repeat(5,1fr);gap:var(--space-4);margin-bottom:var(--space-6)}
+.stat-card{background:var(--color-surface);border:1px solid var(--color-border);border-radius:var(--radius-lg);padding:var(--space-4) var(--space-5);box-shadow:var(--shadow-sm);cursor:pointer;transition:box-shadow var(--transition),transform var(--transition),border-color var(--transition)}
+.stat-card:hover{box-shadow:var(--shadow-md);transform:translateY(-1px)}
+.stat-card.sel{border-color:var(--color-primary);box-shadow:0 0 0 2px var(--color-primary-highlight)}
+.stat-num{font-size:1.8rem;font-weight:800;line-height:1;font-variant-numeric:tabular-nums}
+.stat-label{font-size:var(--text-xs);color:var(--color-text-muted);font-weight:600;text-transform:uppercase;letter-spacing:.06em;margin-top:var(--space-2)}
+.c-all{color:var(--color-primary)}.c-ativo{color:var(--color-info)}.c-pendente{color:var(--color-warning)}
+.c-ganho{color:var(--color-success)}.c-arquivado{color:var(--color-text-faint)}
+
+/* TOOLBAR */
+.toolbar{display:flex;gap:var(--space-3);margin-bottom:var(--space-4);flex-wrap:wrap;align-items:center}
+.search-wrap{position:relative;flex:1;min-width:220px}
+.search-wrap i{position:absolute;left:var(--space-3);top:50%;transform:translateY(-50%);width:16px;height:16px;color:var(--color-text-faint);pointer-events:none}
+.search-input{width:100%;padding:var(--space-2) var(--space-3) var(--space-2) 2.2rem;background:var(--color-surface);border:1px solid var(--color-border);border-radius:var(--radius-md);font-size:var(--text-sm);color:var(--color-text);transition:border-color var(--transition),box-shadow var(--transition)}
+.search-input:focus{outline:none;border-color:var(--color-primary);box-shadow:0 0 0 3px var(--color-primary-highlight)}
+.filter-select{padding:var(--space-2) var(--space-3);background:var(--color-surface);border:1px solid var(--color-border);border-radius:var(--radius-md);font-size:var(--text-sm);color:var(--color-text);cursor:pointer}
+.filter-select:focus{outline:none;border-color:var(--color-primary)}
+
+/* TABLE */
+.tbl-wrap{overflow-x:auto}
+.data-table{width:100%}
+.data-table th{text-align:left;font-size:var(--text-xs);font-weight:700;color:var(--color-text-muted);text-transform:uppercase;letter-spacing:.06em;padding:var(--space-3);background:var(--color-surface-2);border-bottom:1px solid var(--color-divider);white-space:nowrap;cursor:pointer;user-select:none;transition:background var(--transition)}
+.data-table th:hover{background:var(--color-surface-offset)}
+.data-table th .sort-icon{display:inline-block;margin-left:4px;opacity:.4;font-size:.7em}
+.data-table th.sorted .sort-icon{opacity:1;color:var(--color-primary)}
+.data-table td{padding:var(--space-3);font-size:var(--text-sm);border-bottom:1px solid var(--color-divider);vertical-align:middle}
+.data-table tr:last-child td{border-bottom:none}
+.data-table tbody tr{transition:background var(--transition)}
+.data-table tbody tr:hover td{background:var(--color-surface-2)}
+.proc-num{font-weight:600;color:var(--color-primary);font-size:var(--text-xs);font-variant-numeric:tabular-nums;white-space:nowrap}
+.proc-client{font-weight:500}
+.td-actions{display:flex;gap:var(--space-2);align-items:center}
+
+/* BADGES */
+.badge{display:inline-flex;align-items:center;padding:3px 10px;border-radius:var(--radius-full);font-size:.7rem;font-weight:700;letter-spacing:.03em;white-space:nowrap}
+.badge-ativo{background:var(--color-info-bg);color:var(--color-info)}
+.badge-pendente{background:var(--color-warning-bg);color:var(--color-warning)}
+.badge-ganho{background:var(--color-success-bg);color:var(--color-success)}
+.badge-perdido{background:var(--color-error-bg);color:var(--color-error)}
+.badge-arquivado{background:var(--color-surface-offset);color:var(--color-text-muted)}
+.badge-urgente{background:var(--color-error-bg);color:var(--color-error)}
+.area-chip{display:inline-block;padding:2px 8px;border-radius:var(--radius-full);font-size:.68rem;font-weight:600;background:var(--color-primary-highlight);color:var(--color-primary)}
+
+/* PRAZO INDICATOR */
+.prazo-cell{display:flex;align-items:center;gap:var(--space-2);font-size:var(--text-xs);font-variant-numeric:tabular-nums}
+.prazo-dot{width:7px;height:7px;border-radius:var(--radius-full);flex-shrink:0}
+.prazo-urgente{color:var(--color-error)}.pd-urgente{background:var(--color-error)}
+.prazo-alerta{color:var(--color-warning)}.pd-alerta{background:var(--color-warning)}
+.prazo-ok{color:var(--color-text-muted)}.pd-ok{background:var(--color-success)}
+
+/* PAGINATION */
+.pagination{display:flex;align-items:center;justify-content:space-between;padding:var(--space-3) var(--space-5);border-top:1px solid var(--color-divider)}
+.pag-info{font-size:var(--text-xs);color:var(--color-text-muted)}
+.pag-btns{display:flex;gap:var(--space-2)}
+.pag-btn{min-width:32px;height:32px;display:flex;align-items:center;justify-content:center;border-radius:var(--radius-md);font-size:var(--text-xs);font-weight:600;border:1px solid var(--color-border);color:var(--color-text-muted);background:var(--color-surface);transition:background var(--transition),color var(--transition);cursor:pointer}
+.pag-btn:hover{background:var(--color-surface-offset);color:var(--color-text)}
+.pag-btn.active{background:var(--color-primary);color:#fff;border-color:var(--color-primary)}
+.pag-btn:disabled{opacity:.4;cursor:not-allowed}
+
+/* DETAIL DRAWER */
+.drawer-overlay{position:fixed;inset:0;background:rgba(0,0,0,.4);backdrop-filter:blur(3px);z-index:200;display:none;justify-content:flex-end}
+.drawer-overlay.open{display:flex}
+.drawer{width:480px;max-width:95vw;background:var(--color-surface);height:100%;overflow-y:auto;box-shadow:var(--shadow-lg);display:flex;flex-direction:column;animation:drawerIn .22s cubic-bezier(.16,1,.3,1)}
+@keyframes drawerIn{from{transform:translateX(40px);opacity:0}to{transform:translateX(0);opacity:1}}
+.drawer-header{display:flex;align-items:center;justify-content:space-between;padding:var(--space-5) var(--space-6);border-bottom:1px solid var(--color-divider);position:sticky;top:0;background:var(--color-surface);z-index:10}
+.drawer-header h2{font-family:var(--font-display);font-size:var(--text-lg);font-style:italic}
+.drawer-close{width:32px;height:32px;border-radius:var(--radius-md);display:flex;align-items:center;justify-content:center;color:var(--color-text-muted);transition:background var(--transition)}
+.drawer-close:hover{background:var(--color-surface-offset)}
+.drawer-body{padding:var(--space-5) var(--space-6);flex:1;display:flex;flex-direction:column;gap:var(--space-5)}
+.drawer-footer{padding:var(--space-4) var(--space-6);border-top:1px solid var(--color-divider);display:flex;justify-content:space-between;gap:var(--space-3)}
+.detail-section{}
+.detail-section-title{font-size:var(--text-xs);font-weight:700;color:var(--color-text-muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:var(--space-3);display:flex;align-items:center;gap:var(--space-2)}
+.detail-section-title i{width:14px;height:14px}
+.detail-grid{display:grid;grid-template-columns:1fr 1fr;gap:var(--space-3)}
+.detail-field{}
+.detail-field label{font-size:.7rem;font-weight:600;color:var(--color-text-faint);text-transform:uppercase;letter-spacing:.06em;display:block;margin-bottom:2px}
+.detail-field span{font-size:var(--text-sm);color:var(--color-text);font-weight:500}
+.detail-field.full{grid-column:span 2}
+.movs-list{display:flex;flex-direction:column;gap:var(--space-2)}
+.mov-item{display:flex;gap:var(--space-3);align-items:flex-start;padding:var(--space-3);background:var(--color-surface-2);border:1px solid var(--color-divider);border-radius:var(--radius-md)}
+.mov-date{font-size:.7rem;color:var(--color-text-faint);white-space:nowrap;font-variant-numeric:tabular-nums;margin-top:2px}
+.mov-text{font-size:var(--text-sm);color:var(--color-text);line-height:1.4}
+.mov-dot{width:8px;height:8px;border-radius:var(--radius-full);background:var(--color-primary);margin-top:5px;flex-shrink:0}
+
+/* MODAL */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.45);backdrop-filter:blur(4px);z-index:300;display:none;align-items:center;justify-content:center;padding:var(--space-4)}
+.modal-overlay.open{display:flex}
+.modal{background:var(--color-surface);border-radius:var(--radius-lg);box-shadow:var(--shadow-lg);width:100%;max-width:560px;max-height:92vh;overflow-y:auto;animation:modalIn .22s cubic-bezier(.16,1,.3,1)}
+@keyframes modalIn{from{opacity:0;transform:scale(.96) translateY(8px)}to{opacity:1;transform:scale(1) translateY(0)}}
+.modal-header{display:flex;align-items:center;justify-content:space-between;padding:var(--space-5) var(--space-6);border-bottom:1px solid var(--color-divider)}
+.modal-header h2{font-family:var(--font-display);font-size:var(--text-lg);font-style:italic}
+.modal-close{width:32px;height:32px;border-radius:var(--radius-md);display:flex;align-items:center;justify-content:center;color:var(--color-text-muted);transition:background var(--transition)}
+.modal-close:hover{background:var(--color-surface-offset)}
+.modal-body{padding:var(--space-5) var(--space-6)}
+.modal-footer{padding:var(--space-4) var(--space-6);border-top:1px solid var(--color-divider);display:flex;justify-content:flex-end;gap:var(--space-3)}
+
+/* FORM */
+.form-group{margin-bottom:var(--space-4)}
+.form-group label{display:block;font-size:var(--text-xs);font-weight:600;color:var(--color-text-muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:var(--space-2)}
+.form-control{width:100%;padding:var(--space-2) var(--space-3);background:var(--color-surface-2);border:1px solid var(--color-border);border-radius:var(--radius-md);font-size:var(--text-sm);color:var(--color-text);transition:border-color var(--transition),box-shadow var(--transition)}
+.form-control:focus{outline:none;border-color:var(--color-primary);box-shadow:0 0 0 3px var(--color-primary-highlight)}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:var(--space-3)}
+.form-row-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:var(--space-3)}
+
+/* MOV FORM */
+.mov-form{background:var(--color-surface-2);border:1px solid var(--color-border);border-radius:var(--radius-md);padding:var(--space-4)}
+.mov-form-title{font-size:var(--text-xs);font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--color-text-muted);margin-bottom:var(--space-3)}
+
+/* TOAST */
+.toast-wrap{position:fixed;bottom:var(--space-6);right:var(--space-6);z-index:400;display:flex;flex-direction:column;gap:var(--space-2);pointer-events:none}
+.toast{background:var(--color-text);color:var(--color-bg);padding:var(--space-3) var(--space-5);border-radius:var(--radius-lg);font-size:var(--text-sm);font-weight:500;box-shadow:var(--shadow-lg);display:flex;align-items:center;gap:var(--space-2);animation:toastIn .25s cubic-bezier(.16,1,.3,1) forwards;pointer-events:auto}
+.toast.success{background:var(--color-success);color:#fff}
+.toast.error{background:var(--color-error);color:#fff}
+@keyframes toastIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+
+/* EMPTY */
+.empty-state{display:flex;flex-direction:column;align-items:center;text-align:center;padding:4rem var(--space-8);color:var(--color-text-muted)}
+.empty-state i{width:48px;height:48px;color:var(--color-text-faint);margin-bottom:var(--space-4)}
+.empty-state h3{color:var(--color-text);margin-bottom:var(--space-2)}
+.empty-state p{max-width:36ch;font-size:var(--text-sm);margin-bottom:var(--space-6)}
+
+/* CONFIRM DIALOG */
+.confirm-box{background:var(--color-surface);border-radius:var(--radius-lg);box-shadow:var(--shadow-lg);width:100%;max-width:380px;padding:var(--space-6);text-align:center;animation:modalIn .2s ease}
+.confirm-box h3{font-family:var(--font-display);font-size:var(--text-lg);font-style:italic;margin-bottom:var(--space-3)}
+.confirm-box p{font-size:var(--text-sm);color:var(--color-text-muted);margin-bottom:var(--space-5)}
+.confirm-box .btn-row{display:flex;gap:var(--space-3);justify-content:center}
+
+@media(max-width:900px){.stats-row{grid-template-columns:repeat(3,1fr)}.page-content{padding:var(--space-4)}}
+@media(max-width:680px){.stats-row{grid-template-columns:repeat(2,1fr)}.form-row,.form-row-3{grid-template-columns:1fr}.detail-grid{grid-template-columns:1fr}.detail-field.full{grid-column:span 1}}
+</style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <svg width="26" height="26" viewBox="0 0 28 28" fill="none">
+      <rect x="3" y="13" width="22" height="3" rx="1.5" fill="currentColor"/>
+      <path d="M7 13V8a1 1 0 011-1h12a1 1 0 011 1v5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+      <rect x="10" y="16" width="8" height="9" rx="1" fill="currentColor" opacity=".6"/>
+      <circle cx="14" cy="4" r="2.5" fill="currentColor"/>
+    </svg>
+    <div><div class="logo-name">LexControl</div><div class="logo-sub">Gestão Jurídica</div></div>
+  </div>
+  <nav class="sidebar-nav">
+    <div class="nav-section-label">Principal</div>
+    <div class="nav-item" onclick="goTo('dashboard')"><i data-lucide="layout-dashboard"></i> Dashboard</div>
+    <div class="nav-item active"><i data-lucide="briefcase"></i> Processos <span class="nav-badge" id="sb-badge">0</span></div>
+    <div class="nav-item" onclick="goTo('clientes')"><i data-lucide="users"></i> Clientes</div>
+    <div class="nav-item" onclick="goTo('agenda')"><i data-lucide="calendar"></i> Agenda</div>
+    <div class="nav-section-label">Financeiro</div>
+    <div class="nav-item" onclick="goTo('financeiro')"><i data-lucide="dollar-sign"></i> Financeiro</div>
+    <div class="nav-item" onclick="goTo('honorarios')"><i data-lucide="file-text"></i> Honorários</div>
+    <div class="nav-section-label">Ferramentas</div>
+    <div class="nav-item" onclick="goTo('documentos')"><i data-lucide="folder-open"></i> Documentos</div>
+    <div class="nav-item" onclick="goTo('relatorios')"><i data-lucide="bar-chart-2"></i> Relatórios</div>
+  </nav>
+  <div class="sidebar-footer">
+    <div class="sidebar-user">
+      <div class="user-avatar">DR</div>
+      <div><div class="user-name">Dr. Advogado</div><div class="user-role">Sócio Titular</div></div>
+    </div>
+  </div>
+</aside>
+
+<!-- MAIN -->
+<div class="main-wrap">
+  <header class="topbar">
+    <span class="topbar-title">Processos</span>
+    <div class="topbar-actions">
+      <span class="topbar-date" id="topbar-date"></span>
+      <button class="icon-btn" data-theme-toggle aria-label="Tema">
+        <i data-lucide="sun"></i>
+      </button>
+    </div>
+  </header>
+
+  <main class="page-content">
+    <!-- PAGE HEADER -->
+    <div class="page-header">
+      <div class="page-header-left">
+        <h1>Gestão de Processos</h1>
+        <p>Todos os processos ativos e arquivados do escritório</p>
+      </div>
+      <div class="header-actions">
+        <button class="btn btn-ghost" onclick="exportCSV()"><i data-lucide="download"></i> Exportar</button>
+        <button class="btn btn-primary" onclick="openModal('modal-processo')"><i data-lucide="plus"></i> Novo Processo</button>
+      </div>
+    </div>
+
+    <!-- STATS -->
+    <div class="stats-row">
+      <div class="stat-card sel" onclick="filterStat('Todos',this)">
+        <div class="stat-num c-all" id="cnt-all">0</div>
+        <div class="stat-label">Total</div>
+      </div>
+      <div class="stat-card" onclick="filterStat('Ativo',this)">
+        <div class="stat-num c-ativo" id="cnt-ativo">0</div>
+        <div class="stat-label">Ativos</div>
+      </div>
+      <div class="stat-card" onclick="filterStat('Pendente',this)">
+        <div class="stat-num c-pendente" id="cnt-pendente">0</div>
+        <div class="stat-label">Pendentes</div>
+      </div>
+      <div class="stat-card" onclick="filterStat('Ganho',this)">
+        <div class="stat-num c-ganho" id="cnt-ganho">0</div>
+        <div class="stat-label">Ganhos</div>
+      </div>
+      <div class="stat-card" onclick="filterStat('Arquivado',this)">
+        <div class="stat-num c-arquivado" id="cnt-arquivado">0</div>
+        <div class="stat-label">Arquivados</div>
+      </div>
+    </div>
+
+    <!-- TOOLBAR -->
+    <div class="toolbar">
+      <div class="search-wrap">
+        <i data-lucide="search"></i>
+        <input class="search-input" id="search-input" placeholder="Buscar por número, cliente, vara..." oninput="applyFilters()">
+      </div>
+      <select class="filter-select" id="filter-area" onchange="applyFilters()">
+        <option value="">Todas as áreas</option>
+        <option>Cível</option><option>Trabalhista</option><option>Consumidor</option>
+        <option>Família</option><option>Criminal</option><option>Tributário</option>
+      </select>
+      <select class="filter-select" id="filter-sort" onchange="applyFilters()">
+        <option value="prazo">Ordenar: Prazo</option>
+        <option value="cliente">Ordenar: Cliente</option>
+        <option value="area">Ordenar: Área</option>
+        <option value="data">Ordenar: Cadastro</option>
+      </select>
+    </div>
+
+    <!-- TABLE CARD -->
+    <div class="card">
+      <div class="card-header">
+        <span class="card-title"><i data-lucide="list"></i> <span id="table-count-label">Processos</span></span>
+        <span style="font-size:var(--text-xs);color:var(--color-text-muted)" id="pag-info-top"></span>
+      </div>
+      <div class="tbl-wrap">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th onclick="sortBy('num')">Nº Processo <span class="sort-icon">↕</span></th>
+              <th onclick="sortBy('cliente')">Cliente <span class="sort-icon">↕</span></th>
+              <th onclick="sortBy('area')">Área <span class="sort-icon">↕</span></th>
+              <th onclick="sortBy('status')">Status <span class="sort-icon">↕</span></th>
+              <th onclick="sortBy('prazoRaw')">Próximo Prazo <span class="sort-icon">↕</span></th>
+              <th>Vara / Juízo</th>
+              <th>Ações</th>
+            </tr>
+          </thead>
+          <tbody id="proc-tbody"></tbody>
+        </table>
+      </div>
+      <div id="empty-tbl" class="empty-state" style="display:none">
+        <i data-lucide="search-x"></i>
+        <h3>Nenhum processo encontrado</h3>
+        <p>Tente ajustar os filtros ou adicione um novo processo.</p>
+        <button class="btn btn-primary" onclick="openModal('modal-processo')"><i data-lucide="plus"></i> Novo Processo</button>
+      </div>
+      <div class="pagination" id="pagination-bar">
+        <span class="pag-info" id="pag-info-bottom"></span>
+        <div class="pag-btns" id="pag-btns"></div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<!-- ===== DRAWER: DETALHE DO PROCESSO ===== -->
+<div class="drawer-overlay" id="drawer-overlay" onclick="fecharDrawer(event)">
+  <div class="drawer" id="drawer">
+    <div class="drawer-header">
+      <h2 id="drawer-title">Detalhes</h2>
+      <button class="drawer-close" onclick="closeDrawer()"><i data-lucide="x"></i></button>
+    </div>
+    <div class="drawer-body" id="drawer-body"></div>
+    <div class="drawer-footer">
+      <button class="btn btn-danger btn-sm" id="drawer-delete-btn"><i data-lucide="trash-2"></i> Excluir</button>
+      <button class="btn btn-ghost btn-sm" onclick="closeDrawer()">Fechar</button>
+      <button class="btn btn-primary btn-sm" id="drawer-edit-btn"><i data-lucide="pencil"></i> Editar</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== MODAL: NOVO / EDITAR PROCESSO ===== -->
+<div class="modal-overlay" id="modal-processo">
+  <div class="modal">
+    <div class="modal-header">
+      <h2 id="modal-proc-title">Novo Processo</h2>
+      <button class="modal-close" onclick="closeModal('modal-processo')"><i data-lucide="x"></i></button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="edit-id">
+      <div class="form-row">
+        <div class="form-group">
+          <label>Nº do Processo *</label>
+          <input class="form-control" id="f-num" placeholder="0000000-00.0000.0.00.0000">
+        </div>
+        <div class="form-group">
+          <label>Área *</label>
+          <select class="form-control" id="f-area">
+            <option>Cível</option><option>Trabalhista</option><option>Consumidor</option>
+            <option>Família</option><option>Criminal</option><option>Tributário</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Cliente *</label>
+          <input class="form-control" id="f-cliente" placeholder="Nome completo">
+        </div>
+        <div class="form-group">
+          <label>CPF / CNPJ</label>
+          <input class="form-control" id="f-doc" placeholder="000.000.000-00">
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Vara / Tribunal *</label>
+          <input class="form-control" id="f-vara" placeholder="Ex: 3ª Vara Cível">
+        </div>
+        <div class="form-group">
+          <label>Comarca</label>
+          <input class="form-control" id="f-comarca" placeholder="Ex: Goiânia">
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Parte Contrária</label>
+          <input class="form-control" id="f-parte" placeholder="Nome do réu/autor">
+        </div>
+        <div class="form-group">
+          <label>Status</label>
+          <select class="form-control" id="f-status">
+            <option>Ativo</option><option>Pendente</option><option>Ganho</option>
+            <option>Perdido</option><option>Arquivado</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-row-3">
+        <div class="form-group">
+          <label>Data de Início</label>
+          <input type="date" class="form-control" id="f-data">
+        </div>
+        <div class="form-group">
+          <label>Próximo Prazo</label>
+          <input type="date" class="form-control" id="f-prazo">
+        </div>
+        <div class="form-group">
+          <label>Valor da Causa (R$)</label>
+          <input class="form-control" id="f-valor" placeholder="0,00" oninput="maskMoney(this)">
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Resumo do Caso</label>
+        <textarea class="form-control" id="f-obs" rows="3" placeholder="Objeto da ação, principais fatos..."></textarea>
+      </div>
+
+      <!-- Movimentação inicial -->
+      <div class="mov-form">
+        <div class="mov-form-title">Primeira Movimentação (opcional)</div>
+        <div class="form-row">
+          <div class="form-group" style="margin-bottom:0">
+            <label>Descrição</label>
+            <input class="form-control" id="f-mov-desc" placeholder="Ex: Petição inicial protocolada">
+          </div>
+          <div class="form-group" style="margin-bottom:0">
+            <label>Data</label>
+            <input type="date" class="form-control" id="f-mov-data">
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('modal-processo')">Cancelar</button>
+      <button class="btn btn-primary" onclick="salvarProcesso()"><i data-lucide="save"></i> Salvar</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== MODAL: CONFIRM DELETE ===== -->
+<div class="modal-overlay" id="modal-confirm">
+  <div class="confirm-box">
+    <h3>Confirmar Exclusão</h3>
+    <p id="confirm-msg">Tem certeza que deseja excluir este processo? Esta ação não pode ser desfeita.</p>
+    <div class="btn-row">
+      <button class="btn btn-ghost" onclick="closeModal('modal-confirm')">Cancelar</button>
+      <button class="btn btn-danger" id="confirm-ok-btn">Excluir</button>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast-wrap" id="toast-wrap"></div>
+
+<script>
+// ============================================================
+// DATA SEED
+// ============================================================
+let processos = [
+  {id:1,num:'0012345-67.2024.8.09.0051',cliente:'Maria das Graças Oliveira',doc:'123.456.789-00',area:'Consumidor',vara:'3ª Vara Cível',comarca:'Goiânia',parte:'Banco Alfa S/A',status:'Ativo',data:'2024-03-10',prazoRaw:'2026-04-25',valor:'R$ 15.000,00',obs:'Revisão contratual com cobrança indevida de tarifas. Cliente prejudicada desde 2022.',movs:[{data:'2024-03-10',desc:'Petição inicial protocolada'},{data:'2024-05-14',desc:'Audiência de conciliação — sem acordo'},{data:'2025-01-20',desc:'Perícia contábil determinada'}]},
+  {id:2,num:'0009821-33.2023.8.09.0051',cliente:'João Pereira da Silva',doc:'987.654.321-00',area:'Trabalhista',vara:'2ª VT Goiânia',comarca:'Goiânia',parte:'Construtora Beta Ltda',status:'Pendente',data:'2023-08-01',prazoRaw:'2026-04-28',valor:'R$ 42.000,00',obs:'Verbas rescisórias não pagas. Horas extras e adicional de insalubridade.',movs:[{data:'2023-08-01',desc:'Reclamação trabalhista distribuída'},{data:'2023-11-15',desc:'Audiência inaugural'}]},
+  {id:3,num:'0031122-44.2025.8.09.0051',cliente:'Empresa XYZ Ltda',doc:'12.345.678/0001-99',area:'Cível',vara:'1ª Vara Cível',comarca:'Goiânia',parte:'Fornecedor Gama Eireli',status:'Ativo',data:'2025-01-05',prazoRaw:'2026-05-02',valor:'R$ 78.000,00',obs:'Cobrança de inadimplemento contratual. Entrega de mercadorias com defeito.',movs:[{data:'2025-01-05',desc:'Petição inicial — ação de cobrança'},{data:'2025-03-20',desc:'Contestação recebida'}]},
+  {id:4,num:'0044567-12.2022.8.09.0051',cliente:'Ana Rodrigues Faria',doc:'456.789.123-00',area:'Família',vara:'Vara de Família',comarca:'Goiânia',parte:'Carlos Roberto Faria',status:'Ativo',data:'2022-06-15',prazoRaw:'2026-05-05',valor:'R$ 0,00',obs:'Divórcio litigioso com partilha de bens e guarda compartilhada.',movs:[{data:'2022-06-15',desc:'Petição inicial distribuída'},{data:'2023-02-10',desc:'Audiência de mediação'},{data:'2023-09-08',desc:'Laudo de avaliação de imóvel juntado'}]},
+  {id:5,num:'0055678-99.2024.8.09.0051',cliente:'Pedro Alves Mendes',doc:'321.654.987-00',area:'Criminal',vara:'1ª Vara Criminal',comarca:'Aparecida de Goiânia',parte:'MP-GO',status:'Pendente',data:'2024-07-22',prazoRaw:'2026-04-30',valor:'R$ 0,00',obs:'Defesa em ação penal — artigo 155 CP. Cliente preso em flagrante.',movs:[{data:'2024-07-22',desc:'Habeas corpus impetrado'},{data:'2024-08-05',desc:'HC denegado — réu solto após pagamento de fiança'}]},
+  {id:6,num:'0067890-11.2023.8.09.0051',cliente:'Cooperativa Agrícola Sul',doc:'98.765.432/0001-11',area:'Tributário',vara:'1ª Vara Federal',comarca:'Goiânia',parte:'União Federal',status:'Ativo',data:'2023-04-18',prazoRaw:'2026-06-10',valor:'R$ 234.000,00',obs:'Ação anulatória de auto de infração fiscal — COFINS.',movs:[{data:'2023-04-18',desc:'Ação anulatória distribuída'},{data:'2023-07-01',desc:'Liminar deferida suspendendo a exigibilidade'}]},
+  {id:7,num:'0078901-55.2021.8.09.0051',cliente:'Fernanda Costa Lima',doc:'654.321.987-00',area:'Cível',vara:'4ª Vara Cível',comarca:'Goiânia',parte:'Seguradora Delta',status:'Ganho',data:'2021-09-01',prazoRaw:'',valor:'R$ 28.000,00',obs:'Indenização por sinistro recusado indevidamente.',movs:[{data:'2021-09-01',desc:'Petição inicial'},{data:'2022-11-30',desc:'Sentença favorável — R$ 28.000 + danos morais'},{data:'2023-02-15',desc:'Trânsito em julgado — execução iniciada'}]},
+  {id:8,num:'0089012-77.2020.8.09.0051',cliente:'Roberto Nascimento',doc:'789.012.345-00',area:'Trabalhista',vara:'5ª VT Goiânia',comarca:'Goiânia',parte:'Supermercado Omega S/A',status:'Arquivado',data:'2020-03-10',prazoRaw:'',valor:'R$ 12.000,00',obs:'Acordo homologado em audiência.',movs:[{data:'2020-03-10',desc:'Reclamação trabalhista'},{data:'2021-06-20',desc:'Acordo homologado — R$ 9.500'}]},
+];
+
+let nextId = 9;
+let activeFilter = 'Todos';
+let sortField = 'prazoRaw';
+let sortDir = 1;
+let currentPage = 1;
+const PER_PAGE = 6;
+let drawerProcId = null;
+
+// ============================================================
+// INIT
+// ============================================================
+document.addEventListener('DOMContentLoaded', () => {
+  lucide.createIcons();
+  setDate();
+  applyFilters();
+  initTheme();
+});
+
+function setDate() {
+  const opts = {weekday:'long',day:'numeric',month:'long',year:'numeric'};
+  document.getElementById('topbar-date').textContent = new Date().toLocaleDateString('pt-BR',opts);
+}
+
+// ============================================================
+// FILTER + RENDER
+// ============================================================
+function filterStat(val, el) {
+  activeFilter = val;
+  document.querySelectorAll('.stat-card').forEach(c => c.classList.remove('sel'));
+  if(el) el.classList.add('sel');
+  currentPage = 1;
+  applyFilters();
+}
+
+function applyFilters() {
+  const q = document.getElementById('search-input').value.toLowerCase();
+  const area = document.getElementById('filter-area').value;
+  sortField = document.getElementById('filter-sort').value;
+
+  let list = processos.filter(p => {
+    const matchStat = activeFilter === 'Todos' || p.status === activeFilter;
+    const matchArea = !area || p.area === area;
+    const matchQ = !q || p.num.toLowerCase().includes(q) || p.cliente.toLowerCase().includes(q) || p.vara.toLowerCase().includes(q) || p.parte.toLowerCase().includes(q);
+    return matchStat && matchArea && matchQ;
+  });
+
+  list.sort((a,b) => {
+    const va = a[sortField]||'', vb = b[sortField]||'';
+    if(!va) return 1; if(!vb) return -1;
+    return va.localeCompare(vb) * sortDir;
+  });
+
+  // update counts
+  document.getElementById('cnt-all').textContent = processos.length;
+  document.getElementById('cnt-ativo').textContent = processos.filter(p=>p.status==='Ativo').length;
+  document.getElementById('cnt-pendente').textContent = processos.filter(p=>p.status==='Pendente').length;
+  document.getElementById('cnt-ganho').textContent = processos.filter(p=>p.status==='Ganho').length;
+  document.getElementById('cnt-arquivado').textContent = processos.filter(p=>p.status==='Arquivado').length;
+  document.getElementById('sb-badge').textContent = processos.filter(p=>p.status==='Ativo'||p.status==='Pendente').length;
+
+  renderTable(list);
+}
+
+function renderTable(list) {
+  const total = list.length;
+  const pages = Math.max(1, Math.ceil(total / PER_PAGE));
+  if(currentPage > pages) currentPage = pages;
+  const start = (currentPage-1)*PER_PAGE;
+  const slice = list.slice(start, start+PER_PAGE);
+
+  const tbody = document.getElementById('proc-tbody');
+  const empty = document.getElementById('empty-tbl');
+  const pagBar = document.getElementById('pagination-bar');
+
+  if(!total) {
+    tbody.innerHTML=''; empty.style.display='flex'; pagBar.style.display='none';
+    lucide.createIcons(); return;
+  }
+  empty.style.display='none'; pagBar.style.display='flex';
+
+  tbody.innerHTML = slice.map(p => {
+    const badge = statusBadge(p.status);
+    const prazoHtml = prazoCell(p.prazoRaw);
+    return `<tr>
+      <td><span class="proc-num">${p.num.substring(0,20)}…</span></td>
+      <td><span class="proc-client">${p.cliente}</span></td>
+      <td><span class="area-chip">${p.area}</span></td>
+      <td>${badge}</td>
+      <td>${prazoHtml}</td>
+      <td style="font-size:var(--text-xs);color:var(--color-text-muted);max-width:150px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${p.vara}</td>
+      <td>
+        <div class="td-actions">
+          <button class="btn btn-ghost btn-sm" onclick="openDrawer(${p.id})"><i data-lucide="eye" style="width:14px;height:14px"></i> Ver</button>
+          <button class="btn btn-ghost btn-sm" onclick="editProcesso(${p.id})"><i data-lucide="pencil" style="width:14px;height:14px"></i></button>
+        </div>
+      </td>
+    </tr>`;
+  }).join('');
+
+  const info = `${start+1}–${Math.min(start+PER_PAGE,total)} de ${total}`;
+  document.getElementById('pag-info-top').textContent = info;
+  document.getElementById('pag-info-bottom').textContent = info;
+  document.getElementById('table-count-label').textContent = `${total} processo${total!==1?'s':''}`;
+
+  // pag buttons
+  const btnWrap = document.getElementById('pag-btns');
+  let btns = '';
+  btns += `<button class="pag-btn" onclick="goPage(${currentPage-1})" ${currentPage===1?'disabled':''}>‹</button>`;
+  for(let i=1;i<=pages;i++) btns += `<button class="pag-btn ${i===currentPage?'active':''}" onclick="goPage(${i})">${i}</button>`;
+  btns += `<button class="pag-btn" onclick="goPage(${currentPage+1})" ${currentPage===pages?'disabled':''}>›</button>`;
+  btnWrap.innerHTML = btns;
+
+  lucide.createIcons();
+}
+
+function goPage(p) {
+  currentPage = p;
+  applyFilters();
+}
+
+function sortBy(field) {
+  if(sortField===field) sortDir*=-1; else { sortField=field; sortDir=1; }
+  document.getElementById('filter-sort').value = field;
+  applyFilters();
+}
+
+// ============================================================
+// BADGE / PRAZO
+// ============================================================
+function statusBadge(s) {
+  const m={Ativo:'badge-ativo',Pendente:'badge-pendente',Ganho:'badge-ganho',Perdido:'badge-perdido',Arquivado:'badge-arquivado'};
+  return `<span class="badge ${m[s]||'badge-arquivado'}">${s}</span>`;
+}
+
+function prazoCell(raw) {
+  if(!raw) return '<span style="color:var(--color-text-faint);font-size:var(--text-xs)">—</span>';
+  const today = new Date(); today.setHours(0,0,0,0);
+  const d = new Date(raw+'T00:00:00');
+  const diff = Math.round((d-today)/(1000*60*60*24));
+  const fmt = d.toLocaleDateString('pt-BR');
+  if(diff<0) return `<div class="prazo-cell prazo-urgente"><span class="prazo-dot pd-urgente"></span>${fmt} (vencido)</div>`;
+  if(diff<=7) return `<div class="prazo-cell prazo-urgente"><span class="prazo-dot pd-urgente"></span>${fmt} (${diff}d)</div>`;
+  if(diff<=30) return `<div class="prazo-cell prazo-alerta"><span class="prazo-dot pd-alerta"></span>${fmt} (${diff}d)</div>`;
+  return `<div class="prazo-cell prazo-ok"><span class="prazo-dot pd-ok"></span>${fmt}</div>`;
+}
+
+// ============================================================
+// DRAWER
+// ============================================================
+function openDrawer(id) {
+  const p = processos.find(x=>x.id===id);
+  if(!p) return;
+  drawerProcId = id;
+  document.getElementById('drawer-title').textContent = p.area + ' — ' + p.num.substring(0,14)+'…';
+  document.getElementById('drawer-body').innerHTML = `
+    <div class="detail-section">
+      <div class="detail-section-title"><i data-lucide="user"></i> Cliente</div>
+      <div class="detail-grid">
+        <div class="detail-field"><label>Nome</label><span>${p.cliente}</span></div>
+        <div class="detail-field"><label>CPF/CNPJ</label><span>${p.doc||'—'}</span></div>
+        <div class="detail-field"><label>Parte Contrária</label><span>${p.parte||'—'}</span></div>
+        <div class="detail-field"><label>Comarca</label><span>${p.comarca||'—'}</span></div>
+      </div>
+    </div>
+    <div class="detail-section">
+      <div class="detail-section-title"><i data-lucide="briefcase"></i> Processo</div>
+      <div class="detail-grid">
+        <div class="detail-field full"><label>Número</label><span style="word-break:break-all">${p.num}</span></div>
+        <div class="detail-field"><label>Vara/Tribunal</label><span>${p.vara}</span></div>
+        <div class="detail-field"><label>Área</label><span>${p.area}</span></div>
+        <div class="detail-field"><label>Status</label><span>${statusBadge(p.status)}</span></div>
+        <div class="detail-field"><label>Valor da Causa</label><span>${p.valor||'—'}</span></div>
+        <div class="detail-field"><label>Data de Início</label><span>${p.data ? new Date(p.data+'T12:00:00').toLocaleDateString('pt-BR') : '—'}</span></div>
+        <div class="detail-field"><label>Próximo Prazo</label><span>${p.prazoRaw ? prazoCell(p.prazoRaw) : '—'}</span></div>
+        <div class="detail-field full"><label>Resumo</label><span>${p.obs||'—'}</span></div>
+      </div>
+    </div>
+    <div class="detail-section">
+      <div class="detail-section-title"><i data-lucide="activity"></i> Movimentações</div>
+      <div class="movs-list" id="movs-list-${id}">
+        ${(p.movs||[]).map(m=>`
+          <div class="mov-item">
+            <div class="mov-dot"></div>
+            <div style="flex:1">
+              <div class="mov-text">${m.desc}</div>
+              <div class="mov-date">${new Date(m.data+'T12:00:00').toLocaleDateString('pt-BR')}</div>
+            </div>
+          </div>`).join('') || '<p style="font-size:var(--text-sm);color:var(--color-text-muted)">Nenhuma movimentação.</p>'}
+      </div>
+      <div style="margin-top:var(--space-4)">
+        <div class="mov-form-title" style="font-size:var(--text-xs);font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--color-text-muted);margin-bottom:var(--space-3)">Adicionar Movimentação</div>
+        <div class="form-row" style="margin-bottom:var(--space-3)">
+          <div class="form-group" style="margin:0"><label>Descrição</label><input class="form-control" id="mov-desc-${id}" placeholder="Descreva o andamento..."></div>
+          <div class="form-group" style="margin:0"><label>Data</label><input type="date" class="form-control" id="mov-data-${id}"></div>
+        </div>
+        <button class="btn btn-ghost btn-sm" onclick="addMovimentacao(${id})"><i data-lucide="plus"></i> Registrar</button>
+      </div>
+    </div>
+  `;
+  document.getElementById('drawer-edit-btn').onclick = () => { closeDrawer(); editProcesso(id); };
+  document.getElementById('drawer-delete-btn').onclick = () => confirmDelete(id);
+  document.getElementById('drawer-overlay').classList.add('open');
+  lucide.createIcons();
+}
+
+function fecharDrawer(e) { if(e.target === document.getElementById('drawer-overlay')) closeDrawer(); }
+function closeDrawer() { document.getElementById('drawer-overlay').classList.remove('open'); drawerProcId = null; }
+
+function addMovimentacao(id) {
+  const desc = document.getElementById('mov-desc-'+id).value.trim();
+  const data = document.getElementById('mov-data-'+id).value;
+  if(!desc||!data) { showToast('Preencha descrição e data.','error'); return; }
+  const p = processos.find(x=>x.id===id);
+  if(!p) return;
+  p.movs.push({data,desc});
+  p.movs.sort((a,b)=>a.data.localeCompare(b.data));
+  openDrawer(id);
+  showToast('Movimentação registrada!','success');
+}
+
+// ============================================================
+// MODAL
+// ============================================================
+function openModal(id) { document.getElementById(id).classList.add('open'); }
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+document.querySelectorAll('.modal-overlay').forEach(o => o.addEventListener('click', e => { if(e.target===o) o.classList.remove('open'); }));
+
+function clearForm() {
+  ['f-num','f-area','f-cliente','f-doc','f-vara','f-comarca','f-parte','f-status','f-data','f-prazo','f-valor','f-obs','f-mov-desc','f-mov-data'].forEach(id => {
+    const el = document.getElementById(id);
+    if(el) el.value = '';
+  });
+  document.getElementById('edit-id').value = '';
+  document.getElementById('modal-proc-title').textContent = 'Novo Processo';
+}
+
+function editProcesso(id) {
+  const p = processos.find(x=>x.id===id);
+  if(!p) return;
+  clearForm();
+  document.getElementById('edit-id').value = id;
+  document.getElementById('modal-proc-title').textContent = 'Editar Processo';
+  document.getElementById('f-num').value = p.num;
+  document.getElementById('f-area').value = p.area;
+  document.getElementById('f-cliente').value = p.cliente;
+  document.getElementById('f-doc').value = p.doc||'';
+  document.getElementById('f-vara').value = p.vara;
+  document.getElementById('f-comarca').value = p.comarca||'';
+  document.getElementById('f-parte').value = p.parte||'';
+  document.getElementById('f-status').value = p.status;
+  document.getElementById('f-data').value = p.data||'';
+  document.getElementById('f-prazo').value = p.prazoRaw||'';
+  document.getElementById('f-valor').value = p.valor||'';
+  document.getElementById('f-obs').value = p.obs||'';
+  openModal('modal-processo');
+}
+
+function salvarProcesso() {
+  const num = document.getElementById('f-num').value.trim();
+  const cliente = document.getElementById('f-cliente').value.trim();
+  const vara = document.getElementById('f-vara').value.trim();
+  if(!num||!cliente||!vara) { showToast('Preencha os campos obrigatórios (*)','error'); return; }
+
+  const editId = parseInt(document.getElementById('edit-id').value)||0;
+  const movDesc = document.getElementById('f-mov-desc').value.trim();
+  const movData = document.getElementById('f-mov-data').value;
+
+  if(editId) {
+    const p = processos.find(x=>x.id===editId);
+    if(p) {
+      Object.assign(p, {num,cliente,vara,area:document.getElementById('f-area').value,status:document.getElementById('f-status').value,doc:document.getElementById('f-doc').value,comarca:document.getElementById('f-comarca').value,parte:document.getElementById('f-parte').value,data:document.getElementById('f-data').value,prazoRaw:document.getElementById('f-prazo').value,valor:document.getElementById('f-valor').value,obs:document.getElementById('f-obs').value});
+      showToast('Processo atualizado!','success');
+    }
+  } else {
+    const movs = movDesc&&movData ? [{data:movData,desc:movDesc}] : [];
+    processos.unshift({id:nextId++,num,cliente,vara,area:document.getElementById('f-area').value,status:document.getElementById('f-status').value,doc:document.getElementById('f-doc').value,comarca:document.getElementById('f-comarca').value,parte:document.getElementById('f-parte').value,data:document.getElementById('f-data').value,prazoRaw:document.getElementById('f-prazo').value,valor:document.getElementById('f-valor').value,obs:document.getElementById('f-obs').value,movs});
+    showToast('Processo cadastrado!','success');
+  }
+  closeModal('modal-processo');
+  clearForm();
+  applyFilters();
+}
+
+// ============================================================
+// DELETE
+// ============================================================
+function confirmDelete(id) {
+  const p = processos.find(x=>x.id===id);
+  document.getElementById('confirm-msg').textContent = `Deseja excluir o processo de ${p?p.cliente:''}? Esta ação não pode ser desfeita.`;
+  document.getElementById('confirm-ok-btn').onclick = () => { deleteProcesso(id); closeModal('modal-confirm'); };
+  openModal('modal-confirm');
+}
+function deleteProcesso(id) {
+  processos = processos.filter(x=>x.id!==id);
+  closeDrawer();
+  applyFilters();
+  showToast('Processo excluído.','');
+}
+
+// ============================================================
+// EXPORT CSV
+// ============================================================
+function exportCSV() {
+  const rows = [['ID','Numero','Cliente','Area','Status','Vara','Comarca','Parte','Data','Prazo','Valor']];
+  processos.forEach(p => rows.push([p.id,p.num,p.cliente,p.area,p.status,p.vara,p.comarca||'',p.parte||'',p.data||'',p.prazoRaw||'',p.valor||'']));
+  const csv = rows.map(r=>r.map(v=>'"'+String(v).replace(/"/g,'""')+'"').join(',')).join('\n');
+  const a = document.createElement('a');
+  a.href = 'data:text/csv;charset=utf-8,\uFEFF'+encodeURIComponent(csv);
+  a.download = 'processos_lexcontrol.csv';
+  a.click();
+  showToast('Exportação concluída!','success');
+}
+
+// ============================================================
+// UTILS
+// ============================================================
+function maskMoney(el) {
+  let v = el.value.replace(/\D/g,'');
+  if(!v){el.value='';return;}
+  v = (parseInt(v,10)/100).toFixed(2);
+  el.value = 'R$ '+v.replace('.',',').replace(/\B(?=(\d{3})+(?!\d))/g,'.');
+}
+
+function showToast(msg,type='') {
+  const wrap = document.getElementById('toast-wrap');
+  const t = document.createElement('div');
+  t.className='toast '+type; t.textContent=msg;
+  wrap.appendChild(t);
+  setTimeout(()=>t.remove(),3200);
+}
+
+function goTo(view) {
+  showToast('Navegue para o arquivo da Parte 1 — '+view,'');
+}
+
+// ============================================================
+// THEME
+// ============================================================
+function initTheme() {
+  const btn = document.querySelector('[data-theme-toggle]');
+  const html = document.documentElement;
+  let dark = matchMedia('(prefers-color-scheme:dark)').matches;
+  const set = () => {
+    html.setAttribute('data-theme',dark?'dark':'light');
+    if(btn) btn.innerHTML = dark
+      ? '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>'
+      : '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>';
+  };
+  set();
+  if(btn) btn.addEventListener('click',()=>{dark=!dark;set();});
+}
+</script>
+</body>
+</html>

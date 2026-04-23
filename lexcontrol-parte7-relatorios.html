@@ -1,0 +1,740 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LexControl — Relatórios</title>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter:wght@300..700&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+:root{
+  --bg:#f4f5f7;--surf:#fff;--surf2:#f9fafb;--surf3:#eef0f3;
+  --div:#d8dce4;--bord:#cdd2db;
+  --tx:#1a1f2e;--txm:#6b7280;--txf:#b0b7c3;
+  --pri:#1e3a5f;--prih:#162d4a;--prihl:#dce6f0;
+  --acc:#b8860b;--acch:#9a6f08;--acchl:#fdf3d7;
+  --ok:#166534;--okbg:#dcfce7;
+  --warn:#92400e;--warnbg:#fef3c7;
+  --err:#991b1b;--errbg:#fee2e2;
+  --inf:#1e40af;--infbg:#dbeafe;
+  --sb:#1a2744;--sbt:#c8d3e8;--sbm:#7888aa;
+  --sba:#2d4a80;--sbh:#243256;--sbb:#253360;
+  --fd:'Instrument Serif',Georgia,serif;
+  --fb:'Inter',system-ui,sans-serif;
+  --xs:.8rem;--sm:.9rem;--base:1rem;--lg:1.3rem;--xl:1.8rem;
+  --s1:.25rem;--s2:.5rem;--s3:.75rem;--s4:1rem;--s5:1.25rem;--s6:1.5rem;--s8:2rem;
+  --r:.375rem;--rm:.5rem;--rl:.75rem;--rx:1rem;--rf:9999px;
+  --sh:0 1px 3px rgba(0,0,0,.08);--shm:0 4px 12px rgba(0,0,0,.10);--shl:0 12px 32px rgba(0,0,0,.13);
+  --sw:240px;--hh:60px;--tr:180ms cubic-bezier(.16,1,.3,1);
+}
+[data-theme="dark"]{
+  --bg:#0f1322;--surf:#161c31;--surf2:#1c2440;--surf3:#1a2038;
+  --div:#2a3454;--bord:#334070;
+  --tx:#e2e8f5;--txm:#8896b8;--txf:#4a5680;
+  --pri:#6b93d4;--prih:#89aadf;--prihl:#1e2e50;
+  --acc:#e6aa2a;--acch:#f0bf52;--acchl:#2d2410;
+  --ok:#4ade80;--okbg:#14532d;
+  --warn:#fbbf24;--warnbg:#451a03;
+  --err:#f87171;--errbg:#450a0a;
+  --inf:#60a5fa;--infbg:#1e3a8a;
+  --sb:#0d1220;--sbt:#b0bdd8;--sbm:#5a6888;--sba:#1e2e50;--sbh:#141c35;--sbb:#1e2840;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{-webkit-font-smoothing:antialiased}
+body{font-family:var(--fb);font-size:var(--base);color:var(--tx);background:var(--bg);min-height:100dvh;display:flex;overflow:hidden}
+button{cursor:pointer;background:none;border:none;font:inherit;color:inherit}
+input,select,textarea{font:inherit;color:inherit}
+table{border-collapse:collapse;width:100%}
+
+.sidebar{width:var(--sw);min-height:100dvh;background:var(--sb);display:flex;flex-direction:column;flex-shrink:0;position:fixed;left:0;top:0;bottom:0;z-index:100;border-right:1px solid var(--sbb)}
+.sidebar-logo{padding:var(--s5);border-bottom:1px solid var(--sbb);display:flex;align-items:center;gap:var(--s3)}
+.sidebar-logo svg{color:var(--acc)}
+.logo-name{font-family:var(--fd);font-size:1.2rem;color:#fff;line-height:1.1}
+.logo-sub{font-size:.68rem;color:var(--sbm);letter-spacing:.05em;text-transform:uppercase}
+.sidebar-nav{flex:1;overflow-y:auto;padding:var(--s4) var(--s3);display:flex;flex-direction:column;gap:2px}
+.nav-sec{font-size:.68rem;font-weight:600;color:var(--sbm);text-transform:uppercase;letter-spacing:.1em;padding:var(--s3) var(--s3) var(--s2);margin-top:var(--s2)}
+.nav-item{display:flex;align-items:center;gap:var(--s3);padding:var(--s2) var(--s3);border-radius:var(--rm);color:var(--sbt);font-size:var(--sm);cursor:pointer;transition:background var(--tr);position:relative}
+.nav-item:hover{background:var(--sbh);color:#fff}
+.nav-item.active{background:var(--sba);color:#fff;font-weight:600}
+.nav-item.active::before{content:'';position:absolute;left:0;top:20%;bottom:20%;width:3px;background:var(--acc);border-radius:0 var(--rf) var(--rf) 0}
+.nav-item i{width:18px;height:18px;flex-shrink:0}
+.sidebar-footer{padding:var(--s4) var(--s3);border-top:1px solid var(--sbb)}
+.sb-user{display:flex;align-items:center;gap:var(--s3);padding:var(--s2) var(--s3);border-radius:var(--rm);cursor:pointer}
+.sb-user:hover{background:var(--sbh)}
+.u-av{width:32px;height:32px;border-radius:var(--rf);background:var(--sba);border:2px solid var(--acc);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.75rem;color:#fff}
+.u-name{font-size:var(--sm);color:#fff;font-weight:600}
+.u-role{font-size:var(--xs);color:var(--sbm)}
+
+.main-wrap{margin-left:var(--sw);flex:1;display:flex;flex-direction:column;min-height:100dvh;overflow-x:hidden}
+.topbar{height:var(--hh);background:var(--surf);border-bottom:1px solid var(--div);display:flex;align-items:center;padding:0 var(--s6);gap:var(--s4);position:sticky;top:0;z-index:50;box-shadow:var(--sh)}
+.topbar-title{font-family:var(--fd);font-size:var(--lg);font-style:italic;flex:1}
+.topbar-actions{display:flex;align-items:center;gap:var(--s3)}
+.topbar-date{font-size:var(--xs);color:var(--txm);background:var(--surf2);border:1px solid var(--bord);border-radius:var(--rf);padding:var(--s1) var(--s3)}
+.icon-btn{width:36px;height:36px;border-radius:var(--rm);display:flex;align-items:center;justify-content:center;color:var(--txm);transition:background var(--tr)}
+.icon-btn:hover{background:var(--surf3)}
+.page-content{flex:1;overflow-y:auto;padding:var(--s6) var(--s8)}
+
+.page-header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:var(--s6);gap:var(--s4);flex-wrap:wrap}
+.page-header h1{font-family:var(--fd);font-size:var(--xl);font-style:italic}
+.page-header p{font-size:var(--sm);color:var(--txm);margin-top:var(--s1)}
+.header-actions{display:flex;gap:var(--s3)}
+.btn{display:inline-flex;align-items:center;gap:var(--s2);padding:var(--s2) var(--s5);border-radius:var(--rm);font-size:var(--sm);font-weight:600;cursor:pointer;border:none;transition:background var(--tr),transform var(--tr)}
+.btn:active{transform:translateY(1px)}
+.btn-primary{background:var(--pri);color:#fff}.btn-primary:hover{background:var(--prih)}
+.btn-ghost{background:transparent;color:var(--txm);border:1px solid var(--bord)}.btn-ghost:hover{background:var(--surf3);color:var(--tx)}
+.btn-sm{padding:var(--s1) var(--s3);font-size:var(--xs)}
+.btn i{width:16px;height:16px}
+
+/* PERIOD SELECTOR */
+.period-bar{display:flex;gap:var(--s2);align-items:center;margin-bottom:var(--s6);flex-wrap:wrap}
+.period-label{font-size:var(--xs);font-weight:700;color:var(--txm);text-transform:uppercase;letter-spacing:.06em;margin-right:var(--s2)}
+.period-btn{padding:var(--s1) var(--s4);border-radius:var(--rf);font-size:var(--xs);font-weight:700;border:1px solid var(--bord);background:var(--surf);color:var(--txm);cursor:pointer;transition:all var(--tr)}
+.period-btn:hover{background:var(--surf3)}
+.period-btn.active{background:var(--pri);color:#fff;border-color:var(--pri)}
+
+/* KPI GRID */
+.kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:var(--s4);margin-bottom:var(--s6)}
+.kpi-card{background:var(--surf);border:1px solid var(--bord);border-radius:var(--rl);padding:var(--s4) var(--s5);box-shadow:var(--sh);display:flex;align-items:center;gap:var(--s4)}
+.kpi-ico{width:44px;height:44px;border-radius:var(--rm);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.kpi-ico i{width:20px;height:20px}
+.ki-navy{background:var(--prihl);color:var(--pri)}.ki-gold{background:var(--acchl);color:var(--acc)}
+.ki-green{background:var(--okbg);color:var(--ok)}.ki-red{background:var(--errbg);color:var(--err)}
+.ki-blue{background:var(--infbg);color:var(--inf)}
+.kpi-val{font-size:1.5rem;font-weight:800;line-height:1;font-variant-numeric:tabular-nums}
+.kpi-lbl{font-size:var(--xs);color:var(--txm);font-weight:600;text-transform:uppercase;letter-spacing:.06em;margin-top:3px}
+.kpi-delta{font-size:var(--xs);font-weight:700;margin-top:4px}
+.delta-up{color:var(--ok)}.delta-dn{color:var(--err)}
+
+/* CHARTS GRID */
+.charts-row{display:grid;grid-template-columns:2fr 1fr;gap:var(--s5);margin-bottom:var(--s5)}
+.charts-row-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:var(--s5);margin-bottom:var(--s5)}
+.charts-row-2{display:grid;grid-template-columns:1fr 1fr;gap:var(--s5);margin-bottom:var(--s5)}
+.chart-card{background:var(--surf);border:1px solid var(--bord);border-radius:var(--rl);box-shadow:var(--sh);overflow:hidden}
+.chart-header{padding:var(--s4) var(--s5);border-bottom:1px solid var(--div);display:flex;align-items:center;justify-content:space-between}
+.chart-title{font-size:var(--sm);font-weight:700;display:flex;align-items:center;gap:var(--s2)}
+.chart-title i{width:15px;height:15px;color:var(--pri)}
+.chart-sub{font-size:var(--xs);color:var(--txm)}
+.chart-body{padding:var(--s5);position:relative}
+.chart-body canvas{display:block;max-height:240px}
+
+/* RANKING */
+.ranking-list{display:flex;flex-direction:column;gap:var(--s2);padding:var(--s4) var(--s5)}
+.rank-item{display:flex;align-items:center;gap:var(--s3);padding:var(--s2) var(--s3);border-radius:var(--rm);transition:background var(--tr)}
+.rank-item:hover{background:var(--surf2)}
+.rank-num{width:24px;height:24px;border-radius:var(--rf);display:flex;align-items:center;justify-content:center;font-size:.68rem;font-weight:800;flex-shrink:0}
+.rn1{background:var(--acchl);color:var(--acc)}.rn2{background:var(--prihl);color:var(--pri)}.rn3{background:var(--okbg);color:var(--ok)}.rn-rest{background:var(--surf3);color:var(--txm)}
+.rank-info{flex:1;min-width:0}
+.rank-name{font-size:var(--sm);font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rank-sub{font-size:var(--xs);color:var(--txm)}
+.rank-bar-wrap{width:80px;height:6px;background:var(--surf3);border-radius:var(--rf);overflow:hidden;flex-shrink:0}
+.rank-bar{height:100%;border-radius:var(--rf);background:var(--pri)}
+.rank-val{font-size:var(--xs);font-weight:800;color:var(--pri);min-width:70px;text-align:right;font-variant-numeric:tabular-nums}
+
+/* SUMMARY TABLE */
+.sum-table th{text-align:left;font-size:var(--xs);font-weight:700;color:var(--txm);text-transform:uppercase;letter-spacing:.06em;padding:var(--s3);background:var(--surf2);border-bottom:1px solid var(--div)}
+.sum-table td{padding:var(--s3);font-size:var(--sm);border-bottom:1px solid var(--div);vertical-align:middle}
+.sum-table tr:last-child td{border-bottom:none}
+.sum-table tbody tr:hover td{background:var(--surf2)}
+.badge{display:inline-flex;align-items:center;padding:3px 10px;border-radius:var(--rf);font-size:.7rem;font-weight:700;white-space:nowrap}
+.b-ok{background:var(--okbg);color:var(--ok)}.b-warn{background:var(--warnbg);color:var(--warn)}
+.b-err{background:var(--errbg);color:var(--err)}.b-info{background:var(--infbg);color:var(--inf)}.b-muted{background:var(--surf3);color:var(--txm)}
+
+/* INSIGHTS */
+.insights-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:var(--s4);margin-bottom:var(--s5)}
+.insight-card{background:var(--surf);border:1px solid var(--bord);border-radius:var(--rl);box-shadow:var(--sh);padding:var(--s4) var(--s5);display:flex;gap:var(--s4);align-items:flex-start}
+.insight-ico{width:38px;height:38px;border-radius:var(--rm);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.insight-ico i{width:18px;height:18px}
+.ii-gold{background:var(--acchl);color:var(--acc)}.ii-green{background:var(--okbg);color:var(--ok)}
+.ii-red{background:var(--errbg);color:var(--err)}.ii-blue{background:var(--infbg);color:var(--inf)}
+.ii-navy{background:var(--prihl);color:var(--pri)}
+.insight-text{}
+.insight-title{font-size:var(--sm);font-weight:700;margin-bottom:3px}
+.insight-body{font-size:var(--xs);color:var(--txm);line-height:1.5}
+
+.toast-wrap{position:fixed;bottom:var(--s6);right:var(--s6);z-index:400;display:flex;flex-direction:column;gap:var(--s2);pointer-events:none}
+.toast{background:var(--tx);color:var(--bg);padding:var(--s3) var(--s5);border-radius:var(--rl);font-size:var(--sm);font-weight:500;box-shadow:var(--shl);animation:tIn .25s ease forwards;pointer-events:auto}
+.toast.success{background:var(--ok);color:#fff}.toast.error{background:var(--err);color:#fff}
+@keyframes tIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+
+.section-title{font-family:var(--fd);font-size:1.1rem;font-style:italic;margin-bottom:var(--s4);display:flex;align-items:center;gap:var(--s3);color:var(--tx)}
+.section-title::after{content:'';flex:1;height:1px;background:var(--div)}
+
+@media(max-width:1100px){.charts-row{grid-template-columns:1fr}.charts-row-3{grid-template-columns:1fr 1fr}.insights-grid{grid-template-columns:1fr 1fr}.kpi-grid{grid-template-columns:repeat(2,1fr)}.page-content{padding:var(--s4)}}
+@media(max-width:700px){.kpi-grid{grid-template-columns:1fr 1fr}.charts-row-3,.charts-row-2,.insights-grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <svg width="26" height="26" viewBox="0 0 28 28" fill="none">
+      <rect x="3" y="13" width="22" height="3" rx="1.5" fill="currentColor"/>
+      <path d="M7 13V8a1 1 0 011-1h12a1 1 0 011 1v5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+      <rect x="10" y="16" width="8" height="9" rx="1" fill="currentColor" opacity=".6"/>
+      <circle cx="14" cy="4" r="2.5" fill="currentColor"/>
+    </svg>
+    <div><div class="logo-name">LexControl</div><div class="logo-sub">Gestão Jurídica</div></div>
+  </div>
+  <nav class="sidebar-nav">
+    <div class="nav-sec">Principal</div>
+    <div class="nav-item" onclick="goTo('dashboard')"><i data-lucide="layout-dashboard"></i> Dashboard</div>
+    <div class="nav-item" onclick="goTo('processos')"><i data-lucide="briefcase"></i> Processos</div>
+    <div class="nav-item" onclick="goTo('clientes')"><i data-lucide="users"></i> Clientes</div>
+    <div class="nav-item" onclick="goTo('agenda')"><i data-lucide="calendar"></i> Agenda</div>
+    <div class="nav-sec">Financeiro</div>
+    <div class="nav-item" onclick="goTo('financeiro')"><i data-lucide="dollar-sign"></i> Financeiro</div>
+    <div class="nav-item" onclick="goTo('honorarios')"><i data-lucide="file-text"></i> Honorários</div>
+    <div class="nav-sec">Ferramentas</div>
+    <div class="nav-item" onclick="goTo('documentos')"><i data-lucide="folder-open"></i> Documentos</div>
+    <div class="nav-item active"><i data-lucide="bar-chart-2"></i> Relatórios</div>
+  </nav>
+  <div class="sidebar-footer">
+    <div class="sb-user">
+      <div class="u-av">DR</div>
+      <div><div class="u-name">Dr. Advogado</div><div class="u-role">Sócio Titular</div></div>
+    </div>
+  </div>
+</aside>
+
+<!-- MAIN -->
+<div class="main-wrap">
+  <header class="topbar">
+    <span class="topbar-title">Relatórios</span>
+    <div class="topbar-actions">
+      <span class="topbar-date" id="topbar-date"></span>
+      <button class="btn btn-ghost btn-sm" onclick="exportRelatorio()"><i data-lucide="download"></i> Exportar</button>
+      <button class="icon-btn" data-theme-toggle><i data-lucide="sun"></i></button>
+    </div>
+  </header>
+
+  <main class="page-content">
+    <div class="page-header">
+      <div>
+        <h1>Relatórios Analíticos</h1>
+        <p>Visão consolidada de desempenho financeiro, processual e operacional</p>
+      </div>
+    </div>
+
+    <!-- PERIOD -->
+    <div class="period-bar">
+      <span class="period-label">Período:</span>
+      <button class="period-btn active" id="pb-2026" onclick="setPeriod('2026',this)">2026</button>
+      <button class="period-btn" id="pb-q1" onclick="setPeriod('q1',this)">T1 2026</button>
+      <button class="period-btn" id="pb-q2" onclick="setPeriod('q2',this)">T2 2026</button>
+      <button class="period-btn" id="pb-abr" onclick="setPeriod('abr',this)">Abril 2026</button>
+      <button class="period-btn" id="pb-2025" onclick="setPeriod('2025',this)">2025</button>
+    </div>
+
+    <!-- KPIs -->
+    <div class="kpi-grid">
+      <div class="kpi-card">
+        <div class="kpi-ico ki-gold"><i data-lucide="trending-up"></i></div>
+        <div><div class="kpi-val" id="kpi-receita">—</div><div class="kpi-lbl">Receita Total</div><div class="kpi-delta delta-up" id="kpi-receita-d"></div></div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-ico ki-red"><i data-lucide="trending-down"></i></div>
+        <div><div class="kpi-val" id="kpi-despesa">—</div><div class="kpi-lbl">Despesas</div><div class="kpi-delta delta-dn" id="kpi-despesa-d"></div></div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-ico ki-green"><i data-lucide="wallet"></i></div>
+        <div><div class="kpi-val" id="kpi-lucro">—</div><div class="kpi-lbl">Resultado Líquido</div><div class="kpi-delta" id="kpi-margem"></div></div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-ico ki-navy"><i data-lucide="briefcase"></i></div>
+        <div><div class="kpi-val" id="kpi-proc-ativos">—</div><div class="kpi-lbl">Processos Ativos</div><div class="kpi-delta" id="kpi-proc-d"></div></div>
+      </div>
+    </div>
+
+    <!-- SECTION 1: FINANCEIRO -->
+    <div class="section-title"><i data-lucide="bar-chart-2" style="width:16px;height:16px;color:var(--pri)"></i> Desempenho Financeiro</div>
+
+    <div class="charts-row">
+      <!-- Receitas x Despesas mensal -->
+      <div class="chart-card">
+        <div class="chart-header">
+          <span class="chart-title"><i data-lucide="bar-chart-2"></i> Receitas × Despesas (Mensal)</span>
+          <span class="chart-sub" id="periodo-label">2026</span>
+        </div>
+        <div class="chart-body"><canvas id="chart-fluxo"></canvas></div>
+      </div>
+      <!-- Resultado acumulado -->
+      <div class="chart-card">
+        <div class="chart-header">
+          <span class="chart-title"><i data-lucide="trending-up"></i> Resultado Acumulado</span>
+        </div>
+        <div class="chart-body"><canvas id="chart-acumulado"></canvas></div>
+      </div>
+    </div>
+
+    <div class="charts-row-2">
+      <!-- Receitas por categoria -->
+      <div class="chart-card">
+        <div class="chart-header">
+          <span class="chart-title"><i data-lucide="pie-chart"></i> Receitas por Tipo de Honorário</span>
+        </div>
+        <div class="chart-body"><canvas id="chart-tipo-hon"></canvas></div>
+      </div>
+      <!-- Despesas por categoria -->
+      <div class="chart-card">
+        <div class="chart-header">
+          <span class="chart-title"><i data-lucide="pie-chart"></i> Despesas por Categoria</span>
+        </div>
+        <div class="chart-body"><canvas id="chart-desp-cat"></canvas></div>
+      </div>
+    </div>
+
+    <!-- SECTION 2: PROCESSOS -->
+    <div class="section-title"><i data-lucide="briefcase" style="width:16px;height:16px;color:var(--pri)"></i> Painel Processual</div>
+
+    <div class="charts-row-3">
+      <div class="chart-card">
+        <div class="chart-header"><span class="chart-title"><i data-lucide="pie-chart"></i> Processos por Área</span></div>
+        <div class="chart-body"><canvas id="chart-area"></canvas></div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-header"><span class="chart-title"><i data-lucide="activity"></i> Processos por Status</span></div>
+        <div class="chart-body"><canvas id="chart-status"></canvas></div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-header"><span class="chart-title"><i data-lucide="bar-chart"></i> Novos Processos / Mês</span></div>
+        <div class="chart-body"><canvas id="chart-novos"></canvas></div>
+      </div>
+    </div>
+
+    <!-- SECTION 3: CLIENTES -->
+    <div class="section-title"><i data-lucide="users" style="width:16px;height:16px;color:var(--pri)"></i> Clientes & Honorários</div>
+
+    <div class="charts-row-2">
+      <!-- TOP clientes -->
+      <div class="chart-card">
+        <div class="chart-header">
+          <span class="chart-title"><i data-lucide="star"></i> Top Clientes por Honorários</span>
+        </div>
+        <div class="ranking-list" id="ranking-clientes"></div>
+      </div>
+      <!-- Honorários recebimento -->
+      <div class="chart-card">
+        <div class="chart-header">
+          <span class="chart-title"><i data-lucide="bar-chart-horizontal"></i> Honorários: Recebido × A Receber</span>
+        </div>
+        <div class="chart-body"><canvas id="chart-hon-status"></canvas></div>
+      </div>
+    </div>
+
+    <!-- SECTION 4: INSIGHTS -->
+    <div class="section-title"><i data-lucide="zap" style="width:16px;height:16px;color:var(--acc)"></i> Insights do Escritório</div>
+    <div class="insights-grid" id="insights-grid"></div>
+
+    <!-- SECTION 5: RESUMO MENSAL -->
+    <div class="section-title"><i data-lucide="table" style="width:16px;height:16px;color:var(--pri)"></i> Resumo Mensal</div>
+    <div class="chart-card" style="margin-bottom:var(--s8)">
+      <div class="chart-header"><span class="chart-title"><i data-lucide="table"></i> Consolidado por Mês</span></div>
+      <div style="overflow-x:auto">
+        <table class="sum-table" id="resumo-table"></table>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<div class="toast-wrap" id="toast-wrap"></div>
+
+<script>
+// ============================================================
+// DATA
+// ============================================================
+const fmt = v => 'R$ '+Number(v).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
+const fmtK = v => v >= 1000 ? 'R$ '+(v/1000).toFixed(1)+'k' : fmt(v);
+
+const DATA = {
+  '2026': {
+    meses: ['Jan','Fev','Mar','Abr','Mai','Jun'],
+    receitas: [18500,21200,19800,22400,0,0],
+    despesas: [7200,8100,7600,8900,0,0],
+    novosProc: [3,5,2,4,0,0],
+  },
+  'q1': {
+    meses: ['Jan','Fev','Mar'],
+    receitas: [18500,21200,19800],
+    despesas: [7200,8100,7600],
+    novosProc: [3,5,2],
+  },
+  'q2': {
+    meses: ['Abr','Mai','Jun'],
+    receitas: [22400,0,0],
+    despesas: [8900,0,0],
+    novosProc: [4,0,0],
+  },
+  'abr': {
+    meses: ['Semana 1','Semana 2','Semana 3','Semana 4'],
+    receitas: [5800,6200,5100,5300],
+    despesas: [2200,2400,1900,2300],
+    novosProc: [1,1,1,1],
+  },
+  '2025': {
+    meses: ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'],
+    receitas: [14000,15500,13800,16200,17000,15600,16800,18200,17400,19000,20100,21500],
+    despesas: [5800,6200,5600,6500,6800,6200,6700,7100,6900,7500,7800,8200],
+    novosProc: [2,3,1,4,2,3,2,4,3,5,3,4],
+  },
+};
+
+const PROCESSOS = {
+  area: {Cível:12,Trabalhista:8,Consumidor:6,Família:5,Criminal:3,Tributário:4},
+  status: {Ativo:24,Encerrado:10,'Aguardando':4},
+};
+
+const CLIENTES_TOP = [
+  {nome:'Cooperativa Agrícola Sul',val:24000},
+  {nome:'Empresa XYZ Ltda',val:15000},
+  {nome:'Ana Rodrigues Faria',val:12000},
+  {nome:'Pedro Alves Mendes',val:10000},
+  {nome:'Maria das Graças Oliveira',val:8000},
+];
+
+const TIPO_HON = {Fixo:33000,Mensal:30000,Êxito:12000};
+const DESP_CAT = {Pessoal:28000,Escritório:12000,'Sistemas/TI':6000,Deslocamento:4800,Outros:3200};
+
+let activePeriod = '2026';
+let charts = {};
+
+// ============================================================
+// INIT
+// ============================================================
+document.addEventListener('DOMContentLoaded',()=>{
+  lucide.createIcons();
+  document.getElementById('topbar-date').textContent = new Date().toLocaleDateString('pt-BR',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
+  initTheme();
+  buildAll();
+});
+
+// ============================================================
+// PERIOD
+// ============================================================
+function setPeriod(p, el){
+  activePeriod = p;
+  document.querySelectorAll('.period-btn').forEach(b=>b.classList.remove('active'));
+  el.classList.add('active');
+  buildAll();
+}
+
+// ============================================================
+// BUILD
+// ============================================================
+function buildAll(){
+  const d = DATA[activePeriod];
+  const totalRec = d.receitas.reduce((a,v)=>a+v,0);
+  const totalDesp = d.despesas.reduce((a,v)=>a+v,0);
+  const lucro = totalRec - totalDesp;
+  const margem = totalRec ? Math.round((lucro/totalRec)*100) : 0;
+
+  // KPIs
+  document.getElementById('kpi-receita').textContent = fmtK(totalRec);
+  document.getElementById('kpi-receita-d').textContent = '▲ +12% vs período anterior';
+  document.getElementById('kpi-despesa').textContent = fmtK(totalDesp);
+  document.getElementById('kpi-despesa-d').textContent = '▲ +8% vs período anterior';
+  document.getElementById('kpi-lucro').textContent = fmtK(lucro);
+  document.getElementById('kpi-margem').textContent = `Margem: ${margem}%`;
+  document.getElementById('kpi-margem').className = 'kpi-delta '+(margem>=30?'delta-up':'delta-dn');
+  document.getElementById('kpi-proc-ativos').textContent = '38';
+  document.getElementById('kpi-proc-d').textContent = '24 ativos · 10 encerrados';
+  document.getElementById('kpi-proc-d').className = 'kpi-delta delta-up';
+  document.getElementById('periodo-label').textContent = {
+    '2026':'Jan–Jun 2026','q1':'T1 (Jan–Mar 2026)','q2':'T2 (Abr–Jun 2026)',
+    'abr':'Abril 2026','2025':'Ano completo 2025'
+  }[activePeriod]||activePeriod;
+
+  buildFluxo(d);
+  buildAcumulado(d);
+  buildTipoHon();
+  buildDespCat();
+  buildArea();
+  buildStatus();
+  buildNovos(d);
+  buildHonStatus();
+  buildRanking();
+  buildInsights(totalRec,totalDesp,lucro,margem);
+  buildResumoTable(d);
+}
+
+// ============================================================
+// CHART HELPERS
+// ============================================================
+function isDark(){ return document.documentElement.getAttribute('data-theme')==='dark'; }
+
+function getGrid(){ return isDark()?'rgba(255,255,255,.07)':'rgba(0,0,0,.07)'; }
+function getTx(){ return isDark()?'#8896b8':'#6b7280'; }
+
+const chartDefaults = ()=>({
+  responsive:true,
+  maintainAspectRatio:true,
+  plugins:{legend:{labels:{color:getTx(),font:{size:11,family:'Inter'}}}},
+});
+
+function destroyChart(id){ if(charts[id]){charts[id].destroy();delete charts[id];} }
+
+// ============================================================
+// CHARTS
+// ============================================================
+function buildFluxo(d){
+  destroyChart('fluxo');
+  const ctx = document.getElementById('chart-fluxo').getContext('2d');
+  charts['fluxo'] = new Chart(ctx,{
+    type:'bar',
+    data:{
+      labels:d.meses,
+      datasets:[
+        {label:'Receitas',data:d.receitas,backgroundColor:'rgba(30,58,95,.75)',borderRadius:4,borderSkipped:false},
+        {label:'Despesas',data:d.despesas,backgroundColor:'rgba(153,27,27,.65)',borderRadius:4,borderSkipped:false},
+      ]
+    },
+    options:{...chartDefaults(),scales:{
+      x:{grid:{color:getGrid()},ticks:{color:getTx(),font:{size:11}}},
+      y:{grid:{color:getGrid()},ticks:{color:getTx(),font:{size:11},callback:v=>fmtK(v)}},
+    }}
+  });
+}
+
+function buildAcumulado(d){
+  destroyChart('acumulado');
+  const ctx = document.getElementById('chart-acumulado').getContext('2d');
+  let acc=0;
+  const acumData = d.receitas.map((r,i)=>{acc+=r-d.despesas[i];return acc;});
+  charts['acumulado'] = new Chart(ctx,{
+    type:'line',
+    data:{
+      labels:d.meses,
+      datasets:[{label:'Resultado Acumulado',data:acumData,borderColor:'#b8860b',backgroundColor:'rgba(184,134,11,.12)',fill:true,tension:.4,pointRadius:4,pointBackgroundColor:'#b8860b'}]
+    },
+    options:{...chartDefaults(),scales:{
+      x:{grid:{color:getGrid()},ticks:{color:getTx(),font:{size:11}}},
+      y:{grid:{color:getGrid()},ticks:{color:getTx(),font:{size:11},callback:v=>fmtK(v)}},
+    }}
+  });
+}
+
+function buildTipoHon(){
+  destroyChart('tipohon');
+  const ctx = document.getElementById('chart-tipo-hon').getContext('2d');
+  charts['tipohon'] = new Chart(ctx,{
+    type:'doughnut',
+    data:{
+      labels:Object.keys(TIPO_HON),
+      datasets:[{data:Object.values(TIPO_HON),backgroundColor:['#1e3a5f','#b8860b','#166534'],borderWidth:2,borderColor:isDark()?'#161c31':'#fff'}]
+    },
+    options:{...chartDefaults(),cutout:'62%',plugins:{legend:{position:'bottom',labels:{color:getTx(),font:{size:11},padding:12}}}}
+  });
+}
+
+function buildDespCat(){
+  destroyChart('despcat');
+  const ctx = document.getElementById('chart-desp-cat').getContext('2d');
+  charts['despcat'] = new Chart(ctx,{
+    type:'doughnut',
+    data:{
+      labels:Object.keys(DESP_CAT),
+      datasets:[{data:Object.values(DESP_CAT),backgroundColor:['#991b1b','#92400e','#1e40af','#166534','#6b7280'],borderWidth:2,borderColor:isDark()?'#161c31':'#fff'}]
+    },
+    options:{...chartDefaults(),cutout:'62%',plugins:{legend:{position:'bottom',labels:{color:getTx(),font:{size:11},padding:12}}}}
+  });
+}
+
+function buildArea(){
+  destroyChart('area');
+  const ctx = document.getElementById('chart-area').getContext('2d');
+  const colors = ['#1e3a5f','#b8860b','#166534','#991b1b','#1e40af','#4f46e5'];
+  charts['area'] = new Chart(ctx,{
+    type:'doughnut',
+    data:{labels:Object.keys(PROCESSOS.area),datasets:[{data:Object.values(PROCESSOS.area),backgroundColor:colors,borderWidth:2,borderColor:isDark()?'#161c31':'#fff'}]},
+    options:{...chartDefaults(),cutout:'60%',plugins:{legend:{position:'bottom',labels:{color:getTx(),font:{size:10},padding:8}}}}
+  });
+}
+
+function buildStatus(){
+  destroyChart('status');
+  const ctx = document.getElementById('chart-status').getContext('2d');
+  charts['status'] = new Chart(ctx,{
+    type:'bar',
+    data:{
+      labels:Object.keys(PROCESSOS.status),
+      datasets:[{data:Object.values(PROCESSOS.status),backgroundColor:['#1e3a5f','#6b7280','#b8860b'],borderRadius:6,borderSkipped:false}]
+    },
+    options:{...chartDefaults(),indexAxis:'y',plugins:{legend:{display:false}},scales:{
+      x:{grid:{color:getGrid()},ticks:{color:getTx(),font:{size:11}}},
+      y:{grid:{color:'transparent'},ticks:{color:getTx(),font:{size:11}}},
+    }}
+  });
+}
+
+function buildNovos(d){
+  destroyChart('novos');
+  const ctx = document.getElementById('chart-novos').getContext('2d');
+  charts['novos'] = new Chart(ctx,{
+    type:'bar',
+    data:{
+      labels:d.meses,
+      datasets:[{label:'Novos processos',data:d.novosProc,backgroundColor:'rgba(30,64,175,.65)',borderRadius:4,borderSkipped:false}]
+    },
+    options:{...chartDefaults(),plugins:{legend:{display:false}},scales:{
+      x:{grid:{color:getGrid()},ticks:{color:getTx(),font:{size:10}}},
+      y:{grid:{color:getGrid()},ticks:{color:getTx(),font:{size:11},stepSize:1}},
+    }}
+  });
+}
+
+function buildHonStatus(){
+  destroyChart('honstatus');
+  const ctx = document.getElementById('chart-hon-status').getContext('2d');
+  const clientes = ['Coop. Agrícola','Empresa XYZ','Ana Rodrigues','Pedro Alves','Maria Graças','João Pereira'];
+  const recebido = [16000,10000,7000,10000,5000,2000];
+  const areceber = [8000,5000,5000,0,3000,4000];
+  charts['honstatus'] = new Chart(ctx,{
+    type:'bar',
+    data:{
+      labels:clientes,
+      datasets:[
+        {label:'Recebido',data:recebido,backgroundColor:'rgba(22,101,52,.7)',borderRadius:4,borderSkipped:false},
+        {label:'A Receber',data:areceber,backgroundColor:'rgba(146,64,14,.6)',borderRadius:4,borderSkipped:false},
+      ]
+    },
+    options:{...chartDefaults(),indexAxis:'y',scales:{
+      x:{stacked:true,grid:{color:getGrid()},ticks:{color:getTx(),font:{size:10},callback:v=>fmtK(v)}},
+      y:{stacked:true,grid:{color:'transparent'},ticks:{color:getTx(),font:{size:10}}},
+    }}
+  });
+}
+
+function buildRanking(){
+  const max = CLIENTES_TOP[0].val;
+  const rnClass = ['rn1','rn2','rn3','rn-rest','rn-rest'];
+  document.getElementById('ranking-clientes').innerHTML = CLIENTES_TOP.map((c,i)=>`
+    <div class="rank-item">
+      <div class="rank-num ${rnClass[i]||'rn-rest'}">${i+1}</div>
+      <div class="rank-info">
+        <div class="rank-name">${c.nome}</div>
+        <div class="rank-sub">${fmt(c.val)}</div>
+      </div>
+      <div class="rank-bar-wrap"><div class="rank-bar" style="width:${Math.round(c.val/max*100)}%"></div></div>
+    </div>`).join('');
+}
+
+function buildInsights(rec,desp,lucro,margem){
+  const melhorMes = 'Abril 2026';
+  const tiket = 'R$ 11.750';
+  document.getElementById('insights-grid').innerHTML = `
+    <div class="insight-card">
+      <div class="insight-ico ii-gold"><i data-lucide="star"></i></div>
+      <div class="insight-text">
+        <div class="insight-title">Melhor mês do período</div>
+        <div class="insight-body">${melhorMes} com receita de R$ 22.400 — crescimento de 13% em relação ao mês anterior.</div>
+      </div>
+    </div>
+    <div class="insight-card">
+      <div class="insight-ico ii-green"><i data-lucide="percent"></i></div>
+      <div class="insight-text">
+        <div class="insight-title">Margem operacional</div>
+        <div class="insight-body">Margem de ${margem}% no período — acima da meta de 50% para o exercício de 2026.</div>
+      </div>
+    </div>
+    <div class="insight-card">
+      <div class="insight-ico ii-navy"><i data-lucide="users"></i></div>
+      <div class="insight-text">
+        <div class="insight-title">Ticket médio por cliente</div>
+        <div class="insight-body">Ticket médio de ${tiket} por contrato de honorários. Top 3 clientes respondem por 66% da receita.</div>
+      </div>
+    </div>
+    <div class="insight-card">
+      <div class="insight-ico ii-blue"><i data-lucide="briefcase"></i></div>
+      <div class="insight-text">
+        <div class="insight-title">Área mais rentável</div>
+        <div class="insight-body">Área Tributária concentra os maiores contratos (R$ 39k). Área Cível tem maior volume (12 processos).</div>
+      </div>
+    </div>
+    <div class="insight-card">
+      <div class="insight-ico ii-red"><i data-lucide="alert-triangle"></i></div>
+      <div class="insight-text">
+        <div class="insight-title">Inadimplência</div>
+        <div class="insight-body">R$ 20.000 em parcelas em atraso. Recomenda-se contato proativo com 3 clientes nesta semana.</div>
+      </div>
+    </div>
+    <div class="insight-card">
+      <div class="insight-ico ii-gold"><i data-lucide="trending-up"></i></div>
+      <div class="insight-text">
+        <div class="insight-title">Projeção anual 2026</div>
+        <div class="insight-body">Com base no T1, projeção de receita anual em R$ 245k — crescimento estimado de 14% vs 2025.</div>
+      </div>
+    </div>`;
+  lucide.createIcons();
+}
+
+function buildResumoTable(d){
+  const thead = `<thead><tr>
+    <th>Mês</th><th>Receitas</th><th>Despesas</th><th>Resultado</th><th>Margem</th><th>Novos Proc.</th><th>Status</th>
+  </tr></thead>`;
+  let acc = 0;
+  const rows = d.meses.map((m,i)=>{
+    const r = d.receitas[i], dp = d.despesas[i], res = r-dp;
+    acc += res;
+    const mg = r ? Math.round(res/r*100) : 0;
+    const statusCls = r===0?'b-muted':mg>=40?'b-ok':mg>=20?'b-warn':'b-err';
+    const statusTx = r===0?'—':mg>=40?'Excelente':mg>=20?'Regular':'Atenção';
+    return `<tr>
+      <td style="font-weight:600">${m}</td>
+      <td style="color:var(--ok);font-weight:700;font-variant-numeric:tabular-nums">${r?fmt(r):'—'}</td>
+      <td style="color:var(--err);font-variant-numeric:tabular-nums">${dp?fmt(dp):'—'}</td>
+      <td style="font-weight:800;font-variant-numeric:tabular-nums;color:${res>0?'var(--ok)':'var(--err)'}">${res?fmt(res):'—'}</td>
+      <td style="font-variant-numeric:tabular-nums">${r?mg+'%':'—'}</td>
+      <td style="text-align:center;font-weight:700">${d.novosProc[i]||'—'}</td>
+      <td><span class="badge ${statusCls}">${statusTx}</span></td>
+    </tr>`;
+  }).join('');
+  document.getElementById('resumo-table').innerHTML = thead+'<tbody>'+rows+'</tbody>';
+}
+
+// ============================================================
+// EXPORT
+// ============================================================
+function exportRelatorio(){
+  const d = DATA[activePeriod];
+  const rows = [['Mês','Receitas','Despesas','Resultado','Margem%']];
+  d.meses.forEach((m,i)=>{
+    const r=d.receitas[i],dp=d.despesas[i],res=r-dp,mg=r?Math.round(res/r*100):0;
+    rows.push([m,r,dp,res,mg+'%']);
+  });
+  const csv = rows.map(r=>r.map(v=>'"'+String(v).replace(/"/g,'""')+'"').join(',')).join('
+');
+  const a = document.createElement('a');
+  a.href = 'data:text/csv;charset=utf-8,﻿'+encodeURIComponent(csv);
+  a.download = `relatorio_lexcontrol_${activePeriod}.csv`;
+  a.click();
+  showToast('Relatório exportado!','success');
+}
+
+function showToast(msg,type=''){
+  const t=document.createElement('div');
+  t.className='toast '+type;t.textContent=msg;
+  document.getElementById('toast-wrap').appendChild(t);
+  setTimeout(()=>t.remove(),3200);
+}
+function goTo(v){showToast('Navegue para o arquivo da Parte 1 — '+v,'');}
+
+function initTheme(){
+  const btn=document.querySelector('[data-theme-toggle]');
+  const html=document.documentElement;
+  let dark=matchMedia('(prefers-color-scheme:dark)').matches;
+  const set=()=>{
+    html.setAttribute('data-theme',dark?'dark':'light');
+    if(btn) btn.innerHTML=dark
+      ?'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>'
+      :'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>';
+    // rebuild charts on theme toggle
+    if(Object.keys(charts).length) buildAll();
+  };
+  set();
+  if(btn) btn.addEventListener('click',()=>{dark=!dark;set();});
+}
+</script>
+</body>
+</html>

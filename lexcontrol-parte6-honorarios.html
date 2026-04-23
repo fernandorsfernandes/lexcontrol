@@ -1,0 +1,841 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LexControl — Honorários</title>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter:wght@300..700&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+<style>
+:root{
+  --bg:#f4f5f7;--surf:#fff;--surf2:#f9fafb;--surf3:#eef0f3;
+  --div:#d8dce4;--bord:#cdd2db;
+  --tx:#1a1f2e;--txm:#6b7280;--txf:#b0b7c3;
+  --pri:#1e3a5f;--prih:#162d4a;--prihl:#dce6f0;
+  --acc:#b8860b;--acch:#9a6f08;--acchl:#fdf3d7;
+  --ok:#166534;--okbg:#dcfce7;
+  --warn:#92400e;--warnbg:#fef3c7;
+  --err:#991b1b;--errbg:#fee2e2;
+  --inf:#1e40af;--infbg:#dbeafe;
+  --sb:#1a2744;--sbt:#c8d3e8;--sbm:#7888aa;
+  --sba:#2d4a80;--sbh:#243256;--sbb:#253360;
+  --fd:'Instrument Serif',Georgia,serif;
+  --fb:'Inter',system-ui,sans-serif;
+  --xs:.8rem;--sm:.9rem;--base:1rem;--lg:1.3rem;--xl:1.8rem;
+  --r:.375rem;--rm:.5rem;--rl:.75rem;--rx:1rem;--rf:9999px;
+  --s1:.25rem;--s2:.5rem;--s3:.75rem;--s4:1rem;--s5:1.25rem;--s6:1.5rem;--s8:2rem;
+  --sh:0 1px 3px rgba(0,0,0,.08);--shm:0 4px 12px rgba(0,0,0,.10);--shl:0 12px 32px rgba(0,0,0,.13);
+  --sw:240px;--hh:60px;--tr:180ms cubic-bezier(.16,1,.3,1);
+}
+[data-theme="dark"]{
+  --bg:#0f1322;--surf:#161c31;--surf2:#1c2440;--surf3:#1a2038;
+  --div:#2a3454;--bord:#334070;
+  --tx:#e2e8f5;--txm:#8896b8;--txf:#4a5680;
+  --pri:#6b93d4;--prih:#89aadf;--prihl:#1e2e50;
+  --acc:#e6aa2a;--acch:#f0bf52;--acchl:#2d2410;
+  --ok:#4ade80;--okbg:#14532d;
+  --warn:#fbbf24;--warnbg:#451a03;
+  --err:#f87171;--errbg:#450a0a;
+  --inf:#60a5fa;--infbg:#1e3a8a;
+  --sb:#0d1220;--sbt:#b0bdd8;--sbm:#5a6888;--sba:#1e2e50;--sbh:#141c35;--sbb:#1e2840;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{-webkit-font-smoothing:antialiased}
+body{font-family:var(--fb);font-size:var(--base);color:var(--tx);background:var(--bg);min-height:100dvh;display:flex;overflow:hidden}
+button{cursor:pointer;background:none;border:none;font:inherit;color:inherit}
+input,select,textarea{font:inherit;color:inherit}
+table{border-collapse:collapse;width:100%}
+
+.sidebar{width:var(--sw);min-height:100dvh;background:var(--sb);display:flex;flex-direction:column;flex-shrink:0;position:fixed;left:0;top:0;bottom:0;z-index:100;border-right:1px solid var(--sbb)}
+.sidebar-logo{padding:var(--s5);border-bottom:1px solid var(--sbb);display:flex;align-items:center;gap:var(--s3)}
+.sidebar-logo svg{color:var(--acc)}
+.logo-name{font-family:var(--fd);font-size:1.2rem;color:#fff;line-height:1.1}
+.logo-sub{font-size:.68rem;color:var(--sbm);letter-spacing:.05em;text-transform:uppercase}
+.sidebar-nav{flex:1;overflow-y:auto;padding:var(--s4) var(--s3);display:flex;flex-direction:column;gap:2px}
+.nav-sec{font-size:.68rem;font-weight:600;color:var(--sbm);text-transform:uppercase;letter-spacing:.1em;padding:var(--s3) var(--s3) var(--s2);margin-top:var(--s2)}
+.nav-item{display:flex;align-items:center;gap:var(--s3);padding:var(--s2) var(--s3);border-radius:var(--rm);color:var(--sbt);font-size:var(--sm);cursor:pointer;transition:background var(--tr);position:relative}
+.nav-item:hover{background:var(--sbh);color:#fff}
+.nav-item.active{background:var(--sba);color:#fff;font-weight:600}
+.nav-item.active::before{content:'';position:absolute;left:0;top:20%;bottom:20%;width:3px;background:var(--acc);border-radius:0 var(--rf) var(--rf) 0}
+.nav-item i{width:18px;height:18px;flex-shrink:0}
+.sidebar-footer{padding:var(--s4) var(--s3);border-top:1px solid var(--sbb)}
+.sb-user{display:flex;align-items:center;gap:var(--s3);padding:var(--s2) var(--s3);border-radius:var(--rm)}
+.sb-user:hover{background:var(--sbh);cursor:pointer}
+.u-av{width:32px;height:32px;border-radius:var(--rf);background:var(--sba);border:2px solid var(--acc);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.75rem;color:#fff}
+.u-name{font-size:var(--sm);color:#fff;font-weight:600}
+.u-role{font-size:var(--xs);color:var(--sbm)}
+
+.main-wrap{margin-left:var(--sw);flex:1;display:flex;flex-direction:column;min-height:100dvh;overflow-x:hidden}
+.topbar{height:var(--hh);background:var(--surf);border-bottom:1px solid var(--div);display:flex;align-items:center;padding:0 var(--s6);gap:var(--s4);position:sticky;top:0;z-index:50;box-shadow:var(--sh)}
+.topbar-title{font-family:var(--fd);font-size:var(--lg);font-style:italic;flex:1}
+.topbar-actions{display:flex;align-items:center;gap:var(--s3)}
+.topbar-date{font-size:var(--xs);color:var(--txm);background:var(--surf2);border:1px solid var(--bord);border-radius:var(--rf);padding:var(--s1) var(--s3)}
+.icon-btn{width:36px;height:36px;border-radius:var(--rm);display:flex;align-items:center;justify-content:center;color:var(--txm);transition:background var(--tr)}
+.icon-btn:hover{background:var(--surf3)}
+.page-content{flex:1;overflow-y:auto;padding:var(--s6) var(--s8)}
+
+.page-header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:var(--s6);gap:var(--s4);flex-wrap:wrap}
+.page-header h1{font-family:var(--fd);font-size:var(--xl);font-style:italic}
+.page-header p{font-size:var(--sm);color:var(--txm);margin-top:var(--s1)}
+.header-actions{display:flex;gap:var(--s3)}
+
+.btn{display:inline-flex;align-items:center;gap:var(--s2);padding:var(--s2) var(--s5);border-radius:var(--rm);font-size:var(--sm);font-weight:600;cursor:pointer;border:none;transition:background var(--tr),transform var(--tr)}
+.btn:active{transform:translateY(1px)}
+.btn-primary{background:var(--pri);color:#fff}.btn-primary:hover{background:var(--prih)}
+.btn-gold{background:var(--acc);color:#1a1000}.btn-gold:hover{background:var(--acch)}
+.btn-ghost{background:transparent;color:var(--txm);border:1px solid var(--bord)}.btn-ghost:hover{background:var(--surf3);color:var(--tx)}
+.btn-danger{background:var(--errbg);color:var(--err)}.btn-danger:hover{background:var(--err);color:#fff}
+.btn-sm{padding:var(--s1) var(--s3);font-size:var(--xs)}
+.btn i{width:16px;height:16px}
+
+.kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:var(--s4);margin-bottom:var(--s6)}
+.kpi-card{background:var(--surf);border:1px solid var(--bord);border-radius:var(--rl);padding:var(--s4) var(--s5);box-shadow:var(--sh);display:flex;align-items:center;gap:var(--s4)}
+.kpi-ico{width:42px;height:42px;border-radius:var(--rm);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.kpi-ico i{width:20px;height:20px}
+.ki-navy{background:var(--prihl);color:var(--pri)}.ki-gold{background:var(--acchl);color:var(--acc)}
+.ki-green{background:var(--okbg);color:var(--ok)}.ki-red{background:var(--errbg);color:var(--err)}
+.kpi-val{font-size:1.5rem;font-weight:800;line-height:1;font-variant-numeric:tabular-nums}
+.kpi-lbl{font-size:var(--xs);color:var(--txm);font-weight:600;text-transform:uppercase;letter-spacing:.06em;margin-top:3px}
+
+.card{background:var(--surf);border-radius:var(--rl);border:1px solid var(--bord);box-shadow:var(--sh);overflow:hidden;margin-bottom:var(--s5)}
+.card-header{display:flex;align-items:center;justify-content:space-between;padding:var(--s4) var(--s5);border-bottom:1px solid var(--div)}
+.card-title{font-size:var(--sm);font-weight:700;display:flex;align-items:center;gap:var(--s2)}
+.card-title i{width:16px;height:16px;color:var(--pri)}
+
+.view-tabs{display:flex;gap:var(--s2);margin-bottom:var(--s5)}
+.v-tab{padding:var(--s2) var(--s4);border-radius:var(--rm);font-size:var(--sm);font-weight:600;border:1px solid var(--bord);background:var(--surf);color:var(--txm);cursor:pointer;transition:all var(--tr);display:flex;align-items:center;gap:var(--s2)}
+.v-tab i{width:15px;height:15px}
+.v-tab.active{background:var(--pri);color:#fff;border-color:var(--pri)}
+
+.toolbar{display:flex;gap:var(--s3);margin-bottom:var(--s4);flex-wrap:wrap;align-items:center}
+.search-wrap{position:relative;flex:1;min-width:200px}
+.search-wrap i{position:absolute;left:var(--s3);top:50%;transform:translateY(-50%);width:15px;height:15px;color:var(--txf);pointer-events:none}
+.search-inp{width:100%;padding:var(--s2) var(--s3) var(--s2) 2.1rem;background:var(--surf);border:1px solid var(--bord);border-radius:var(--rm);font-size:var(--sm);transition:border-color var(--tr)}
+.search-inp:focus{outline:none;border-color:var(--pri);box-shadow:0 0 0 3px var(--prihl)}
+.fil-sel{padding:var(--s2) var(--s3);background:var(--surf);border:1px solid var(--bord);border-radius:var(--rm);font-size:var(--sm);cursor:pointer}
+
+/* CONTRATOS GRID */
+.contratos-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:var(--s4);margin-bottom:var(--s6)}
+.contrato-card{background:var(--surf);border:1px solid var(--bord);border-radius:var(--rl);box-shadow:var(--sh);overflow:hidden;cursor:pointer;transition:box-shadow var(--tr),transform var(--tr)}
+.contrato-card:hover{box-shadow:var(--shm);transform:translateY(-2px)}
+.cc-top{padding:var(--s4) var(--s5);border-bottom:1px solid var(--div)}
+.cc-tipo{font-size:.68rem;font-weight:700;padding:2px 8px;border-radius:var(--rf);width:fit-content;margin-bottom:var(--s2)}
+.cc-nome{font-weight:700;color:var(--tx);margin-bottom:2px}
+.cc-sub{font-size:var(--xs);color:var(--txm)}
+.cc-body{padding:var(--s4) var(--s5)}
+.cc-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:var(--s2)}
+.cc-label{font-size:var(--xs);color:var(--txm);font-weight:600}
+.cc-val{font-size:var(--xs);font-weight:700;color:var(--tx)}
+.cc-footer{padding:var(--s3) var(--s5);border-top:1px solid var(--div);display:flex;justify-content:space-between;align-items:center}
+.progress-bar-wrap{width:100%;height:6px;background:var(--surf3);border-radius:var(--rf);overflow:hidden;margin:var(--s2) 0}
+.progress-bar{height:100%;border-radius:var(--rf);transition:width .6s ease}
+.pb-green{background:var(--ok)}.pb-gold{background:var(--acc)}.pb-red{background:var(--err)}
+
+/* TABLE */
+.tbl-wrap{overflow-x:auto}
+.data-tbl th{text-align:left;font-size:var(--xs);font-weight:700;color:var(--txm);text-transform:uppercase;letter-spacing:.06em;padding:var(--s3);background:var(--surf2);border-bottom:1px solid var(--div);white-space:nowrap}
+.data-tbl td{padding:var(--s3);font-size:var(--sm);border-bottom:1px solid var(--div);vertical-align:middle}
+.data-tbl tr:last-child td{border-bottom:none}
+.data-tbl tbody tr:hover td{background:var(--surf2)}
+
+/* BADGE */
+.badge{display:inline-flex;align-items:center;padding:3px 10px;border-radius:var(--rf);font-size:.7rem;font-weight:700;white-space:nowrap}
+.b-ok{background:var(--okbg);color:var(--ok)}.b-warn{background:var(--warnbg);color:var(--warn)}
+.b-err{background:var(--errbg);color:var(--err)}.b-info{background:var(--infbg);color:var(--inf)}
+.b-muted{background:var(--surf3);color:var(--txm)}
+
+/* PARCELAS SECTION */
+.parcelas-section{margin-top:var(--s5)}
+.parcelas-title{font-size:var(--sm);font-weight:700;margin-bottom:var(--s3);display:flex;align-items:center;gap:var(--s2)}
+.parcela-row{display:flex;align-items:center;gap:var(--s3);padding:var(--s3) var(--s4);background:var(--surf2);border:1px solid var(--div);border-radius:var(--rm);margin-bottom:var(--s2);cursor:pointer;transition:background var(--tr)}
+.parcela-row:hover{background:var(--surf3)}
+.parc-num{width:28px;height:28px;border-radius:var(--rf);display:flex;align-items:center;justify-content:center;font-size:.68rem;font-weight:800;flex-shrink:0}
+.p-ok{background:var(--okbg);color:var(--ok)}.p-pend{background:var(--warnbg);color:var(--warn)}.p-atras{background:var(--errbg);color:var(--err)}
+.parc-info{flex:1;min-width:0}
+.parc-desc{font-size:var(--xs);font-weight:600}
+.parc-date{font-size:var(--xs);color:var(--txm)}
+.parc-val{font-size:var(--sm);font-weight:800;color:var(--tx);font-variant-numeric:tabular-nums}
+
+/* MODAL */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.45);backdrop-filter:blur(4px);z-index:300;display:none;align-items:center;justify-content:center;padding:var(--s4)}
+.modal-overlay.open{display:flex}
+.modal{background:var(--surf);border-radius:var(--rx);box-shadow:var(--shl);width:100%;max-width:560px;max-height:92vh;overflow-y:auto;animation:mIn .22s cubic-bezier(.16,1,.3,1)}
+@keyframes mIn{from{opacity:0;transform:scale(.96) translateY(8px)}to{opacity:1;transform:scale(1) translateY(0)}}
+.modal-header{display:flex;align-items:center;justify-content:space-between;padding:var(--s5) var(--s6);border-bottom:1px solid var(--div)}
+.modal-header h2{font-family:var(--fd);font-size:var(--lg);font-style:italic}
+.modal-close{width:32px;height:32px;border-radius:var(--rm);display:flex;align-items:center;justify-content:center;color:var(--txm);transition:background var(--tr)}
+.modal-close:hover{background:var(--surf3)}
+.modal-body{padding:var(--s5) var(--s6)}
+.modal-footer{padding:var(--s4) var(--s6);border-top:1px solid var(--div);display:flex;justify-content:flex-end;gap:var(--s3)}
+
+/* DRAWER */
+.drawer-overlay{position:fixed;inset:0;background:rgba(0,0,0,.4);backdrop-filter:blur(3px);z-index:200;display:none;justify-content:flex-end}
+.drawer-overlay.open{display:flex}
+.drawer{width:480px;max-width:95vw;background:var(--surf);height:100%;overflow-y:auto;box-shadow:var(--shl);display:flex;flex-direction:column;animation:dIn .22s cubic-bezier(.16,1,.3,1)}
+@keyframes dIn{from{transform:translateX(40px);opacity:0}to{transform:translateX(0);opacity:1}}
+.drawer-header{display:flex;align-items:center;justify-content:space-between;padding:var(--s5) var(--s6);border-bottom:1px solid var(--div);position:sticky;top:0;background:var(--surf);z-index:10}
+.drawer-header h2{font-family:var(--fd);font-size:var(--lg);font-style:italic}
+.drawer-close{width:32px;height:32px;border-radius:var(--rm);display:flex;align-items:center;justify-content:center;color:var(--txm);transition:background var(--tr)}
+.drawer-close:hover{background:var(--surf3)}
+.drawer-body{padding:var(--s5) var(--s6);flex:1}
+.drawer-footer{padding:var(--s4) var(--s6);border-top:1px solid var(--div);display:flex;justify-content:space-between;gap:var(--s3)}
+
+/* FORM */
+.fg{margin-bottom:var(--s4)}
+.fg label{display:block;font-size:var(--xs);font-weight:600;color:var(--txm);text-transform:uppercase;letter-spacing:.06em;margin-bottom:var(--s2)}
+.fc{width:100%;padding:var(--s2) var(--s3);background:var(--surf2);border:1px solid var(--bord);border-radius:var(--rm);font-size:var(--sm);color:var(--tx);transition:border-color var(--tr)}
+.fc:focus{outline:none;border-color:var(--pri);box-shadow:0 0 0 3px var(--prihl)}
+.fr{display:grid;grid-template-columns:1fr 1fr;gap:var(--s3)}
+.fdiv{font-size:var(--xs);font-weight:700;color:var(--txm);text-transform:uppercase;letter-spacing:.08em;display:flex;align-items:center;gap:var(--s3);margin:var(--s4) 0}
+.fdiv::before,.fdiv::after{content:'';flex:1;height:1px;background:var(--div)}
+
+/* TIPO CONTRATO */
+.tipo-contrato-sel{display:grid;grid-template-columns:repeat(3,1fr);gap:var(--s2);margin-bottom:var(--s5)}
+.tc-opt{padding:var(--s3) var(--s2);border-radius:var(--rm);border:2px solid var(--bord);font-size:.7rem;font-weight:700;cursor:pointer;text-align:center;transition:all var(--tr);background:var(--surf2);color:var(--txm);display:flex;flex-direction:column;align-items:center;gap:4px}
+.tc-opt i{width:16px;height:16px}
+.tc-opt:hover{border-color:var(--pri);color:var(--pri)}
+.tc-sel-fixo{border-color:var(--pri);background:var(--prihl);color:var(--pri)}
+.tc-sel-mensal{border-color:var(--acc);background:var(--acchl);color:var(--acc)}
+.tc-sel-exito{border-color:var(--ok);background:var(--okbg);color:var(--ok)}
+
+.toast-wrap{position:fixed;bottom:var(--s6);right:var(--s6);z-index:400;display:flex;flex-direction:column;gap:var(--s2);pointer-events:none}
+.toast{background:var(--tx);color:var(--bg);padding:var(--s3) var(--s5);border-radius:var(--rl);font-size:var(--sm);font-weight:500;box-shadow:var(--shl);animation:tIn .25s ease forwards;pointer-events:auto}
+.toast.success{background:var(--ok);color:#fff}.toast.error{background:var(--err);color:#fff}
+@keyframes tIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+
+.pag{display:flex;align-items:center;justify-content:space-between;padding:var(--s3) var(--s5);border-top:1px solid var(--div)}
+.pag-info{font-size:var(--xs);color:var(--txm)}
+.pag-btns{display:flex;gap:var(--s2)}
+.pag-btn{min-width:32px;height:32px;display:flex;align-items:center;justify-content:center;border-radius:var(--rm);font-size:var(--xs);font-weight:600;border:1px solid var(--bord);color:var(--txm);background:var(--surf);cursor:pointer;transition:background var(--tr)}
+.pag-btn:hover{background:var(--surf3)}
+.pag-btn.active{background:var(--pri);color:#fff;border-color:var(--pri)}
+.pag-btn:disabled{opacity:.4;cursor:not-allowed}
+
+@media(max-width:1000px){.kpi-grid{grid-template-columns:repeat(2,1fr)}.page-content{padding:var(--s4)}}
+@media(max-width:600px){.kpi-grid{grid-template-columns:1fr 1fr}.contratos-grid{grid-template-columns:1fr}.fr{grid-template-columns:1fr}.tipo-contrato-sel{grid-template-columns:repeat(3,1fr)}}
+</style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <svg width="26" height="26" viewBox="0 0 28 28" fill="none">
+      <rect x="3" y="13" width="22" height="3" rx="1.5" fill="currentColor"/>
+      <path d="M7 13V8a1 1 0 011-1h12a1 1 0 011 1v5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+      <rect x="10" y="16" width="8" height="9" rx="1" fill="currentColor" opacity=".6"/>
+      <circle cx="14" cy="4" r="2.5" fill="currentColor"/>
+    </svg>
+    <div><div class="logo-name">LexControl</div><div class="logo-sub">Gestão Jurídica</div></div>
+  </div>
+  <nav class="sidebar-nav">
+    <div class="nav-sec">Principal</div>
+    <div class="nav-item" onclick="goTo('dashboard')"><i data-lucide="layout-dashboard"></i> Dashboard</div>
+    <div class="nav-item" onclick="goTo('processos')"><i data-lucide="briefcase"></i> Processos</div>
+    <div class="nav-item" onclick="goTo('clientes')"><i data-lucide="users"></i> Clientes</div>
+    <div class="nav-item" onclick="goTo('agenda')"><i data-lucide="calendar"></i> Agenda</div>
+    <div class="nav-sec">Financeiro</div>
+    <div class="nav-item" onclick="goTo('financeiro')"><i data-lucide="dollar-sign"></i> Financeiro</div>
+    <div class="nav-item active"><i data-lucide="file-text"></i> Honorários</div>
+    <div class="nav-sec">Ferramentas</div>
+    <div class="nav-item" onclick="goTo('documentos')"><i data-lucide="folder-open"></i> Documentos</div>
+    <div class="nav-item" onclick="goTo('relatorios')"><i data-lucide="bar-chart-2"></i> Relatórios</div>
+  </nav>
+  <div class="sidebar-footer">
+    <div class="sb-user">
+      <div class="u-av">DR</div>
+      <div><div class="u-name">Dr. Advogado</div><div class="u-role">Sócio Titular</div></div>
+    </div>
+  </div>
+</aside>
+
+<!-- MAIN -->
+<div class="main-wrap">
+  <header class="topbar">
+    <span class="topbar-title">Honorários</span>
+    <div class="topbar-actions">
+      <span class="topbar-date" id="topbar-date"></span>
+      <button class="icon-btn" data-theme-toggle><i data-lucide="sun"></i></button>
+    </div>
+  </header>
+
+  <main class="page-content">
+    <div class="page-header">
+      <div>
+        <h1>Contratos de Honorários</h1>
+        <p>Gestão de contratos, parcelas e recebimentos do escritório</p>
+      </div>
+      <div class="header-actions">
+        <button class="btn btn-ghost" onclick="exportCSV()"><i data-lucide="download"></i> Exportar</button>
+        <button class="btn btn-primary" onclick="openModal()"><i data-lucide="plus"></i> Novo Contrato</button>
+      </div>
+    </div>
+
+    <!-- KPIs -->
+    <div class="kpi-grid">
+      <div class="kpi-card">
+        <div class="kpi-ico ki-navy"><i data-lucide="file-text"></i></div>
+        <div><div class="kpi-val" id="kpi-contratos">0</div><div class="kpi-lbl">Contratos Ativos</div></div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-ico ki-gold"><i data-lucide="trending-up"></i></div>
+        <div><div class="kpi-val" id="kpi-total-contrat">R$ 0</div><div class="kpi-lbl">Total Contratado</div></div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-ico ki-green"><i data-lucide="check-circle"></i></div>
+        <div><div class="kpi-val" id="kpi-recebido">R$ 0</div><div class="kpi-lbl">Recebido</div></div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-ico ki-red"><i data-lucide="clock"></i></div>
+        <div><div class="kpi-val" id="kpi-pendente">R$ 0</div><div class="kpi-lbl">A Receber</div></div>
+      </div>
+    </div>
+
+    <!-- TABS -->
+    <div class="view-tabs">
+      <div class="v-tab active" id="tab-contratos" onclick="setView('contratos',this)"><i data-lucide="layout-grid"></i> Contratos</div>
+      <div class="v-tab" id="tab-parcelas" onclick="setView('parcelas',this)"><i data-lucide="list"></i> Parcelas</div>
+    </div>
+
+    <!-- TOOLBAR -->
+    <div class="toolbar">
+      <div class="search-wrap">
+        <i data-lucide="search"></i>
+        <input class="search-inp" id="search-inp" placeholder="Buscar por cliente ou processo..." oninput="render()">
+      </div>
+      <select class="fil-sel" id="fil-tipo" onchange="render()">
+        <option value="">Todos os tipos</option>
+        <option>Fixo</option><option>Mensal</option><option>Êxito</option>
+      </select>
+      <select class="fil-sel" id="fil-status" onchange="render()">
+        <option value="">Todos os status</option>
+        <option>Ativo</option><option>Quitado</option><option>Suspenso</option>
+      </select>
+    </div>
+
+    <!-- CONTRATOS VIEW -->
+    <div id="view-contratos">
+      <div class="contratos-grid" id="contratos-grid"></div>
+      <div id="empty-contratos" style="display:none;padding:3rem;text-align:center;color:var(--txm);font-size:var(--sm)">Nenhum contrato encontrado.</div>
+    </div>
+
+    <!-- PARCELAS VIEW -->
+    <div id="view-parcelas" style="display:none">
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title"><i data-lucide="list"></i> <span id="parc-count-label">Parcelas</span></span>
+        </div>
+        <div class="tbl-wrap">
+          <table class="data-tbl">
+            <thead>
+              <tr>
+                <th>Contrato / Cliente</th><th>Parcela</th><th>Vencimento</th>
+                <th>Valor</th><th>Status</th><th>Pgto</th><th>Ações</th>
+              </tr>
+            </thead>
+            <tbody id="parc-tbody"></tbody>
+          </table>
+        </div>
+        <div id="empty-parc" style="display:none;padding:2rem;text-align:center;font-size:var(--sm);color:var(--txm)">Nenhuma parcela encontrada.</div>
+        <div class="pag">
+          <span class="pag-info" id="pag-info"></span>
+          <div class="pag-btns" id="pag-btns"></div>
+        </div>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<!-- DRAWER: CONTRATO DETAIL -->
+<div class="drawer-overlay" id="drawer-overlay" onclick="if(event.target===this)closeDrawer()">
+  <div class="drawer">
+    <div class="drawer-header">
+      <h2 id="drawer-title">Contrato</h2>
+      <button class="drawer-close" onclick="closeDrawer()"><i data-lucide="x"></i></button>
+    </div>
+    <div class="drawer-body" id="drawer-body"></div>
+    <div class="drawer-footer">
+      <button class="btn btn-danger btn-sm" id="drawer-del"><i data-lucide="trash-2"></i> Excluir</button>
+      <div style="display:flex;gap:var(--s3)">
+        <button class="btn btn-ghost btn-sm" onclick="closeDrawer()">Fechar</button>
+        <button class="btn btn-primary btn-sm" id="drawer-edit"><i data-lucide="pencil"></i> Editar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: NOVO / EDITAR CONTRATO -->
+<div class="modal-overlay" id="modal-contrato">
+  <div class="modal">
+    <div class="modal-header">
+      <h2 id="modal-title">Novo Contrato</h2>
+      <button class="modal-close" onclick="closeModal()"><i data-lucide="x"></i></button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="f-id">
+
+      <div style="margin-bottom:var(--s4)">
+        <label style="display:block;font-size:var(--xs);font-weight:600;color:var(--txm);text-transform:uppercase;letter-spacing:.06em;margin-bottom:var(--s3)">Tipo de Honorário *</label>
+        <div class="tipo-contrato-sel">
+          <div class="tc-opt" id="opt-fixo" onclick="selTipo('Fixo')"><i data-lucide="circle-dot"></i>Fixo</div>
+          <div class="tc-opt" id="opt-mensal" onclick="selTipo('Mensal')"><i data-lucide="repeat"></i>Mensal</div>
+          <div class="tc-opt" id="opt-exito" onclick="selTipo('Êxito')"><i data-lucide="trophy"></i>Êxito</div>
+        </div>
+        <input type="hidden" id="f-tipo" value="">
+      </div>
+
+      <div class="fr">
+        <div class="fg"><label>Cliente *</label><input class="fc" id="f-cliente" placeholder="Nome do cliente"></div>
+        <div class="fg"><label>Processo</label><input class="fc" id="f-proc" placeholder="Nº do processo"></div>
+      </div>
+      <div class="fg"><label>Descrição do Serviço</label><input class="fc" id="f-desc" placeholder="Ex: Ação de indenização por danos morais"></div>
+
+      <div class="fdiv">Valores</div>
+      <div class="fr">
+        <div class="fg"><label>Valor Total (R$) *</label><input class="fc" id="f-valor" placeholder="0,00" oninput="calcParcelas()"></div>
+        <div class="fg"><label>Entrada (R$)</label><input class="fc" id="f-entrada" placeholder="0,00" oninput="calcParcelas()"></div>
+      </div>
+      <div class="fr">
+        <div class="fg"><label>Parcelas</label>
+          <select class="fc" id="f-parcelas" onchange="calcParcelas()">
+            <option value="1">1x (à vista)</option>
+            <option value="2">2x</option><option value="3">3x</option>
+            <option value="4">4x</option><option value="6">6x</option>
+            <option value="12">12x</option>
+          </select>
+        </div>
+        <div class="fg"><label>Vencimento dia</label>
+          <select class="fc" id="f-vencdia">
+            <option value="5">5</option><option value="10">10</option>
+            <option value="15">15</option><option value="20">20</option><option value="25">25</option>
+          </select>
+        </div>
+      </div>
+      <div id="preview-parcelas" style="background:var(--surf2);border:1px solid var(--div);border-radius:var(--rm);padding:var(--s3) var(--s4);font-size:var(--xs);color:var(--txm);margin-bottom:var(--s4)">Preencha o valor para visualizar parcelas.</div>
+
+      <div class="fdiv">Datas</div>
+      <div class="fr">
+        <div class="fg"><label>Início do Contrato</label><input type="date" class="fc" id="f-inicio"></div>
+        <div class="fg"><label>Status</label>
+          <select class="fc" id="f-status">
+            <option>Ativo</option><option>Quitado</option><option>Suspenso</option>
+          </select>
+        </div>
+      </div>
+      <div class="fg"><label>Observações</label><textarea class="fc" id="f-obs" rows="2"></textarea></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal()">Cancelar</button>
+      <button class="btn btn-primary" onclick="salvar()"><i data-lucide="save"></i> Salvar</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast-wrap" id="toast-wrap"></div>
+
+<script>
+// ============================================================
+// DATA
+// ============================================================
+const fmt = v => 'R$ '+Number(v).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
+const TODAY = new Date(); TODAY.setHours(0,0,0,0);
+const toISO = d => d.toISOString().slice(0,10);
+const todayISO = toISO(TODAY);
+
+function gerarParcelas(total, entrada, n, vencDia, inicioISO){
+  const restante = total - entrada;
+  const valParcela = n > 0 ? restante / n : 0;
+  const parcelas = [];
+  if(entrada > 0) parcelas.push({num:0,desc:'Entrada',venc:inicioISO,valor:entrada,status:'Pago',pgto:inicioISO});
+  for(let i=1;i<=n;i++){
+    const d = new Date(inicioISO+'T12:00:00');
+    d.setMonth(d.getMonth()+i);
+    d.setDate(vencDia);
+    const venc = toISO(d);
+    const vDate = new Date(venc+'T12:00:00');
+    let status = vDate < TODAY ? 'Atrasado' : 'Pendente';
+    if(i===1 && entrada===0) status='Pago';
+    parcelas.push({num:i,desc:`Parcela ${i}/${n}`,venc,valor:valParcela,status,pgto:status==='Pago'?venc:''});
+  }
+  return parcelas;
+}
+
+let contratos = [
+  {id:1,tipo:'Fixo',cliente:'Maria das Graças Oliveira',proc:'0012345-67.2024.8.09.0051',desc:'Ação de indenização bancária',valor:8000,entrada:2000,parcelas:3,vencDia:10,inicio:'2026-01-10',status:'Ativo',obs:'Êxito previsto em 2026',parts:gerarParcelas(8000,2000,3,10,'2026-01-10')},
+  {id:2,tipo:'Mensal',cliente:'João Pereira da Silva',proc:'0009821-33.2023.8.09.0051',desc:'Reclamação trabalhista — consultoria mensal',valor:6000,entrada:0,parcelas:6,vencDia:5,inicio:'2026-01-05',status:'Ativo',obs:'',parts:gerarParcelas(6000,0,6,5,'2026-01-05')},
+  {id:3,tipo:'Fixo',cliente:'Empresa XYZ Ltda',proc:'0031122-44.2025.8.09.0051',desc:'Defesa em ação cível',valor:15000,entrada:5000,parcelas:4,vencDia:15,inicio:'2025-10-15',status:'Ativo',obs:'PJ — emitir NF',parts:gerarParcelas(15000,5000,4,15,'2025-10-15')},
+  {id:4,tipo:'Êxito',cliente:'Ana Rodrigues Faria',proc:'0044567-12.2022.8.09.0051',desc:'Ação de divórcio litigioso — êxito',valor:12000,entrada:3000,parcelas:3,vencDia:20,inicio:'2026-02-20',status:'Ativo',obs:'Sentença favorável obtida',parts:gerarParcelas(12000,3000,3,20,'2026-02-20')},
+  {id:5,tipo:'Mensal',cliente:'Cooperativa Agrícola Sul',proc:'0067890-11.2023.8.09.0051',desc:'Consultoria tributária mensal',valor:24000,entrada:0,parcelas:12,vencDia:5,inicio:'2026-01-05',status:'Ativo',obs:'Contrato anual',parts:gerarParcelas(24000,0,12,5,'2026-01-05')},
+  {id:6,tipo:'Fixo',cliente:'Pedro Alves Mendes',proc:'0055678-99.2024.8.09.0051',desc:'Defesa criminal — instrução',valor:10000,entrada:4000,parcelas:3,vencDia:10,inicio:'2025-11-10',status:'Quitado',obs:'',parts:gerarParcelas(10000,4000,3,10,'2025-11-10').map(p=>({...p,status:'Pago',pgto:p.venc}))},
+];
+let nextId = 7;
+let currentView = 'contratos';
+let currentPage = 1;
+const PER_PAGE = 10;
+let drawerContratoId = null;
+let tipoAtual = '';
+
+// ============================================================
+// INIT
+// ============================================================
+document.addEventListener('DOMContentLoaded',()=>{
+  lucide.createIcons();
+  document.getElementById('topbar-date').textContent = new Date().toLocaleDateString('pt-BR',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
+  initTheme();
+  render();
+});
+
+// ============================================================
+// KPIs
+// ============================================================
+function updateKPIs(){
+  const ativos = contratos.filter(c=>c.status==='Ativo');
+  const totalContrat = contratos.reduce((a,c)=>a+c.valor,0);
+  const recebido = contratos.reduce((a,c)=>a+c.parts.filter(p=>p.status==='Pago').reduce((x,p)=>x+p.valor,0),0);
+  const pendente = contratos.reduce((a,c)=>a+c.parts.filter(p=>p.status!=='Pago').reduce((x,p)=>x+p.valor,0),0);
+  document.getElementById('kpi-contratos').textContent = ativos.length;
+  document.getElementById('kpi-total-contrat').textContent = fmt(totalContrat);
+  document.getElementById('kpi-recebido').textContent = fmt(recebido);
+  document.getElementById('kpi-pendente').textContent = fmt(pendente);
+}
+
+// ============================================================
+// FILTERS
+// ============================================================
+function getFiltered(){
+  const q = document.getElementById('search-inp').value.toLowerCase();
+  const tipo = document.getElementById('fil-tipo').value;
+  const status = document.getElementById('fil-status').value;
+  return contratos.filter(c=>{
+    const mq = !q || c.cliente.toLowerCase().includes(q) || (c.proc||'').includes(q) || (c.desc||'').toLowerCase().includes(q);
+    const mt = !tipo || c.tipo===tipo;
+    const ms = !status || c.status===status;
+    return mq&&mt&&ms;
+  });
+}
+
+// ============================================================
+// VIEW
+// ============================================================
+function setView(v,el){
+  currentView = v;
+  document.querySelectorAll('.v-tab').forEach(t=>t.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('view-contratos').style.display = v==='contratos'?'':'none';
+  document.getElementById('view-parcelas').style.display = v==='parcelas'?'':'none';
+  render();
+}
+
+function render(){
+  updateKPIs();
+  const list = getFiltered();
+  if(currentView==='contratos') renderContratos(list);
+  else renderParcelas(list);
+}
+
+// ============================================================
+// CONTRATOS GRID
+// ============================================================
+const tipoBadge = t => {
+  const m = {Fixo:`<span class="badge b-info">${t}</span>`,Mensal:`<span class="badge b-warn">${t}</span>`,'Êxito':`<span class="badge b-ok">${t}</span>`};
+  return m[t]||`<span class="badge b-muted">${t}</span>`;
+};
+const statusBadge = s => {
+  const m = {Ativo:'b-ok',Quitado:'b-muted',Suspenso:'b-err'};
+  return `<span class="badge ${m[s]||'b-muted'}">${s}</span>`;
+};
+
+function renderContratos(list){
+  const grid = document.getElementById('contratos-grid');
+  const empty = document.getElementById('empty-contratos');
+  if(!list.length){grid.innerHTML='';empty.style.display='block';return;}
+  empty.style.display='none';
+  grid.innerHTML = list.map(c=>{
+    const recebido = c.parts.filter(p=>p.status==='Pago').reduce((a,p)=>a+p.valor,0);
+    const pct = Math.round((recebido/c.valor)*100);
+    const pbClass = pct>=100?'pb-green':pct>=50?'pb-gold':'pb-red';
+    const proxPend = c.parts.find(p=>p.status==='Pendente'||p.status==='Atrasado');
+    return `
+    <div class="contrato-card" onclick="openDrawer(${c.id})">
+      <div class="cc-top">
+        <div style="display:flex;gap:var(--s2);margin-bottom:var(--s2)">${tipoBadge(c.tipo)} ${statusBadge(c.status)}</div>
+        <div class="cc-nome">${c.cliente}</div>
+        <div class="cc-sub">${c.desc}</div>
+      </div>
+      <div class="cc-body">
+        <div class="cc-row"><span class="cc-label">Valor Total</span><span class="cc-val" style="color:var(--pri)">${fmt(c.valor)}</span></div>
+        <div class="cc-row"><span class="cc-label">Recebido</span><span class="cc-val" style="color:var(--ok)">${fmt(recebido)}</span></div>
+        <div class="cc-row"><span class="cc-label">Processo</span><span class="cc-val" style="color:var(--pri);font-size:.7rem">${c.proc?c.proc.substring(0,18)+'…':'—'}</span></div>
+        <div class="progress-bar-wrap"><div class="progress-bar ${pbClass}" style="width:${pct}%"></div></div>
+        <div style="font-size:.68rem;color:var(--txm)">${pct}% recebido · ${c.parcelas}x de ${fmt(c.valor/c.parcelas)}</div>
+      </div>
+      <div class="cc-footer">
+        <span style="font-size:var(--xs);color:var(--txm)">${proxPend?'Próx: '+new Date(proxPend.venc+'T12:00:00').toLocaleDateString('pt-BR'):'—'}</span>
+        <span style="font-size:var(--xs);font-weight:700;color:${proxPend&&proxPend.status==='Atrasado'?'var(--err)':'var(--txm)'}">${proxPend?proxPend.status:''}</span>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ============================================================
+// PARCELAS TABLE
+// ============================================================
+function renderParcelas(list){
+  const allParcs = [];
+  list.forEach(c=>{
+    c.parts.forEach(p=>{allParcs.push({...p,contratoId:c.id,cliente:c.cliente,proc:c.proc});});
+  });
+  allParcs.sort((a,b)=>a.venc.localeCompare(b.venc));
+  const total = allParcs.length;
+  const pages = Math.max(1,Math.ceil(total/PER_PAGE));
+  if(currentPage>pages) currentPage=pages;
+  const start = (currentPage-1)*PER_PAGE;
+  const slice = allParcs.slice(start,start+PER_PAGE);
+
+  document.getElementById('parc-count-label').textContent=`${total} parcela${total!==1?'s':''}`;
+  const tbody = document.getElementById('parc-tbody');
+  const empty = document.getElementById('empty-parc');
+  if(!total){tbody.innerHTML='';empty.style.display='block';}
+  else{
+    empty.style.display='none';
+    tbody.innerHTML = slice.map(p=>{
+      const vDate = new Date(p.venc+'T12:00:00');
+      const flag = p.status==='Atrasado'?'🔴 ':p.status==='Pendente'&&vDate-TODAY<=7*86400000?'🟡 ':'';
+      const sClass = p.status==='Pago'?'b-ok':p.status==='Atrasado'?'b-err':'b-warn';
+      return `<tr>
+        <td>
+          <div style="font-weight:600;font-size:var(--xs)">${p.cliente}</div>
+          <div style="font-size:.68rem;color:var(--txm)">${p.proc?p.proc.substring(0,20)+'…':'Sem processo'}</div>
+        </td>
+        <td style="font-size:var(--xs);color:var(--txm)">${p.desc}</td>
+        <td style="font-size:var(--xs);font-variant-numeric:tabular-nums">${flag}${vDate.toLocaleDateString('pt-BR')}</td>
+        <td style="font-weight:800;color:var(--pri);font-variant-numeric:tabular-nums">${fmt(p.valor)}</td>
+        <td><span class="badge ${sClass}">${p.status}</span></td>
+        <td style="font-size:var(--xs);color:var(--txm)">${p.pgto?new Date(p.pgto+'T12:00:00').toLocaleDateString('pt-BR'):'—'}</td>
+        <td>
+          ${p.status!=='Pago'?`<button class="btn btn-ghost btn-sm" onclick="marcarPago(${p.contratoId},${p.num})" title="Marcar como pago"><i data-lucide="check" style="width:13px;height:13px"></i></button>`:'<span style="color:var(--ok);font-size:var(--xs)">✓</span>'}
+        </td>
+      </tr>`;
+    }).join('');
+  }
+
+  const info = total ? `${start+1}–${Math.min(start+PER_PAGE,total)} de ${total}` : 'Nenhuma';
+  document.getElementById('pag-info').textContent = info;
+  const btnWrap = document.getElementById('pag-btns');
+  let btns = `<button class="pag-btn" onclick="goPage(${currentPage-1})" ${currentPage===1?'disabled':''}>‹</button>`;
+  for(let i=1;i<=pages;i++) btns+=`<button class="pag-btn ${i===currentPage?'active':''}" onclick="goPage(${i})">${i}</button>`;
+  btns+=`<button class="pag-btn" onclick="goPage(${currentPage+1})" ${currentPage===pages?'disabled':''}>›</button>`;
+  btnWrap.innerHTML = btns;
+  lucide.createIcons();
+}
+
+function goPage(p){currentPage=p;render();}
+
+function marcarPago(cid,num){
+  const c = contratos.find(x=>x.id===cid); if(!c) return;
+  const p = c.parts.find(x=>x.num===num); if(!p) return;
+  p.status='Pago'; p.pgto=todayISO;
+  showToast('Parcela marcada como paga!','success');
+  render();
+}
+
+// ============================================================
+// DRAWER
+// ============================================================
+function openDrawer(id){
+  const c = contratos.find(x=>x.id===id); if(!c) return;
+  drawerContratoId = id;
+  document.getElementById('drawer-title').textContent = c.cliente;
+  document.getElementById('drawer-edit').onclick = ()=>{closeDrawer();editContrato(id);};
+  document.getElementById('drawer-del').onclick = ()=>{if(confirm('Excluir este contrato?')){contratos=contratos.filter(x=>x.id!==id);closeDrawer();render();showToast('Contrato excluído.','');}};
+
+  const recebido = c.parts.filter(p=>p.status==='Pago').reduce((a,p)=>a+p.valor,0);
+  const pct = Math.round((recebido/c.valor)*100);
+  const pbClass = pct>=100?'pb-green':pct>=50?'pb-gold':'pb-red';
+
+  const parcsHTML = c.parts.map(p=>{
+    const cls = p.status==='Pago'?'p-ok':p.status==='Atrasado'?'p-atras':'p-pend';
+    const icon = p.status==='Pago'?'✓':p.status==='Atrasado'?'!':'○';
+    return `<div class="parcela-row" onclick="event.stopPropagation();marcarPago(${c.id},${p.num});renderDrawerParcelas(${c.id})">
+      <div class="parc-num ${cls}">${icon}</div>
+      <div class="parc-info">
+        <div class="parc-desc">${p.desc}</div>
+        <div class="parc-date">Venc: ${new Date(p.venc+'T12:00:00').toLocaleDateString('pt-BR')}${p.pgto?' · Pago: '+new Date(p.pgto+'T12:00:00').toLocaleDateString('pt-BR'):''}</div>
+      </div>
+      <div class="parc-val">${fmt(p.valor)}</div>
+    </div>`;
+  }).join('');
+
+  document.getElementById('drawer-body').innerHTML = `
+    <div style="margin-bottom:var(--s5)">
+      <div style="display:flex;gap:var(--s2);margin-bottom:var(--s3)">${tipoBadge(c.tipo)} ${statusBadge(c.status)}</div>
+      <div style="font-size:var(--lg);font-weight:800">${fmt(c.valor)}</div>
+      <div style="font-size:var(--sm);color:var(--txm);margin-top:4px">${c.desc}</div>
+      <div class="progress-bar-wrap" style="margin-top:var(--s4)"><div class="progress-bar ${pbClass}" style="width:${pct}%"></div></div>
+      <div style="font-size:var(--xs);color:var(--txm)">${pct}% recebido · ${fmt(recebido)} de ${fmt(c.valor)}</div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:var(--s3);margin-bottom:var(--s5)">
+      <div><label style="font-size:.68rem;font-weight:600;color:var(--txf);text-transform:uppercase;letter-spacing:.06em;display:block;margin-bottom:2px">Processo</label><span style="font-size:var(--xs);color:var(--pri)">${c.proc||'—'}</span></div>
+      <div><label style="font-size:.68rem;font-weight:600;color:var(--txf);text-transform:uppercase;letter-spacing:.06em;display:block;margin-bottom:2px">Início</label><span style="font-size:var(--xs)">${new Date(c.inicio+'T12:00:00').toLocaleDateString('pt-BR')}</span></div>
+      <div><label style="font-size:.68rem;font-weight:600;color:var(--txf);text-transform:uppercase;letter-spacing:.06em;display:block;margin-bottom:2px">Parcelas</label><span style="font-size:var(--xs)">${c.parcelas}x de ${fmt(c.valor/c.parcelas)}</span></div>
+      <div><label style="font-size:.68rem;font-weight:600;color:var(--txf);text-transform:uppercase;letter-spacing:.06em;display:block;margin-bottom:2px">Vence dia</label><span style="font-size:var(--xs)">${c.vencDia} de cada mês</span></div>
+      ${c.obs?`<div style="grid-column:span 2"><label style="font-size:.68rem;font-weight:600;color:var(--txf);text-transform:uppercase;letter-spacing:.06em;display:block;margin-bottom:2px">Obs</label><span style="font-size:var(--xs)">${c.obs}</span></div>`:''}
+    </div>
+    <div>
+      <div class="parcelas-title"><i data-lucide="list" style="width:14px;height:14px"></i> Parcelas (${c.parts.length}) — clique para marcar como pago</div>
+      <div id="drawer-parcelas">${parcsHTML}</div>
+    </div>`;
+  document.getElementById('drawer-overlay').classList.add('open');
+  lucide.createIcons();
+}
+
+function renderDrawerParcelas(id){
+  const c = contratos.find(x=>x.id===id); if(!c) return;
+  const parcsHTML = c.parts.map(p=>{
+    const cls = p.status==='Pago'?'p-ok':p.status==='Atrasado'?'p-atras':'p-pend';
+    const icon = p.status==='Pago'?'✓':p.status==='Atrasado'?'!':'○';
+    return `<div class="parcela-row" onclick="event.stopPropagation();marcarPago(${c.id},${p.num});renderDrawerParcelas(${c.id})">
+      <div class="parc-num ${cls}">${icon}</div>
+      <div class="parc-info">
+        <div class="parc-desc">${p.desc}</div>
+        <div class="parc-date">Venc: ${new Date(p.venc+'T12:00:00').toLocaleDateString('pt-BR')}${p.pgto?' · Pago: '+new Date(p.pgto+'T12:00:00').toLocaleDateString('pt-BR'):''}</div>
+      </div>
+      <div class="parc-val">${fmt(p.valor)}</div>
+    </div>`;
+  }).join('');
+  const el = document.getElementById('drawer-parcelas');
+  if(el) el.innerHTML = parcsHTML;
+  updateKPIs();
+}
+
+function closeDrawer(){document.getElementById('drawer-overlay').classList.remove('open');}
+
+// ============================================================
+// MODAL
+// ============================================================
+function selTipo(t){
+  tipoAtual=t;
+  document.getElementById('f-tipo').value=t;
+  ['fixo','mensal','exito'].forEach(k=>document.getElementById('opt-'+k).className='tc-opt');
+  const map={'Fixo':'fixo','Mensal':'mensal','Êxito':'exito'};
+  document.getElementById('opt-'+map[t]).className='tc-opt tc-sel-'+map[t];
+}
+
+function calcParcelas(){
+  const val = parseFloat(document.getElementById('f-valor').value.replace(',','.'))||0;
+  const ent = parseFloat(document.getElementById('f-entrada').value.replace(',','.'))||0;
+  const n = parseInt(document.getElementById('f-parcelas').value)||1;
+  const el = document.getElementById('preview-parcelas');
+  if(!val){el.textContent='Preencha o valor para visualizar parcelas.';return;}
+  const restante = val-ent;
+  const pp = restante/n;
+  el.innerHTML = `<strong>Restante: ${fmt(restante)}</strong> · ${n}x de <strong>${fmt(pp)}</strong>${ent>0?' (+ entrada de '+fmt(ent)+')':''}`;
+}
+
+function openModal(){
+  document.getElementById('f-id').value='';
+  document.getElementById('modal-title').textContent='Novo Contrato';
+  ['f-cliente','f-proc','f-desc','f-valor','f-entrada','f-obs'].forEach(id=>{document.getElementById(id).value='';});
+  document.getElementById('f-parcelas').value='1';
+  document.getElementById('f-vencdia').value='10';
+  document.getElementById('f-status').value='Ativo';
+  document.getElementById('f-inicio').value=todayISO;
+  tipoAtual='';
+  ['fixo','mensal','exito'].forEach(k=>document.getElementById('opt-'+k).className='tc-opt');
+  document.getElementById('f-tipo').value='';
+  document.getElementById('preview-parcelas').textContent='Preencha o valor para visualizar parcelas.';
+  document.getElementById('modal-contrato').classList.add('open');
+  lucide.createIcons();
+}
+
+function closeModal(){document.getElementById('modal-contrato').classList.remove('open');}
+document.getElementById('modal-contrato').addEventListener('click',e=>{if(e.target===document.getElementById('modal-contrato'))closeModal();});
+
+function editContrato(id){
+  const c = contratos.find(x=>x.id===id); if(!c) return;
+  document.getElementById('f-id').value=id;
+  document.getElementById('modal-title').textContent='Editar Contrato';
+  selTipo(c.tipo);
+  document.getElementById('f-cliente').value=c.cliente;
+  document.getElementById('f-proc').value=c.proc||'';
+  document.getElementById('f-desc').value=c.desc||'';
+  document.getElementById('f-valor').value=c.valor;
+  document.getElementById('f-entrada').value=c.entrada||0;
+  document.getElementById('f-parcelas').value=c.parcelas;
+  document.getElementById('f-vencdia').value=c.vencDia;
+  document.getElementById('f-inicio').value=c.inicio;
+  document.getElementById('f-status').value=c.status;
+  document.getElementById('f-obs').value=c.obs||'';
+  calcParcelas();
+  document.getElementById('modal-contrato').classList.add('open');
+  lucide.createIcons();
+}
+
+function salvar(){
+  const tipo = document.getElementById('f-tipo').value;
+  const cliente = document.getElementById('f-cliente').value.trim();
+  const valor = parseFloat(document.getElementById('f-valor').value.replace(',','.'))||0;
+  if(!tipo||!cliente||!valor){showToast('Preencha tipo, cliente e valor.','error');return;}
+  const entrada = parseFloat(document.getElementById('f-entrada').value.replace(',','.'))||0;
+  const parcelas = parseInt(document.getElementById('f-parcelas').value)||1;
+  const vencDia = parseInt(document.getElementById('f-vencdia').value)||10;
+  const inicio = document.getElementById('f-inicio').value||todayISO;
+  const obj = {tipo,cliente,proc:document.getElementById('f-proc').value,desc:document.getElementById('f-desc').value,valor,entrada,parcelas,vencDia,inicio,status:document.getElementById('f-status').value,obs:document.getElementById('f-obs').value,parts:gerarParcelas(valor,entrada,parcelas,vencDia,inicio)};
+  const editId = parseInt(document.getElementById('f-id').value)||0;
+  if(editId){
+    const idx = contratos.findIndex(x=>x.id===editId);
+    if(idx>=0) contratos[idx]={...contratos[idx],...obj};
+    showToast('Contrato atualizado!','success');
+  } else {
+    contratos.unshift({id:nextId++,...obj});
+    showToast('Contrato criado!','success');
+  }
+  closeModal(); render();
+}
+
+// ============================================================
+// EXPORT
+// ============================================================
+function exportCSV(){
+  const rows=[['ID','Tipo','Cliente','Processo','Descrição','Valor Total','Recebido','Parcelas','Status']];
+  contratos.forEach(c=>{
+    const rec = c.parts.filter(p=>p.status==='Pago').reduce((a,p)=>a+p.valor,0);
+    rows.push([c.id,c.tipo,c.cliente,c.proc||'',c.desc||'',c.valor,rec.toFixed(2),c.parcelas,c.status]);
+  });
+  const csv = rows.map(r=>r.map(v=>'"'+String(v).replace(/"/g,'""')+'"').join(',')).join('
+');
+  const a = document.createElement('a');
+  a.href = 'data:text/csv;charset=utf-8,﻿'+encodeURIComponent(csv);
+  a.download = 'honorarios_lexcontrol.csv';
+  a.click();
+  showToast('Exportação concluída!','success');
+}
+
+// ============================================================
+// UTILS
+// ============================================================
+function showToast(msg,type=''){
+  const t=document.createElement('div');
+  t.className='toast '+type;t.textContent=msg;
+  document.getElementById('toast-wrap').appendChild(t);
+  setTimeout(()=>t.remove(),3200);
+}
+function goTo(v){showToast('Navegue para o arquivo — '+v,'');}
+
+function initTheme(){
+  const btn=document.querySelector('[data-theme-toggle]');
+  const html=document.documentElement;
+  let dark=matchMedia('(prefers-color-scheme:dark)').matches;
+  const set=()=>{
+    html.setAttribute('data-theme',dark?'dark':'light');
+    if(btn) btn.innerHTML=dark
+      ?'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>'
+      :'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>';
+  };
+  set();
+  if(btn) btn.addEventListener('click',()=>{dark=!dark;set();});
+}
+</script>
+</body>
+</html>

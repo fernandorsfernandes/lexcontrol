@@ -1,0 +1,846 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LexControl — Clientes</title>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter:wght@300..700&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+<style>
+:root{
+  --color-bg:#f4f5f7;--color-surface:#fff;--color-surface-2:#f9fafb;
+  --color-surface-offset:#eef0f3;--color-divider:#d8dce4;--color-border:#cdd2db;
+  --color-text:#1a1f2e;--color-text-muted:#6b7280;--color-text-faint:#b0b7c3;
+  --color-primary:#1e3a5f;--color-primary-hover:#162d4a;--color-primary-highlight:#dce6f0;
+  --color-accent:#b8860b;--color-accent-hover:#9a6f08;--color-accent-highlight:#fdf3d7;
+  --color-success:#166534;--color-success-bg:#dcfce7;
+  --color-warning:#92400e;--color-warning-bg:#fef3c7;
+  --color-error:#991b1b;--color-error-bg:#fee2e2;
+  --color-info:#1e40af;--color-info-bg:#dbeafe;
+  --color-sidebar-bg:#1a2744;--color-sidebar-text:#c8d3e8;
+  --color-sidebar-muted:#7888aa;--color-sidebar-active:#2d4a80;
+  --color-sidebar-hover:#243256;--color-sidebar-border:#253360;
+  --font-display:'Instrument Serif',Georgia,serif;
+  --font-body:'Inter',system-ui,sans-serif;
+  --text-xs:.8rem;--text-sm:.9rem;--text-base:1rem;--text-lg:1.3rem;--text-xl:1.8rem;
+  --sp1:.25rem;--sp2:.5rem;--sp3:.75rem;--sp4:1rem;--sp5:1.25rem;--sp6:1.5rem;--sp8:2rem;
+  --radius-sm:.375rem;--radius-md:.5rem;--radius-lg:.75rem;--radius-xl:1rem;--radius-full:9999px;
+  --shadow-sm:0 1px 3px rgba(0,0,0,.08);--shadow-md:0 4px 12px rgba(0,0,0,.10);--shadow-lg:0 12px 32px rgba(0,0,0,.13);
+  --sidebar-w:240px;--header-h:60px;--tr:180ms cubic-bezier(.16,1,.3,1);
+}
+[data-theme="dark"]{
+  --color-bg:#0f1322;--color-surface:#161c31;--color-surface-2:#1c2440;
+  --color-surface-offset:#1a2038;--color-divider:#2a3454;--color-border:#334070;
+  --color-text:#e2e8f5;--color-text-muted:#8896b8;--color-text-faint:#4a5680;
+  --color-primary:#6b93d4;--color-primary-hover:#89aadf;--color-primary-highlight:#1e2e50;
+  --color-accent:#e6aa2a;--color-accent-hover:#f0bf52;--color-accent-highlight:#2d2410;
+  --color-success:#4ade80;--color-success-bg:#14532d;
+  --color-warning:#fbbf24;--color-warning-bg:#451a03;
+  --color-error:#f87171;--color-error-bg:#450a0a;
+  --color-info:#60a5fa;--color-info-bg:#1e3a8a;
+  --color-sidebar-bg:#0d1220;--color-sidebar-text:#b0bdd8;
+  --color-sidebar-muted:#5a6888;--color-sidebar-active:#1e2e50;
+  --color-sidebar-hover:#141c35;--color-sidebar-border:#1e2840;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{-webkit-font-smoothing:antialiased}
+body{font-family:var(--font-body);font-size:var(--text-base);color:var(--color-text);background:var(--color-bg);min-height:100dvh;display:flex;overflow:hidden}
+button{cursor:pointer;background:none;border:none;font:inherit;color:inherit}
+input,select,textarea{font:inherit;color:inherit}
+table{border-collapse:collapse;width:100%}
+
+/* SIDEBAR */
+.sidebar{width:var(--sidebar-w);min-height:100dvh;background:var(--color-sidebar-bg);display:flex;flex-direction:column;flex-shrink:0;position:fixed;left:0;top:0;bottom:0;z-index:100;border-right:1px solid var(--color-sidebar-border)}
+.sidebar-logo{padding:var(--sp5);border-bottom:1px solid var(--color-sidebar-border);display:flex;align-items:center;gap:var(--sp3)}
+.sidebar-logo svg{color:var(--color-accent)}
+.logo-name{font-family:var(--font-display);font-size:1.2rem;color:#fff;line-height:1.1}
+.logo-sub{font-size:.68rem;color:var(--color-sidebar-muted);letter-spacing:.05em;text-transform:uppercase}
+.sidebar-nav{flex:1;overflow-y:auto;padding:var(--sp4) var(--sp3);display:flex;flex-direction:column;gap:2px}
+.nav-section-label{font-size:.68rem;font-weight:600;color:var(--color-sidebar-muted);text-transform:uppercase;letter-spacing:.1em;padding:var(--sp3) var(--sp3) var(--sp2);margin-top:var(--sp2)}
+.nav-item{display:flex;align-items:center;gap:var(--sp3);padding:var(--sp2) var(--sp3);border-radius:var(--radius-md);color:var(--color-sidebar-text);font-size:var(--text-sm);cursor:pointer;transition:background var(--tr),color var(--tr);position:relative}
+.nav-item:hover{background:var(--color-sidebar-hover);color:#fff}
+.nav-item.active{background:var(--color-sidebar-active);color:#fff;font-weight:600}
+.nav-item.active::before{content:'';position:absolute;left:0;top:20%;bottom:20%;width:3px;background:var(--color-accent);border-radius:0 var(--radius-full) var(--radius-full) 0}
+.nav-item i{width:18px;height:18px;flex-shrink:0}
+.sidebar-footer{padding:var(--sp4) var(--sp3);border-top:1px solid var(--color-sidebar-border)}
+.sidebar-user{display:flex;align-items:center;gap:var(--sp3);padding:var(--sp2) var(--sp3);border-radius:var(--radius-md);cursor:pointer}
+.sidebar-user:hover{background:var(--color-sidebar-hover)}
+.user-avatar{width:32px;height:32px;border-radius:var(--radius-full);background:var(--color-sidebar-active);border:2px solid var(--color-accent);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.75rem;color:#fff}
+.user-name{font-size:var(--text-sm);color:#fff;font-weight:600}
+.user-role{font-size:var(--text-xs);color:var(--color-sidebar-muted)}
+
+/* MAIN */
+.main-wrap{margin-left:var(--sidebar-w);flex:1;display:flex;flex-direction:column;min-height:100dvh;overflow-x:hidden}
+.topbar{height:var(--header-h);background:var(--color-surface);border-bottom:1px solid var(--color-divider);display:flex;align-items:center;padding:0 var(--sp6);gap:var(--sp4);position:sticky;top:0;z-index:50;box-shadow:var(--shadow-sm)}
+.topbar-title{font-family:var(--font-display);font-size:var(--text-lg);font-style:italic;flex:1}
+.topbar-actions{display:flex;align-items:center;gap:var(--sp3)}
+.topbar-date{font-size:var(--text-xs);color:var(--color-text-muted);background:var(--color-surface-2);border:1px solid var(--color-border);border-radius:var(--radius-full);padding:var(--sp1) var(--sp3)}
+.icon-btn{width:36px;height:36px;border-radius:var(--radius-md);display:flex;align-items:center;justify-content:center;color:var(--color-text-muted);transition:background var(--tr)}
+.icon-btn:hover{background:var(--color-surface-offset);color:var(--color-text)}
+.page-content{flex:1;overflow-y:auto;padding:var(--sp6) var(--sp8)}
+
+/* PAGE HEADER */
+.page-header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:var(--sp6);gap:var(--sp4);flex-wrap:wrap}
+.page-header h1{font-family:var(--font-display);font-size:var(--text-xl);font-style:italic}
+.page-header p{font-size:var(--text-sm);color:var(--color-text-muted);margin-top:var(--sp1)}
+.header-actions{display:flex;gap:var(--sp3);align-items:flex-start}
+
+/* BUTTONS */
+.btn{display:inline-flex;align-items:center;gap:var(--sp2);padding:var(--sp2) var(--sp5);border-radius:var(--radius-md);font-size:var(--text-sm);font-weight:600;cursor:pointer;border:none;transition:background var(--tr),box-shadow var(--tr),transform var(--tr)}
+.btn:active{transform:translateY(1px)}
+.btn-primary{background:var(--color-primary);color:#fff}
+.btn-primary:hover{background:var(--color-primary-hover)}
+.btn-ghost{background:transparent;color:var(--color-text-muted);border:1px solid var(--color-border)}
+.btn-ghost:hover{background:var(--color-surface-offset);color:var(--color-text)}
+.btn-danger{background:var(--color-error-bg);color:var(--color-error)}
+.btn-danger:hover{background:var(--color-error);color:#fff}
+.btn-sm{padding:var(--sp1) var(--sp3);font-size:var(--text-xs)}
+.btn i{width:16px;height:16px}
+
+/* KPI */
+.kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:var(--sp4);margin-bottom:var(--sp6)}
+.kpi-card{background:var(--color-surface);border:1px solid var(--color-border);border-radius:var(--radius-lg);padding:var(--sp4) var(--sp5);box-shadow:var(--shadow-sm);display:flex;align-items:center;gap:var(--sp4)}
+.kpi-icon{width:42px;height:42px;border-radius:var(--radius-md);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.kpi-icon i{width:20px;height:20px}
+.ki-navy{background:var(--color-primary-highlight);color:var(--color-primary)}
+.ki-gold{background:var(--color-accent-highlight);color:var(--color-accent)}
+.ki-green{background:var(--color-success-bg);color:var(--color-success)}
+.ki-blue{background:var(--color-info-bg);color:var(--color-info)}
+.kpi-val{font-size:1.6rem;font-weight:800;line-height:1}
+.kpi-lbl{font-size:var(--text-xs);color:var(--color-text-muted);font-weight:600;text-transform:uppercase;letter-spacing:.06em;margin-top:3px}
+
+/* VIEW TABS */
+.view-tabs{display:flex;gap:var(--sp2);margin-bottom:var(--sp5)}
+.view-tab{padding:var(--sp2) var(--sp4);border-radius:var(--radius-md);font-size:var(--text-sm);font-weight:600;border:1px solid var(--color-border);background:var(--color-surface);color:var(--color-text-muted);cursor:pointer;transition:all var(--tr);display:flex;align-items:center;gap:var(--sp2)}
+.view-tab i{width:15px;height:15px}
+.view-tab:hover{background:var(--color-surface-offset)}
+.view-tab.active{background:var(--color-primary);color:#fff;border-color:var(--color-primary)}
+
+/* TOOLBAR */
+.toolbar{display:flex;gap:var(--sp3);margin-bottom:var(--sp4);flex-wrap:wrap;align-items:center}
+.search-wrap{position:relative;flex:1;min-width:220px}
+.search-wrap i{position:absolute;left:var(--sp3);top:50%;transform:translateY(-50%);width:16px;height:16px;color:var(--color-text-faint);pointer-events:none}
+.search-input{width:100%;padding:var(--sp2) var(--sp3) var(--sp2) 2.2rem;background:var(--color-surface);border:1px solid var(--color-border);border-radius:var(--radius-md);font-size:var(--text-sm);color:var(--color-text);transition:border-color var(--tr)}
+.search-input:focus{outline:none;border-color:var(--color-primary);box-shadow:0 0 0 3px var(--color-primary-highlight)}
+.filter-select{padding:var(--sp2) var(--sp3);background:var(--color-surface);border:1px solid var(--color-border);border-radius:var(--radius-md);font-size:var(--text-sm);cursor:pointer}
+
+/* CARDS GRID */
+.clients-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:var(--sp4);margin-bottom:var(--sp6)}
+.client-card{background:var(--color-surface);border:1px solid var(--color-border);border-radius:var(--radius-lg);box-shadow:var(--shadow-sm);overflow:hidden;transition:box-shadow var(--tr),transform var(--tr);cursor:pointer}
+.client-card:hover{box-shadow:var(--shadow-md);transform:translateY(-2px)}
+.client-card-header{padding:var(--sp4) var(--sp5);display:flex;align-items:center;gap:var(--sp4);border-bottom:1px solid var(--color-divider)}
+.client-avatar{width:46px;height:46px;border-radius:var(--radius-full);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:1rem;color:#fff;flex-shrink:0;font-family:var(--font-display)}
+.client-info{flex:1;min-width:0}
+.client-name{font-weight:700;color:var(--color-text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.client-doc{font-size:var(--text-xs);color:var(--color-text-muted);margin-top:2px}
+.client-card-body{padding:var(--sp4) var(--sp5)}
+.client-meta-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:var(--sp2)}
+.client-meta-label{font-size:var(--text-xs);color:var(--color-text-muted);font-weight:600}
+.client-meta-val{font-size:var(--text-xs);font-weight:600;color:var(--color-text)}
+.client-card-footer{padding:var(--sp3) var(--sp5);border-top:1px solid var(--color-divider);display:flex;justify-content:space-between;align-items:center}
+.client-tipo{font-size:.68rem;font-weight:700;padding:2px 8px;border-radius:var(--radius-full)}
+.tipo-pf{background:var(--color-info-bg);color:var(--color-info)}
+.tipo-pj{background:var(--color-accent-highlight);color:var(--color-accent)}
+
+/* TABLE */
+.card{background:var(--color-surface);border-radius:var(--radius-lg);border:1px solid var(--color-border);box-shadow:var(--shadow-sm);overflow:hidden}
+.card-header{display:flex;align-items:center;justify-content:space-between;padding:var(--sp4) var(--sp5);border-bottom:1px solid var(--color-divider)}
+.card-title{font-size:var(--text-sm);font-weight:700;display:flex;align-items:center;gap:var(--sp2)}
+.card-title i{width:16px;height:16px;color:var(--color-primary)}
+.tbl-wrap{overflow-x:auto}
+.data-table th{text-align:left;font-size:var(--text-xs);font-weight:700;color:var(--color-text-muted);text-transform:uppercase;letter-spacing:.06em;padding:var(--sp3);background:var(--color-surface-2);border-bottom:1px solid var(--color-divider);white-space:nowrap}
+.data-table td{padding:var(--sp3);font-size:var(--text-sm);border-bottom:1px solid var(--color-divider);vertical-align:middle}
+.data-table tr:last-child td{border-bottom:none}
+.data-table tbody tr:hover td{background:var(--color-surface-2)}
+.badge{display:inline-flex;align-items:center;padding:3px 10px;border-radius:var(--radius-full);font-size:.7rem;font-weight:700;white-space:nowrap}
+.b-ativo{background:var(--color-success-bg);color:var(--color-success)}
+.b-inativo{background:var(--color-surface-offset);color:var(--color-text-muted)}
+.b-prospect{background:var(--color-info-bg);color:var(--color-info)}
+
+/* DRAWER */
+.drawer-overlay{position:fixed;inset:0;background:rgba(0,0,0,.4);backdrop-filter:blur(3px);z-index:200;display:none;justify-content:flex-end}
+.drawer-overlay.open{display:flex}
+.drawer{width:460px;max-width:95vw;background:var(--color-surface);height:100%;overflow-y:auto;box-shadow:var(--shadow-lg);display:flex;flex-direction:column;animation:drawerIn .22s cubic-bezier(.16,1,.3,1)}
+@keyframes drawerIn{from{transform:translateX(40px);opacity:0}to{transform:translateX(0);opacity:1}}
+.drawer-header{display:flex;align-items:center;justify-content:space-between;padding:var(--sp5) var(--sp6);border-bottom:1px solid var(--color-divider);position:sticky;top:0;background:var(--color-surface);z-index:10}
+.drawer-header h2{font-family:var(--font-display);font-size:var(--text-lg);font-style:italic}
+.drawer-close{width:32px;height:32px;border-radius:var(--radius-md);display:flex;align-items:center;justify-content:center;color:var(--color-text-muted);transition:background var(--tr)}
+.drawer-close:hover{background:var(--color-surface-offset)}
+.drawer-body{padding:var(--sp5) var(--sp6);flex:1;display:flex;flex-direction:column;gap:var(--sp5)}
+.drawer-footer{padding:var(--sp4) var(--sp6);border-top:1px solid var(--color-divider);display:flex;justify-content:space-between;gap:var(--sp3)}
+
+/* DETAIL */
+.detail-section-title{font-size:var(--text-xs);font-weight:700;color:var(--color-text-muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:var(--sp3);display:flex;align-items:center;gap:var(--sp2)}
+.detail-section-title i{width:14px;height:14px}
+.detail-grid{display:grid;grid-template-columns:1fr 1fr;gap:var(--sp3)}
+.detail-field label{font-size:.7rem;font-weight:600;color:var(--color-text-faint);text-transform:uppercase;letter-spacing:.06em;display:block;margin-bottom:2px}
+.detail-field span{font-size:var(--text-sm);color:var(--color-text);font-weight:500}
+.detail-field.full{grid-column:span 2}
+
+/* PROCESS MINI LIST */
+.proc-mini{display:flex;flex-direction:column;gap:var(--sp2)}
+.proc-mini-item{display:flex;align-items:center;justify-content:space-between;padding:var(--sp3);background:var(--color-surface-2);border:1px solid var(--color-divider);border-radius:var(--radius-md)}
+.proc-mini-num{font-size:var(--text-xs);font-weight:600;color:var(--color-primary)}
+.proc-mini-area{font-size:var(--text-xs);color:var(--color-text-muted)}
+
+/* CLIENT AVATAR COLORS */
+.av-1{background:#1e3a5f}.av-2{background:#b8860b}.av-3{background:#166534}
+.av-4{background:#991b1b}.av-5{background:#1e40af}.av-6{background:#4f46e5}
+.av-7{background:#0891b2}.av-8{background:#7c3aed}.av-9{background:#be185d}
+
+/* MODAL */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.45);backdrop-filter:blur(4px);z-index:300;display:none;align-items:center;justify-content:center;padding:var(--sp4)}
+.modal-overlay.open{display:flex}
+.modal{background:var(--color-surface);border-radius:var(--radius-xl);box-shadow:var(--shadow-lg);width:100%;max-width:560px;max-height:92vh;overflow-y:auto;animation:modalIn .22s cubic-bezier(.16,1,.3,1)}
+@keyframes modalIn{from{opacity:0;transform:scale(.96) translateY(8px)}to{opacity:1;transform:scale(1) translateY(0)}}
+.modal-header{display:flex;align-items:center;justify-content:space-between;padding:var(--sp5) var(--sp6);border-bottom:1px solid var(--color-divider)}
+.modal-header h2{font-family:var(--font-display);font-size:var(--text-lg);font-style:italic}
+.modal-close{width:32px;height:32px;border-radius:var(--radius-md);display:flex;align-items:center;justify-content:center;color:var(--color-text-muted);transition:background var(--tr)}
+.modal-close:hover{background:var(--color-surface-offset)}
+.modal-body{padding:var(--sp5) var(--sp6)}
+.modal-footer{padding:var(--sp4) var(--sp6);border-top:1px solid var(--color-divider);display:flex;justify-content:flex-end;gap:var(--sp3)}
+
+/* TIPO TOGGLE */
+.tipo-toggle{display:flex;gap:var(--sp3);margin-bottom:var(--sp5)}
+.tipo-btn{flex:1;padding:var(--sp3);border-radius:var(--radius-md);border:2px solid var(--color-border);font-size:var(--text-sm);font-weight:700;cursor:pointer;text-align:center;transition:all var(--tr);background:var(--color-surface-2);color:var(--color-text-muted)}
+.tipo-btn.sel-pf{background:var(--color-info-bg);border-color:var(--color-info);color:var(--color-info)}
+.tipo-btn.sel-pj{background:var(--color-accent-highlight);border-color:var(--color-accent);color:var(--color-accent)}
+
+/* FORM */
+.form-group{margin-bottom:var(--sp4)}
+.form-group label{display:block;font-size:var(--text-xs);font-weight:600;color:var(--color-text-muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:var(--sp2)}
+.form-control{width:100%;padding:var(--sp2) var(--sp3);background:var(--color-surface-2);border:1px solid var(--color-border);border-radius:var(--radius-md);font-size:var(--text-sm);color:var(--color-text);transition:border-color var(--tr),box-shadow var(--tr)}
+.form-control:focus{outline:none;border-color:var(--color-primary);box-shadow:0 0 0 3px var(--color-primary-highlight)}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:var(--sp3)}
+.form-row-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:var(--sp3)}
+
+/* DIVIDER */
+.form-divider{font-size:var(--text-xs);font-weight:700;color:var(--color-text-muted);text-transform:uppercase;letter-spacing:.08em;display:flex;align-items:center;gap:var(--sp3);margin:var(--sp4) 0}
+.form-divider::before,.form-divider::after{content:'';flex:1;height:1px;background:var(--color-divider)}
+
+/* PAGINATION */
+.pagination{display:flex;align-items:center;justify-content:space-between;padding:var(--sp3) var(--sp5);border-top:1px solid var(--color-divider)}
+.pag-info{font-size:var(--text-xs);color:var(--color-text-muted)}
+.pag-btns{display:flex;gap:var(--sp2)}
+.pag-btn{min-width:32px;height:32px;display:flex;align-items:center;justify-content:center;border-radius:var(--radius-md);font-size:var(--text-xs);font-weight:600;border:1px solid var(--color-border);color:var(--color-text-muted);background:var(--color-surface);cursor:pointer;transition:background var(--tr)}
+.pag-btn:hover{background:var(--color-surface-offset)}
+.pag-btn.active{background:var(--color-primary);color:#fff;border-color:var(--color-primary)}
+.pag-btn:disabled{opacity:.4;cursor:not-allowed}
+
+/* TOAST */
+.toast-wrap{position:fixed;bottom:var(--sp6);right:var(--sp6);z-index:400;display:flex;flex-direction:column;gap:var(--sp2);pointer-events:none}
+.toast{background:var(--color-text);color:var(--color-bg);padding:var(--sp3) var(--sp5);border-radius:var(--radius-lg);font-size:var(--text-sm);font-weight:500;box-shadow:var(--shadow-lg);animation:toastIn .25s ease forwards;pointer-events:auto}
+.toast.success{background:var(--color-success);color:#fff}
+.toast.error{background:var(--color-error);color:#fff}
+@keyframes toastIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+
+/* EMPTY */
+.empty-state{display:flex;flex-direction:column;align-items:center;text-align:center;padding:4rem var(--sp8);color:var(--color-text-muted)}
+.empty-state i{width:48px;height:48px;color:var(--color-text-faint);margin-bottom:var(--sp4)}
+.empty-state h3{color:var(--color-text);margin-bottom:var(--sp2);font-size:var(--text-base)}
+.empty-state p{max-width:36ch;font-size:var(--text-sm);margin-bottom:var(--sp6)}
+
+@media(max-width:1000px){.kpi-grid{grid-template-columns:repeat(2,1fr)}.page-content{padding:var(--sp4)}}
+@media(max-width:600px){.kpi-grid{grid-template-columns:1fr 1fr}.form-row,.form-row-3{grid-template-columns:1fr}.clients-grid{grid-template-columns:1fr}.detail-grid{grid-template-columns:1fr}.detail-field.full{grid-column:span 1}}
+</style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <svg width="26" height="26" viewBox="0 0 28 28" fill="none">
+      <rect x="3" y="13" width="22" height="3" rx="1.5" fill="currentColor"/>
+      <path d="M7 13V8a1 1 0 011-1h12a1 1 0 011 1v5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+      <rect x="10" y="16" width="8" height="9" rx="1" fill="currentColor" opacity=".6"/>
+      <circle cx="14" cy="4" r="2.5" fill="currentColor"/>
+    </svg>
+    <div><div class="logo-name">LexControl</div><div class="logo-sub">Gestão Jurídica</div></div>
+  </div>
+  <nav class="sidebar-nav">
+    <div class="nav-section-label">Principal</div>
+    <div class="nav-item" onclick="goTo('dashboard')"><i data-lucide="layout-dashboard"></i> Dashboard</div>
+    <div class="nav-item" onclick="goTo('processos')"><i data-lucide="briefcase"></i> Processos</div>
+    <div class="nav-item active"><i data-lucide="users"></i> Clientes</div>
+    <div class="nav-item" onclick="goTo('agenda')"><i data-lucide="calendar"></i> Agenda</div>
+    <div class="nav-section-label">Financeiro</div>
+    <div class="nav-item" onclick="goTo('financeiro')"><i data-lucide="dollar-sign"></i> Financeiro</div>
+    <div class="nav-item" onclick="goTo('honorarios')"><i data-lucide="file-text"></i> Honorários</div>
+    <div class="nav-section-label">Ferramentas</div>
+    <div class="nav-item" onclick="goTo('documentos')"><i data-lucide="folder-open"></i> Documentos</div>
+    <div class="nav-item" onclick="goTo('relatorios')"><i data-lucide="bar-chart-2"></i> Relatórios</div>
+  </nav>
+  <div class="sidebar-footer">
+    <div class="sidebar-user">
+      <div class="user-avatar">DR</div>
+      <div><div class="user-name">Dr. Advogado</div><div class="user-role">Sócio Titular</div></div>
+    </div>
+  </div>
+</aside>
+
+<!-- MAIN -->
+<div class="main-wrap">
+  <header class="topbar">
+    <span class="topbar-title">Clientes</span>
+    <div class="topbar-actions">
+      <span class="topbar-date" id="topbar-date"></span>
+      <button class="icon-btn" data-theme-toggle><i data-lucide="sun"></i></button>
+    </div>
+  </header>
+
+  <main class="page-content">
+    <div class="page-header">
+      <div>
+        <h1>Carteira de Clientes</h1>
+        <p>Cadastro, histórico e dados de todos os clientes do escritório</p>
+      </div>
+      <div class="header-actions">
+        <button class="btn btn-ghost" onclick="exportCSV()"><i data-lucide="download"></i> Exportar</button>
+        <button class="btn btn-primary" onclick="openModal()"><i data-lucide="user-plus"></i> Novo Cliente</button>
+      </div>
+    </div>
+
+    <!-- KPIs -->
+    <div class="kpi-grid">
+      <div class="kpi-card">
+        <div class="kpi-icon ki-navy"><i data-lucide="users"></i></div>
+        <div><div class="kpi-val" id="kpi-total">0</div><div class="kpi-lbl">Total de Clientes</div></div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-icon ki-green"><i data-lucide="user-check"></i></div>
+        <div><div class="kpi-val" id="kpi-ativos">0</div><div class="kpi-lbl">Ativos</div></div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-icon ki-blue"><i data-lucide="building-2"></i></div>
+        <div><div class="kpi-val" id="kpi-pj">0</div><div class="kpi-lbl">Pessoas Jurídicas</div></div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-icon ki-gold"><i data-lucide="star"></i></div>
+        <div><div class="kpi-val" id="kpi-prospects">0</div><div class="kpi-lbl">Prospects</div></div>
+      </div>
+    </div>
+
+    <!-- VIEW TABS -->
+    <div class="view-tabs">
+      <div class="view-tab active" id="tab-cards" onclick="setView('cards',this)"><i data-lucide="layout-grid"></i> Cartões</div>
+      <div class="view-tab" id="tab-lista" onclick="setView('lista',this)"><i data-lucide="list"></i> Lista</div>
+    </div>
+
+    <!-- TOOLBAR -->
+    <div class="toolbar">
+      <div class="search-wrap">
+        <i data-lucide="search"></i>
+        <input class="search-input" id="search-input" placeholder="Buscar por nome, CPF/CNPJ, cidade..." oninput="render()">
+      </div>
+      <select class="filter-select" id="filter-tipo" onchange="render()">
+        <option value="">PF e PJ</option>
+        <option value="PF">Pessoa Física</option>
+        <option value="PJ">Pessoa Jurídica</option>
+      </select>
+      <select class="filter-select" id="filter-status" onchange="render()">
+        <option value="">Todos os status</option>
+        <option value="Ativo">Ativo</option>
+        <option value="Inativo">Inativo</option>
+        <option value="Prospect">Prospect</option>
+      </select>
+      <select class="filter-select" id="filter-area" onchange="render()">
+        <option value="">Todas as áreas</option>
+        <option>Cível</option><option>Trabalhista</option><option>Consumidor</option>
+        <option>Família</option><option>Criminal</option><option>Tributário</option>
+      </select>
+    </div>
+
+    <!-- CARDS VIEW -->
+    <div id="view-cards">
+      <div class="clients-grid" id="clients-grid"></div>
+      <div id="empty-cards" class="empty-state" style="display:none">
+        <i data-lucide="search-x"></i><h3>Nenhum cliente encontrado</h3>
+        <p>Tente ajustar os filtros ou cadastre um novo cliente.</p>
+        <button class="btn btn-primary" onclick="openModal()"><i data-lucide="user-plus"></i> Novo Cliente</button>
+      </div>
+    </div>
+
+    <!-- TABLE VIEW -->
+    <div id="view-lista" style="display:none">
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title"><i data-lucide="list"></i> <span id="tbl-count-label">Clientes</span></span>
+          <span style="font-size:var(--text-xs);color:var(--color-text-muted)" id="pag-info-top"></span>
+        </div>
+        <div class="tbl-wrap">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Cliente</th><th>Tipo</th><th>CPF/CNPJ</th><th>Área Principal</th>
+                <th>Cidade</th><th>Processos</th><th>Status</th><th>Ações</th>
+              </tr>
+            </thead>
+            <tbody id="clients-tbody"></tbody>
+          </table>
+        </div>
+        <div id="empty-tbl" style="display:none;padding:3rem;text-align:center;font-size:var(--text-sm);color:var(--color-text-muted)">Nenhum cliente encontrado.</div>
+        <div class="pagination">
+          <span class="pag-info" id="pag-info-bottom"></span>
+          <div class="pag-btns" id="pag-btns"></div>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<!-- DRAWER: PERFIL DO CLIENTE -->
+<div class="drawer-overlay" id="drawer-overlay" onclick="fecharDrawer(event)">
+  <div class="drawer">
+    <div class="drawer-header">
+      <h2 id="drawer-title">Perfil do Cliente</h2>
+      <button class="drawer-close" onclick="closeDrawer()"><i data-lucide="x"></i></button>
+    </div>
+    <div class="drawer-body" id="drawer-body"></div>
+    <div class="drawer-footer">
+      <button class="btn btn-danger btn-sm" id="drawer-del-btn"><i data-lucide="trash-2"></i> Excluir</button>
+      <div style="display:flex;gap:var(--sp3)">
+        <button class="btn btn-ghost btn-sm" onclick="closeDrawer()">Fechar</button>
+        <button class="btn btn-primary btn-sm" id="drawer-edit-btn"><i data-lucide="pencil"></i> Editar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: NOVO / EDITAR CLIENTE -->
+<div class="modal-overlay" id="modal-cliente">
+  <div class="modal">
+    <div class="modal-header">
+      <h2 id="modal-title">Novo Cliente</h2>
+      <button class="modal-close" onclick="closeModal()"><i data-lucide="x"></i></button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="f-id">
+
+      <!-- Tipo PF/PJ -->
+      <div class="tipo-toggle">
+        <button class="tipo-btn sel-pf" id="btn-pf" onclick="setTipo('PF')">👤 Pessoa Física</button>
+        <button class="tipo-btn" id="btn-pj" onclick="setTipo('PJ')">🏢 Pessoa Jurídica</button>
+      </div>
+      <input type="hidden" id="f-tipo" value="PF">
+
+      <div class="form-group">
+        <label id="lbl-nome">Nome Completo *</label>
+        <input class="form-control" id="f-nome" placeholder="Nome completo do cliente">
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label id="lbl-doc">CPF *</label>
+          <input class="form-control" id="f-doc" placeholder="000.000.000-00">
+        </div>
+        <div class="form-group">
+          <label id="lbl-doc2" style="display:none">CNPJ</label>
+          <div id="field-rg" class="form-group" style="margin:0">
+            <input class="form-control" id="f-doc2" placeholder="RG / Ins. Estadual">
+          </div>
+        </div>
+      </div>
+
+      <div class="form-divider">Contato</div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Telefone / WhatsApp</label>
+          <input class="form-control" id="f-tel" placeholder="(62) 9 9999-9999">
+        </div>
+        <div class="form-group">
+          <label>E-mail</label>
+          <input class="form-control" id="f-email" placeholder="email@exemplo.com">
+        </div>
+      </div>
+
+      <div class="form-divider">Endereço</div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Cidade</label>
+          <input class="form-control" id="f-cidade" placeholder="Goiânia">
+        </div>
+        <div class="form-group">
+          <label>Estado</label>
+          <select class="form-control" id="f-estado">
+            <option>GO</option><option>DF</option><option>SP</option><option>RJ</option>
+            <option>MG</option><option>BA</option><option>RS</option><option>PR</option>
+            <option>SC</option><option>PE</option><option>CE</option><option>AM</option>
+            <option>PA</option><option>MT</option><option>MS</option><option>Outro</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-divider">Jurídico</div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Área Principal</label>
+          <select class="form-control" id="f-area">
+            <option>Cível</option><option>Trabalhista</option><option>Consumidor</option>
+            <option>Família</option><option>Criminal</option><option>Tributário</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Status</label>
+          <select class="form-control" id="f-status">
+            <option>Ativo</option><option>Inativo</option><option>Prospect</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Indicado por</label>
+        <input class="form-control" id="f-indicado" placeholder="Nome de quem indicou (opcional)">
+      </div>
+      <div class="form-group">
+        <label>Observações</label>
+        <textarea class="form-control" id="f-obs" rows="2" placeholder="Notas internas sobre o cliente..."></textarea>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal()">Cancelar</button>
+      <button class="btn btn-primary" onclick="salvar()"><i data-lucide="save"></i> Salvar</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast-wrap" id="toast-wrap"></div>
+
+<script>
+// ============================================================
+// DATA
+// ============================================================
+const AVATAR_COLORS = ['av-1','av-2','av-3','av-4','av-5','av-6','av-7','av-8','av-9'];
+
+let clientes = [
+  {id:1,tipo:'PF',nome:'Maria das Graças Oliveira',doc:'123.456.789-00',doc2:'MG-12.345.678',tel:'(62) 9 9999-1234',email:'maria@email.com',cidade:'Goiânia',estado:'GO',area:'Consumidor',status:'Ativo',indicado:'Google',obs:'Revisão contratual bancária',processos:['0012345-67.2024.8.09.0051']},
+  {id:2,tipo:'PF',nome:'João Pereira da Silva',doc:'987.654.321-00',doc2:'GO-23.456.789',tel:'(62) 9 8888-5678',email:'joao@email.com',cidade:'Aparecida de Goiânia',estado:'GO',area:'Trabalhista',status:'Ativo',indicado:'',obs:'',processos:['0009821-33.2023.8.09.0051']},
+  {id:3,tipo:'PJ',nome:'Empresa XYZ Ltda',doc:'12.345.678/0001-99',doc2:'',tel:'(62) 3333-4444',email:'contato@xyz.com.br',cidade:'Goiânia',estado:'GO',area:'Cível',status:'Ativo',indicado:'Indicação de cliente',obs:'Diretor: Carlos Mendes',processos:['0031122-44.2025.8.09.0051']},
+  {id:4,tipo:'PF',nome:'Ana Rodrigues Faria',doc:'456.789.123-00',doc2:'GO-34.567.890',tel:'(62) 9 7777-9012',email:'ana@email.com',cidade:'Goiânia',estado:'GO',area:'Família',status:'Ativo',indicado:'',obs:'Processo de divórcio litigioso',processos:['0044567-12.2022.8.09.0051']},
+  {id:5,tipo:'PF',nome:'Pedro Alves Mendes',doc:'321.654.987-00',doc2:'GO-45.678.901',tel:'(62) 9 6666-3456',email:'pedro@email.com',cidade:'Aparecida de Goiânia',estado:'GO',area:'Criminal',status:'Ativo',indicado:'',obs:'',processos:['0055678-99.2024.8.09.0051']},
+  {id:6,tipo:'PJ',nome:'Cooperativa Agrícola Sul',doc:'98.765.432/0001-11',doc2:'',tel:'(62) 3222-5555',email:'juridico@coopsul.com.br',cidade:'Rio Verde',estado:'GO',area:'Tributário',status:'Ativo',indicado:'OAB-GO',obs:'Contrato de consultoria anual',processos:['0067890-11.2023.8.09.0051']},
+  {id:7,tipo:'PF',nome:'Fernanda Costa Lima',doc:'654.321.987-00',doc2:'GO-56.789.012',tel:'(62) 9 5555-7890',email:'fernanda@email.com',cidade:'Goiânia',estado:'GO',area:'Cível',status:'Inativo',indicado:'',obs:'Processo encerrado com êxito',processos:['0078901-55.2021.8.09.0051']},
+  {id:8,tipo:'PF',nome:'Roberto Nascimento',doc:'789.012.345-00',doc2:'GO-67.890.123',tel:'(62) 9 4444-2345',email:'roberto@email.com',cidade:'Goiânia',estado:'GO',area:'Trabalhista',status:'Inativo',indicado:'',obs:'Acordo realizado',processos:['0089012-77.2020.8.09.0051']},
+  {id:9,tipo:'PJ',nome:'Indústria Beta S/A',doc:'11.222.333/0001-44',doc2:'',tel:'(62) 3111-6666',email:'juridico@beta.com.br',cidade:'Anápolis',estado:'GO',area:'Tributário',status:'Prospect',indicado:'Evento OAB',obs:'Aguardando proposta de contrato',processos:[]},
+  {id:10,tipo:'PF',nome:'Carla Souza Braga',doc:'111.222.333-44',doc2:'GO-78.901.234',tel:'(62) 9 3333-4567',email:'carla@email.com',cidade:'Goiânia',estado:'GO',area:'Família',status:'Prospect',indicado:'Maria das Graças',obs:'Consulta inicial realizada',processos:[]},
+];
+let nextId=11;
+let currentView='cards';
+let currentPage=1;
+const PER_PAGE=8;
+
+// ============================================================
+// INIT
+// ============================================================
+document.addEventListener('DOMContentLoaded',()=>{
+  lucide.createIcons();
+  document.getElementById('topbar-date').textContent=new Date().toLocaleDateString('pt-BR',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
+  initTheme();
+  render();
+});
+
+// ============================================================
+// KPIs
+// ============================================================
+function updateKPIs(){
+  document.getElementById('kpi-total').textContent=clientes.length;
+  document.getElementById('kpi-ativos').textContent=clientes.filter(c=>c.status==='Ativo').length;
+  document.getElementById('kpi-pj').textContent=clientes.filter(c=>c.tipo==='PJ').length;
+  document.getElementById('kpi-prospects').textContent=clientes.filter(c=>c.status==='Prospect').length;
+}
+
+// ============================================================
+// FILTERS
+// ============================================================
+function getFiltered(){
+  const q=document.getElementById('search-input').value.toLowerCase();
+  const tipo=document.getElementById('filter-tipo').value;
+  const status=document.getElementById('filter-status').value;
+  const area=document.getElementById('filter-area').value;
+  return clientes.filter(c=>{
+    const mq=!q||c.nome.toLowerCase().includes(q)||c.doc.includes(q)||(c.cidade||'').toLowerCase().includes(q)||(c.email||'').toLowerCase().includes(q);
+    const mt=!tipo||c.tipo===tipo;
+    const ms=!status||c.status===status;
+    const ma=!area||c.area===area;
+    return mq&&mt&&ms&&ma;
+  });
+}
+
+// ============================================================
+// VIEW
+// ============================================================
+function setView(v,el){
+  currentView=v;
+  document.querySelectorAll('.view-tab').forEach(t=>t.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('view-cards').style.display=v==='cards'?'':'none';
+  document.getElementById('view-lista').style.display=v==='lista'?'':'none';
+  render();
+}
+
+function render(){
+  updateKPIs();
+  const list=getFiltered();
+  if(currentView==='cards') renderCards(list);
+  else renderTable(list);
+}
+
+// ============================================================
+// CARDS
+// ============================================================
+function initials(nome){return nome.split(' ').slice(0,2).map(w=>w[0]||'').join('').toUpperCase();}
+function avatarColor(id){return AVATAR_COLORS[(id-1)%AVATAR_COLORS.length];}
+function statusBadge(s){const m={Ativo:'b-ativo',Inativo:'b-inativo',Prospect:'b-prospect'};return `<span class="badge ${m[s]||'b-inativo'}">${s}</span>`;}
+
+function renderCards(list){
+  const grid=document.getElementById('clients-grid');
+  const empty=document.getElementById('empty-cards');
+  if(!list.length){grid.innerHTML='';empty.style.display='flex';lucide.createIcons();return;}
+  empty.style.display='none';
+  grid.innerHTML=list.map(c=>`
+    <div class="client-card" onclick="openDrawer(${c.id})">
+      <div class="client-card-header">
+        <div class="client-avatar ${avatarColor(c.id)}">${initials(c.nome)}</div>
+        <div class="client-info">
+          <div class="client-name">${c.nome}</div>
+          <div class="client-doc">${c.doc}</div>
+        </div>
+      </div>
+      <div class="client-card-body">
+        <div class="client-meta-row"><span class="client-meta-label">Área</span><span class="client-meta-val">${c.area}</span></div>
+        <div class="client-meta-row"><span class="client-meta-label">Cidade</span><span class="client-meta-val">${c.cidade||'—'} / ${c.estado||'—'}</span></div>
+        <div class="client-meta-row"><span class="client-meta-label">Processos</span><span class="client-meta-val">${c.processos.length}</span></div>
+        <div class="client-meta-row"><span class="client-meta-label">Telefone</span><span class="client-meta-val" style="color:var(--color-primary)">${c.tel||'—'}</span></div>
+      </div>
+      <div class="client-card-footer">
+        <span class="client-tipo ${c.tipo==='PF'?'tipo-pf':'tipo-pj'}">${c.tipo==='PF'?'Pessoa Física':'Pessoa Jurídica'}</span>
+        ${statusBadge(c.status)}
+      </div>
+    </div>`).join('');
+}
+
+// ============================================================
+// TABLE
+// ============================================================
+function renderTable(list){
+  const total=list.length;
+  const pages=Math.max(1,Math.ceil(total/PER_PAGE));
+  if(currentPage>pages) currentPage=pages;
+  const start=(currentPage-1)*PER_PAGE;
+  const slice=list.slice(start,start+PER_PAGE);
+
+  const tbody=document.getElementById('clients-tbody');
+  const empty=document.getElementById('empty-tbl');
+  document.getElementById('tbl-count-label').textContent=`${total} cliente${total!==1?'s':''}`;
+
+  if(!total){tbody.innerHTML='';empty.style.display='block';}
+  else{
+    empty.style.display='none';
+    tbody.innerHTML=slice.map(c=>`
+      <tr>
+        <td>
+          <div style="display:flex;align-items:center;gap:var(--sp3)">
+            <div class="client-avatar ${avatarColor(c.id)}" style="width:32px;height:32px;font-size:.75rem">${initials(c.nome)}</div>
+            <div>
+              <div style="font-weight:600">${c.nome}</div>
+              <div style="font-size:var(--text-xs);color:var(--color-text-muted)">${c.email||''}</div>
+            </div>
+          </div>
+        </td>
+        <td><span class="client-tipo ${c.tipo==='PF'?'tipo-pf':'tipo-pj'}">${c.tipo}</span></td>
+        <td style="font-size:var(--text-xs);font-variant-numeric:tabular-nums">${c.doc}</td>
+        <td style="font-size:var(--text-xs)">${c.area}</td>
+        <td style="font-size:var(--text-xs);color:var(--color-text-muted)">${c.cidade||'—'} / ${c.estado||'—'}</td>
+        <td style="text-align:center;font-weight:700;color:var(--color-primary)">${c.processos.length}</td>
+        <td>${statusBadge(c.status)}</td>
+        <td>
+          <div style="display:flex;gap:var(--sp2)">
+            <button class="btn btn-ghost btn-sm" onclick="openDrawer(${c.id})"><i data-lucide="eye" style="width:13px;height:13px"></i></button>
+            <button class="btn btn-ghost btn-sm" onclick="editCliente(${c.id})"><i data-lucide="pencil" style="width:13px;height:13px"></i></button>
+          </div>
+        </td>
+      </tr>`).join('');
+  }
+
+  const info=total?`${start+1}–${Math.min(start+PER_PAGE,total)} de ${total}`:'Nenhum';
+  document.getElementById('pag-info-top').textContent=info;
+  document.getElementById('pag-info-bottom').textContent=info;
+
+  const btnWrap=document.getElementById('pag-btns');
+  let btns=`<button class="pag-btn" onclick="goPage(${currentPage-1})" ${currentPage===1?'disabled':''}>‹</button>`;
+  for(let i=1;i<=pages;i++) btns+=`<button class="pag-btn ${i===currentPage?'active':''}" onclick="goPage(${i})">${i}</button>`;
+  btns+=`<button class="pag-btn" onclick="goPage(${currentPage+1})" ${currentPage===pages?'disabled':''}>›</button>`;
+  btnWrap.innerHTML=btns;
+  lucide.createIcons();
+}
+
+function goPage(p){currentPage=p;render();}
+
+// ============================================================
+// DRAWER
+// ============================================================
+function openDrawer(id){
+  const c=clientes.find(x=>x.id===id); if(!c) return;
+  document.getElementById('drawer-title').textContent=c.nome;
+  document.getElementById('drawer-edit-btn').onclick=()=>{closeDrawer();editCliente(id);};
+  document.getElementById('drawer-del-btn').onclick=()=>{if(confirm('Excluir este cliente?')){clientes=clientes.filter(x=>x.id!==id);closeDrawer();render();showToast('Cliente excluído.','');}};
+
+  const procs=c.processos.map(p=>`
+    <div class="proc-mini-item">
+      <div>
+        <div class="proc-mini-num">${p.substring(0,20)}…</div>
+        <div class="proc-mini-area">${c.area}</div>
+      </div>
+      ${statusBadge('Ativo')}
+    </div>`).join('');
+
+  document.getElementById('drawer-body').innerHTML=`
+    <div style="display:flex;align-items:center;gap:var(--sp5)">
+      <div class="client-avatar ${avatarColor(c.id)}" style="width:64px;height:64px;font-size:1.4rem;border-radius:var(--radius-lg)">${initials(c.nome)}</div>
+      <div>
+        <div style="font-size:var(--text-lg);font-weight:800;color:var(--color-text)">${c.nome}</div>
+        <div style="display:flex;gap:var(--sp2);margin-top:var(--sp2)">
+          <span class="client-tipo ${c.tipo==='PF'?'tipo-pf':'tipo-pj'}">${c.tipo==='PF'?'Pessoa Física':'Pessoa Jurídica'}</span>
+          ${statusBadge(c.status)}
+        </div>
+      </div>
+    </div>
+    <div>
+      <div class="detail-section-title"><i data-lucide="id-card"></i> Dados Pessoais</div>
+      <div class="detail-grid">
+        <div class="detail-field"><label>${c.tipo==='PF'?'CPF':'CNPJ'}</label><span>${c.doc}</span></div>
+        <div class="detail-field"><label>${c.tipo==='PF'?'RG':'Ins. Estadual'}</label><span>${c.doc2||'—'}</span></div>
+        <div class="detail-field"><label>Telefone</label><span>${c.tel||'—'}</span></div>
+        <div class="detail-field"><label>E-mail</label><span style="word-break:break-all">${c.email||'—'}</span></div>
+        <div class="detail-field"><label>Cidade / Estado</label><span>${c.cidade||'—'} / ${c.estado||'—'}</span></div>
+        <div class="detail-field"><label>Indicado por</label><span>${c.indicado||'—'}</span></div>
+        <div class="detail-field full"><label>Área Principal</label><span>${c.area}</span></div>
+        ${c.obs?`<div class="detail-field full"><label>Observações</label><span>${c.obs}</span></div>`:''}
+      </div>
+    </div>
+    <div>
+      <div class="detail-section-title"><i data-lucide="briefcase"></i> Processos (${c.processos.length})</div>
+      <div class="proc-mini">${procs||'<p style="font-size:var(--text-sm);color:var(--color-text-muted)">Nenhum processo vinculado.</p>'}</div>
+    </div>`;
+  document.getElementById('drawer-overlay').classList.add('open');
+  lucide.createIcons();
+}
+
+function fecharDrawer(e){if(e.target===document.getElementById('drawer-overlay'))closeDrawer();}
+function closeDrawer(){document.getElementById('drawer-overlay').classList.remove('open');}
+
+// ============================================================
+// MODAL
+// ============================================================
+function setTipo(t){
+  document.getElementById('f-tipo').value=t;
+  document.getElementById('btn-pf').className='tipo-btn'+(t==='PF'?' sel-pf':'');
+  document.getElementById('btn-pj').className='tipo-btn'+(t==='PJ'?' sel-pj':'');
+  document.getElementById('lbl-nome').textContent=t==='PF'?'Nome Completo *':'Razão Social *';
+  document.getElementById('lbl-doc').textContent=t==='PF'?'CPF *':'CNPJ *';
+  document.getElementById('f-doc').placeholder=t==='PF'?'000.000.000-00':'00.000.000/0001-00';
+  document.getElementById('f-doc2').placeholder=t==='PF'?'RG':'Inscrição Estadual';
+}
+
+function openModal(){
+  document.getElementById('f-id').value='';
+  document.getElementById('modal-title').textContent='Novo Cliente';
+  ['f-nome','f-doc','f-doc2','f-tel','f-email','f-cidade','f-indicado','f-obs'].forEach(id=>{document.getElementById(id).value='';});
+  document.getElementById('f-estado').value='GO';
+  document.getElementById('f-area').value='Cível';
+  document.getElementById('f-status').value='Ativo';
+  setTipo('PF');
+  document.getElementById('modal-cliente').classList.add('open');
+  lucide.createIcons();
+}
+
+function closeModal(){document.getElementById('modal-cliente').classList.remove('open');}
+document.getElementById('modal-cliente').addEventListener('click',e=>{if(e.target===document.getElementById('modal-cliente'))closeModal();});
+
+function editCliente(id){
+  const c=clientes.find(x=>x.id===id); if(!c) return;
+  document.getElementById('f-id').value=id;
+  document.getElementById('modal-title').textContent='Editar Cliente';
+  setTipo(c.tipo);
+  document.getElementById('f-nome').value=c.nome;
+  document.getElementById('f-doc').value=c.doc;
+  document.getElementById('f-doc2').value=c.doc2||'';
+  document.getElementById('f-tel').value=c.tel||'';
+  document.getElementById('f-email').value=c.email||'';
+  document.getElementById('f-cidade').value=c.cidade||'';
+  document.getElementById('f-estado').value=c.estado||'GO';
+  document.getElementById('f-area').value=c.area;
+  document.getElementById('f-status').value=c.status;
+  document.getElementById('f-indicado').value=c.indicado||'';
+  document.getElementById('f-obs').value=c.obs||'';
+  document.getElementById('modal-cliente').classList.add('open');
+  lucide.createIcons();
+}
+
+function salvar(){
+  const nome=document.getElementById('f-nome').value.trim();
+  const doc=document.getElementById('f-doc').value.trim();
+  if(!nome||!doc){showToast('Preencha nome e CPF/CNPJ.','error');return;}
+  const editId=parseInt(document.getElementById('f-id').value)||0;
+  const obj={
+    tipo:document.getElementById('f-tipo').value,nome,doc,
+    doc2:document.getElementById('f-doc2').value,
+    tel:document.getElementById('f-tel').value,
+    email:document.getElementById('f-email').value,
+    cidade:document.getElementById('f-cidade').value,
+    estado:document.getElementById('f-estado').value,
+    area:document.getElementById('f-area').value,
+    status:document.getElementById('f-status').value,
+    indicado:document.getElementById('f-indicado').value,
+    obs:document.getElementById('f-obs').value,
+  };
+  if(editId){
+    const idx=clientes.findIndex(x=>x.id===editId);
+    if(idx>=0) clientes[idx]={...clientes[idx],...obj};
+    showToast('Cliente atualizado!','success');
+  } else {
+    clientes.unshift({id:nextId++,...obj,processos:[]});
+    showToast('Cliente cadastrado!','success');
+  }
+  closeModal();render();
+}
+
+// ============================================================
+// EXPORT CSV
+// ============================================================
+function exportCSV(){
+  const rows=[['ID','Tipo','Nome','CPF/CNPJ','Telefone','Email','Cidade','Estado','Área','Status','Processos']];
+  clientes.forEach(c=>rows.push([c.id,c.tipo,c.nome,c.doc,c.tel||'',c.email||'',c.cidade||'',c.estado||'',c.area,c.status,c.processos.length]));
+  const csv=rows.map(r=>r.map(v=>'"'+String(v).replace(/"/g,'""')+'"').join(',')).join('
+');
+  const a=document.createElement('a');
+  a.href='data:text/csv;charset=utf-8,﻿'+encodeURIComponent(csv);
+  a.download='clientes_lexcontrol.csv';
+  a.click();
+  showToast('Exportação concluída!','success');
+}
+
+// ============================================================
+// UTILS
+// ============================================================
+function showToast(msg,type=''){
+  const t=document.createElement('div');
+  t.className='toast '+type;t.textContent=msg;
+  document.getElementById('toast-wrap').appendChild(t);
+  setTimeout(()=>t.remove(),3200);
+}
+function goTo(v){showToast('Navegue para o arquivo da Parte 1 — '+v,'');}
+
+function initTheme(){
+  const btn=document.querySelector('[data-theme-toggle]');
+  const html=document.documentElement;
+  let dark=matchMedia('(prefers-color-scheme:dark)').matches;
+  const set=()=>{
+    html.setAttribute('data-theme',dark?'dark':'light');
+    if(btn) btn.innerHTML=dark
+      ?'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>'
+      :'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>';
+  };
+  set();
+  if(btn) btn.addEventListener('click',()=>{dark=!dark;set();});
+}
+</script>
+</body>
+</html>
