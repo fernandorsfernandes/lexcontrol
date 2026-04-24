@@ -128,7 +128,7 @@ body {
   background: var(--color-bg);
   min-height: 100dvh;
   display: flex;
-  overflow: hidden;
+  overflow: auto;
 }
 img, svg { display: block; max-width: 100%; }
 button { cursor: pointer; background: none; border: none; font: inherit; color: inherit; }
@@ -454,7 +454,7 @@ p { text-wrap: pretty; }
   border-radius: var(--radius-lg);
   border: 1px solid var(--color-border);
   box-shadow: var(--shadow-sm);
-  overflow: hidden;
+  overflow: auto;
 }
 .card-header {
   display: flex; align-items: center; justify-content: space-between;
@@ -610,7 +610,7 @@ p { text-wrap: pretty; }
   height: 8px;
   background: var(--color-surface-offset);
   border-radius: var(--radius-full);
-  overflow: hidden;
+  overflow: auto;
 }
 .progress-fill {
   height: 100%;
@@ -1306,7 +1306,7 @@ const tipoTag = t => {
 const tipoClass = t => ({Audiência:'red', Reunião:'', Prazo:'gold'})[t] || '';
 
 function renderAgendaHoje() {
-  const hoje = eventos.filter(e => e.data === '2026-04-23');
+  const hoje = eventos.filter(e => e.data === new Date().toISOString().slice(0,10));
   const el = document.getElementById('agenda-hoje');
   if(!el) return;
   if(!hoje.length) { el.innerHTML = '<div class="empty-state" style="padding:var(--space-8)"><i data-lucide="calendar"></i><p>Nenhum evento hoje</p></div>'; lucide.createIcons(); return; }
@@ -1437,9 +1437,7 @@ function toggleSidebar() {
 // ============================================================
 // DATE
 // ============================================================
-function initDate() {
-  const now = new Date();
-  const opts = { weekday:'long', day:'numeric', month:'long', year:'numeric' };
+function initDate(){ const d=new Date(); document.getElementById('current-date').textContent=d.toLocaleDateString('pt-BR',{weekday:'long',day:'numeric',month:'long',year:'numeric'}); };
   document.getElementById('topbar-date').textContent = now.toLocaleDateString('pt-BR', opts);
   const meses = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
   document.getElementById('mes-atual').textContent = meses[now.getMonth()] + ' ' + now.getFullYear();
@@ -1453,6 +1451,7 @@ document.addEventListener('DOMContentLoaded', () => {
   initDate();
   renderDashboardProcessos();
   renderAgendaHoje();
+  navigate('dashboard', document.querySelector('.nav-item'));
 });
 </script>
 </body>

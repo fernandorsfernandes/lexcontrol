@@ -41,7 +41,7 @@
 }
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 html{-webkit-font-smoothing:antialiased}
-body{font-family:var(--fb);font-size:var(--base);color:var(--tx);background:var(--bg);min-height:100dvh;display:flex;overflow:hidden}
+body{font-family:var(--fb);font-size:var(--base);color:var(--tx);background:var(--bg);min-height:100dvh;display:flex;overflow: auto}
 button{cursor:pointer;background:none;border:none;font:inherit;color:inherit}
 input,select,textarea{font:inherit;color:inherit}
 table{border-collapse:collapse;width:100%}
@@ -65,14 +65,13 @@ table{border-collapse:collapse;width:100%}
 .u-name{font-size:var(--sm);color:#fff;font-weight:600}
 .u-role{font-size:var(--xs);color:var(--sbm)}
 
-.main-wrap{margin-left:var(--sw);flex:1;display:flex;flex-direction:column;min-height:100dvh;overflow-x:hidden}
-.topbar{height:var(--hh);background:var(--surf);border-bottom:1px solid var(--div);display:flex;align-items:center;padding:0 var(--s6);gap:var(--s4);position:sticky;top:0;z-index:50;box-shadow:var(--sh)}
+.main-wrap{margin-left:var(--sw);flex:1;display:flex;flex-direction:column;min-height:100dvh;overflow-y: auto;background:var(--surf);border-bottom:1px solid var(--div);display:flex;align-items:center;padding:0 var(--s6);gap:var(--s4);position:sticky;top:0;z-index:50;box-shadow:var(--sh)}
 .topbar-title{font-family:var(--fd);font-size:var(--lg);font-style:italic;flex:1}
 .topbar-actions{display:flex;align-items:center;gap:var(--s3)}
 .topbar-date{font-size:var(--xs);color:var(--txm);background:var(--surf2);border:1px solid var(--bord);border-radius:var(--rf);padding:var(--s1) var(--s3)}
 .icon-btn{width:36px;height:36px;border-radius:var(--rm);display:flex;align-items:center;justify-content:center;color:var(--txm);transition:background var(--tr)}
 .icon-btn:hover{background:var(--surf3)}
-.page-content{flex:1;overflow-y:auto;padding:var(--s6) var(--s8)}
+.page-content{flex:1;overflow-y: auto;padding:var(--s6) var(--s8)}
 
 .page-header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:var(--s6);gap:var(--s4);flex-wrap:wrap}
 .page-header h1{font-family:var(--fd);font-size:var(--xl);font-style:italic}
