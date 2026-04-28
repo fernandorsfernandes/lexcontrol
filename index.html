@@ -1,0 +1,548 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LexControl — Sistema de Gestão Jurídica</title>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter:wght@300..700&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+<style>
+:root{
+  --bg:#f4f5f7;--surf:#fff;--surf2:#f9fafb;--surf3:#eef0f3;
+  --div:#d8dce4;--bord:#cdd2db;
+  --tx:#1a1f2e;--txm:#6b7280;--txf:#b0b7c3;
+  --pri:#1e3a5f;--prih:#162d4a;--prihl:#dce6f0;
+  --acc:#b8860b;--acch:#9a6f08;--acchl:#fdf3d7;
+  --ok:#166534;--okbg:#dcfce7;
+  --warn:#92400e;--warnbg:#fef3c7;
+  --err:#991b1b;--errbg:#fee2e2;
+  --inf:#1e40af;--infbg:#dbeafe;
+  --sb:#1a2744;--sbt:#c8d3e8;--sbm:#7888aa;
+  --sba:#2d4a80;--sbh:#243256;--sbb:#253360;
+  --fd:'Instrument Serif',Georgia,serif;
+  --fb:'Inter',system-ui,sans-serif;
+  --xs:.8rem;--sm:.9rem;--base:1rem;--lg:1.3rem;--xl:1.8rem;
+  --s1:.25rem;--s2:.5rem;--s3:.75rem;--s4:1rem;--s5:1.25rem;--s6:1.5rem;--s8:2rem;
+  --r:.375rem;--rm:.5rem;--rl:.75rem;--rx:1rem;--rf:9999px;
+  --sh:0 1px 3px rgba(0,0,0,.08);--shm:0 4px 16px rgba(0,0,0,.12);--shl:0 12px 40px rgba(0,0,0,.15);
+  --sw:260px;--hh:56px;--tr:180ms cubic-bezier(.16,1,.3,1);
+}
+[data-theme="dark"]{
+  --bg:#0f1322;--surf:#161c31;--surf2:#1c2440;--surf3:#1a2038;
+  --div:#2a3454;--bord:#334070;
+  --tx:#e2e8f5;--txm:#8896b8;--txf:#4a5680;
+  --pri:#6b93d4;--prih:#89aadf;--prihl:#1e2e50;
+  --acc:#e6aa2a;--acch:#f0bf52;--acchl:#2d2410;
+  --ok:#4ade80;--okbg:#14532d;
+  --warn:#fbbf24;--warnbg:#451a03;
+  --err:#f87171;--errbg:#450a0a;
+  --inf:#60a5fa;--infbg:#1e3a8a;
+  --sb:#0d1220;--sbt:#b0bdd8;--sbm:#5a6888;--sba:#1e2e50;--sbh:#141c35;--sbb:#1e2840;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{-webkit-font-smoothing:antialiased}
+body{font-family:var(--fb);font-size:var(--base);color:var(--tx);background:var(--bg);height:100dvh;display:flex;flex-direction:column;overflow: auto}
+button{cursor:pointer;background:none;border:none;font:inherit;color:inherit}
+
+/* TOP BAR */
+.topbar{height:var(--hh);background:var(--sb);display:flex;align-items:center;padding:0 var(--s5);gap:var(--s4);flex-shrink:0;border-bottom:2px solid var(--acc);z-index:200;position:relative}
+.topbar-logo{display:flex;align-items:center;gap:var(--s3);flex-shrink:0}
+.topbar-logo svg{color:var(--acc)}
+.logo-name{font-family:var(--fd);font-size:1.15rem;color:#fff;line-height:1}
+.logo-sub{font-size:.62rem;color:var(--sbm);letter-spacing:.06em;text-transform:uppercase}
+.topbar-divider{width:1px;height:28px;background:var(--sbb);flex-shrink:0}
+.topbar-nav{display:flex;align-items:center;gap:2px;flex:1;overflow-x:auto;scrollbar-width:none}
+.topbar-nav::-webkit-scrollbar{display:none}
+.nav-pill{display:flex;align-items:center;gap:var(--s2);padding:var(--s2) var(--s4);border-radius:var(--rm);color:var(--sbt);font-size:var(--xs);font-weight:600;cursor:pointer;transition:background var(--tr),color var(--tr);white-space:nowrap;position:relative;flex-shrink:0}
+.nav-pill:hover{background:var(--sbh);color:#fff}
+.nav-pill.active{background:var(--sba);color:#fff}
+.nav-pill.active::after{content:'';position:absolute;bottom:-2px;left:50%;transform:translateX(-50%);width:24px;height:2px;background:var(--acc);border-radius:var(--rf)}
+.nav-pill i{width:15px;height:15px;flex-shrink:0}
+.nav-pill .pill-badge{background:var(--acc);color:#1a1000;font-size:.58rem;font-weight:800;padding:1px 5px;border-radius:var(--rf);margin-left:2px}
+.topbar-right{display:flex;align-items:center;gap:var(--s3);flex-shrink:0}
+.topbar-date{font-size:var(--xs);color:var(--sbm);white-space:nowrap}
+.icon-btn{width:32px;height:32px;border-radius:var(--rm);display:flex;align-items:center;justify-content:center;color:var(--sbt);transition:background var(--tr)}
+.icon-btn:hover{background:var(--sbh);color:#fff}
+.icon-btn i{width:16px;height:16px}
+.user-chip{display:flex;align-items:center;gap:var(--s2);padding:var(--s1) var(--s3);border-radius:var(--rm);cursor:pointer;transition:background var(--tr)}
+.user-chip:hover{background:var(--sbh)}
+.u-av{width:28px;height:28px;border-radius:var(--rf);background:var(--sba);border:2px solid var(--acc);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.65rem;color:#fff}
+.u-name{font-size:var(--xs);color:#fff;font-weight:600}
+
+/* CONTENT */
+.content-wrap{flex:1;display:flex;overflow:hidden;position:relative;min-height:0}
+
+/* IFRAME */
+#main-frame{flex:1;border:none;background:var(--bg);transition:opacity .15s;width:100%;height:100%;overflow-y:auto}
+#main-frame.loading{opacity:0}
+
+/* WELCOME SCREEN */
+#welcome{position:absolute;inset:0;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:var(--s8);z-index:10;transition:opacity .3s,transform .3s}
+#welcome.hidden{opacity:0;transform:scale(.97);pointer-events:none}
+.welcome-logo{margin-bottom:var(--s8)}
+.welcome-logo svg{color:var(--acc);width:56px;height:56px}
+.welcome-title{font-family:var(--fd);font-size:2.4rem;font-style:italic;margin-bottom:var(--s3)}
+.welcome-sub{font-size:var(--sm);color:var(--txm);max-width:46ch;margin:0 auto var(--s8)}
+.modules-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:var(--s4);max-width:780px;width:100%}
+.module-btn{background:var(--surf);border:1px solid var(--bord);border-radius:var(--rl);padding:var(--s5);display:flex;flex-direction:column;align-items:center;gap:var(--s3);cursor:pointer;transition:box-shadow var(--tr),transform var(--tr),border-color var(--tr);text-align:center}
+.module-btn:hover{box-shadow:var(--shm);transform:translateY(-3px);border-color:var(--pri)}
+.module-btn:active{transform:translateY(0)}
+.module-icon{width:46px;height:46px;border-radius:var(--rm);display:flex;align-items:center;justify-content:center}
+.module-icon i{width:22px;height:22px}
+.mi-navy{background:var(--prihl);color:var(--pri)}.mi-gold{background:var(--acchl);color:var(--acc)}
+.mi-green{background:var(--okbg);color:var(--ok)}.mi-blue{background:var(--infbg);color:var(--inf)}
+.mi-red{background:var(--errbg);color:var(--err)}.mi-warn{background:var(--warnbg);color:var(--warn)}
+.mi-purple{background:#ede9fe;color:#6d28d9}.mi-teal{background:#ccfbf1;color:#0f766e}
+.module-name{font-size:var(--sm);font-weight:700;color:var(--tx)}
+.module-desc{font-size:var(--xs);color:var(--txm);line-height:1.4}
+.welcome-footer{margin-top:var(--s8);font-size:var(--xs);color:var(--txf)}
+
+/* LOADING OVERLAY */
+#loader{position:absolute;inset:0;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:5;opacity:0;pointer-events:none;transition:opacity .15s}
+#loader.show{opacity:1;pointer-events:auto}
+.spinner{width:36px;height:36px;border:3px solid var(--bord);border-top-color:var(--pri);border-radius:50%;animation:spin .7s linear infinite;margin-bottom:var(--s4)}
+@keyframes spin{to{transform:rotate(360deg)}}
+.loader-text{font-size:var(--sm);color:var(--txm)}
+
+/* BREADCRUMB */
+.breadcrumb{height:34px;background:var(--surf);border-bottom:1px solid var(--div);display:none;align-items:center;padding:0 var(--s6);gap:var(--s2);font-size:var(--xs);color:var(--txm);flex-shrink:0}
+.breadcrumb.visible{display:flex}
+.bc-item{display:flex;align-items:center;gap:var(--s2);font-weight:600;color:var(--txm)}
+.bc-item.active{color:var(--tx)}
+.bc-sep{color:var(--txf)}
+.bc-new-tab{margin-left:auto;display:flex;align-items:center;gap:var(--s2);padding:var(--s1) var(--s3);border-radius:var(--rm);border:1px solid var(--bord);font-size:var(--xs);font-weight:600;color:var(--txm);cursor:pointer;transition:background var(--tr)}
+.bc-new-tab:hover{background:var(--surf3);color:var(--tx)}
+.bc-new-tab i{width:13px;height:13px}
+
+/* TOAST */
+.toast-wrap{position:fixed;bottom:var(--s6);right:var(--s6);z-index:500;display:flex;flex-direction:column;gap:var(--s2);pointer-events:none}
+.toast{background:var(--tx);color:var(--bg);padding:var(--s3) var(--s5);border-radius:var(--rl);font-size:var(--sm);font-weight:500;box-shadow:var(--shl);animation:tIn .25s ease forwards;pointer-events:auto}
+.toast.success{background:var(--ok);color:#fff}.toast.error{background:var(--err);color:#fff}
+@keyframes tIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+
+/* SEARCH PALETTE */
+.palette-overlay{position:fixed;inset:0;background:rgba(0,0,0,.45);backdrop-filter:blur(4px);z-index:400;display:none;align-items:flex-start;justify-content:center;padding-top:10vh}
+.palette-overlay.open{display:flex}
+.palette{background:var(--surf);border-radius:var(--rx);box-shadow:var(--shl);width:100%;max-width:520px;overflow:hidden}
+.palette-input-wrap{display:flex;align-items:center;gap:var(--s3);padding:var(--s4) var(--s5);border-bottom:1px solid var(--div)}
+.palette-input-wrap i{width:18px;height:18px;color:var(--txm);flex-shrink:0}
+.palette-input{flex:1;background:none;border:none;font-size:var(--base);color:var(--tx);outline:none}
+.palette-results{max-height:320px;overflow-y:auto}
+.palette-item{display:flex;align-items:center;gap:var(--s4);padding:var(--s3) var(--s5);cursor:pointer;transition:background var(--tr)}
+.palette-item:hover,.palette-item.hl{background:var(--prihl)}
+.pi-icon{width:34px;height:34px;border-radius:var(--rm);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.pi-icon i{width:16px;height:16px}
+.pi-info{flex:1}
+.pi-name{font-size:var(--sm);font-weight:700}
+.pi-desc{font-size:var(--xs);color:var(--txm)}
+.pi-kbd{font-size:var(--xs);color:var(--txf);background:var(--surf3);border:1px solid var(--bord);border-radius:var(--r);padding:1px 6px}
+.palette-footer{padding:var(--s3) var(--s5);border-top:1px solid var(--div);display:flex;gap:var(--s4);font-size:var(--xs);color:var(--txf)}
+.palette-footer span{display:flex;align-items:center;gap:var(--s2)}
+
+@media(max-width:800px){.modules-grid{grid-template-columns:repeat(2,1fr)}.topbar-date{display:none}}
+@media(max-width:480px){.modules-grid{grid-template-columns:repeat(2,1fr)}.logo-sub{display:none}}
+
+/* USER MODAL */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.45);backdrop-filter:blur(4px);z-index:600;display:none;align-items:center;justify-content:center}
+.modal-overlay.open{display:flex}
+.modal-box{background:var(--surf);border-radius:var(--rx);box-shadow:var(--shl);width:100%;max-width:380px;overflow:hidden}
+.modal-header{padding:var(--s5);border-bottom:1px solid var(--div);display:flex;align-items:center;justify-content:space-between}
+.modal-header h3{font-family:var(--fd);font-size:var(--lg);font-style:italic}
+.modal-body{padding:var(--s5);display:flex;flex-direction:column;gap:var(--s4)}
+.modal-label{font-size:var(--xs);font-weight:700;color:var(--txm);text-transform:uppercase;letter-spacing:.06em;margin-bottom:var(--s2)}
+.modal-input{width:100%;padding:var(--s3) var(--s4);border:1px solid var(--bord);border-radius:var(--rm);background:var(--surf2);font-size:var(--sm);color:var(--tx);outline:none;transition:border-color var(--tr)}
+.modal-input:focus{border-color:var(--pri)}
+.modal-footer{padding:var(--s4) var(--s5);border-top:1px solid var(--div);display:flex;justify-content:flex-end;gap:var(--s3)}
+</style>
+</head>
+<body>
+
+<!-- TOPBAR -->
+<header class="topbar">
+  <div class="topbar-logo">
+    <svg width="24" height="24" viewBox="0 0 28 28" fill="none">
+      <rect x="3" y="13" width="22" height="3" rx="1.5" fill="currentColor"/>
+      <path d="M7 13V8a1 1 0 011-1h12a1 1 0 011 1v5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+      <rect x="10" y="16" width="8" height="9" rx="1" fill="currentColor" opacity=".6"/>
+      <circle cx="14" cy="4" r="2.5" fill="currentColor"/>
+    </svg>
+    <div>
+      <div class="logo-name">LexControl</div>
+      <div class="logo-sub">Gestão Jurídica</div>
+    </div>
+  </div>
+  <div class="topbar-divider"></div>
+
+  <nav class="topbar-nav" id="topbar-nav">
+    <div class="nav-pill active" id="pill-home" onclick="goHome()">
+      <i data-lucide="home"></i> Início
+    </div>
+    <div class="nav-pill" id="pill-dashboard" onclick="navigate('dashboard')">
+      <i data-lucide="layout-dashboard"></i> Dashboard
+    </div>
+    <div class="nav-pill" id="pill-processos" onclick="navigate('processos')">
+      <i data-lucide="briefcase"></i> Processos
+    </div>
+    <div class="nav-pill" id="pill-financeiro" onclick="navigate('financeiro')">
+      <i data-lucide="dollar-sign"></i> Financeiro
+    </div>
+    <div class="nav-pill" id="pill-agenda" onclick="navigate('agenda')">
+      <i data-lucide="calendar"></i> Agenda <span class="pill-badge" id="badge-agenda">3</span>
+    </div>
+    <div class="nav-pill" id="pill-clientes" onclick="navigate('clientes')">
+      <i data-lucide="users"></i> Clientes
+    </div>
+    <div class="nav-pill" id="pill-honorarios" onclick="navigate('honorarios')">
+      <i data-lucide="file-text"></i> Honorários
+    </div>
+    <div class="nav-pill" id="pill-relatorios" onclick="navigate('relatorios')">
+      <i data-lucide="bar-chart-2"></i> Relatórios
+    </div>
+  </nav>
+
+  <div class="topbar-right">
+    <span class="topbar-date" id="topbar-date"></span>
+    <button class="icon-btn" onclick="openPalette()" title="Busca rápida (Ctrl+K)"><i data-lucide="search"></i></button>
+    <button class="icon-btn" id="theme-btn" onclick="toggleTheme()" title="Alternar tema"><i data-lucide="sun"></i></button>
+    <div class="user-chip" onclick="openUserModal()" title="Personalizar perfil">
+      <div class="u-av">DR</div>
+      <span class="u-name">Dr. Advogado</span>
+    </div>
+  </div>
+</header>
+
+<!-- BREADCRUMB -->
+<div class="breadcrumb" id="breadcrumb">
+  <span class="bc-item"><i data-lucide="home" style="width:13px;height:13px"></i> LexControl</span>
+  <span class="bc-sep">›</span>
+  <span class="bc-item active" id="bc-current">—</span>
+  <button class="bc-new-tab" id="bc-open-btn" onclick="openInNewTab()">
+    <i data-lucide="external-link"></i> Abrir em nova aba
+  </button>
+</div>
+
+<!-- CONTENT -->
+<div class="content-wrap">
+
+  <!-- WELCOME -->
+  <div id="welcome">
+    <div class="welcome-logo">
+      <svg viewBox="0 0 28 28" fill="none">
+        <rect x="3" y="13" width="22" height="3" rx="1.5" fill="currentColor"/>
+        <path d="M7 13V8a1 1 0 011-1h12a1 1 0 011 1v5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+        <rect x="10" y="16" width="8" height="9" rx="1" fill="currentColor" opacity=".6"/>
+        <circle cx="14" cy="4" r="2.5" fill="currentColor"/>
+      </svg>
+    </div>
+    <h1 class="welcome-title">Bem-vindo ao LexControl</h1>
+    <p class="welcome-sub">Sistema completo de gestão jurídica. Selecione um módulo para começar ou use <kbd style="background:var(--surf3);border:1px solid var(--bord);border-radius:var(--r);padding:1px 6px;font-size:var(--xs)">Ctrl+K</kbd> para busca rápida.</p>
+
+    <div class="modules-grid">
+      <div class="module-btn" onclick="navigate('dashboard')">
+        <div class="module-icon mi-navy"><i data-lucide="layout-dashboard"></i></div>
+        <div class="module-name">Dashboard</div>
+        <div class="module-desc">Visão geral e KPIs principais</div>
+      </div>
+      <div class="module-btn" onclick="navigate('processos')">
+        <div class="module-icon mi-blue"><i data-lucide="briefcase"></i></div>
+        <div class="module-name">Processos</div>
+        <div class="module-desc">Gestão de processos judiciais</div>
+      </div>
+      <div class="module-btn" onclick="navigate('financeiro')">
+        <div class="module-icon mi-gold"><i data-lucide="dollar-sign"></i></div>
+        <div class="module-name">Financeiro</div>
+        <div class="module-desc">Fluxo de caixa e lançamentos</div>
+      </div>
+      <div class="module-btn" onclick="navigate('agenda')">
+        <div class="module-icon mi-red"><i data-lucide="calendar"></i></div>
+        <div class="module-name">Agenda</div>
+        <div class="module-desc">Audiências, prazos e reuniões</div>
+      </div>
+      <div class="module-btn" onclick="navigate('clientes')">
+        <div class="module-icon mi-green"><i data-lucide="users"></i></div>
+        <div class="module-name">Clientes</div>
+        <div class="module-desc">Carteira e perfil de clientes</div>
+      </div>
+      <div class="module-btn" onclick="navigate('honorarios')">
+        <div class="module-icon mi-warn"><i data-lucide="file-text"></i></div>
+        <div class="module-name">Honorários</div>
+        <div class="module-desc">Contratos e recebimentos</div>
+      </div>
+      <div class="module-btn" onclick="navigate('relatorios')">
+        <div class="module-icon mi-purple"><i data-lucide="bar-chart-2"></i></div>
+        <div class="module-name">Relatórios</div>
+        <div class="module-desc">Análises e gráficos gerenciais</div>
+      </div>
+      <div class="module-btn" style="opacity:.5;cursor:default" title="Em breve">
+        <div class="module-icon mi-teal"><i data-lucide="folder-open"></i></div>
+        <div class="module-name">Documentos</div>
+        <div class="module-desc">Em breve</div>
+      </div>
+    </div>
+
+    <div class="welcome-footer">LexControl v1.0 · 7 módulos · Desenvolvido com IA · 2026</div>
+  </div>
+
+  <!-- LOADER -->
+  <div id="loader">
+    <div class="spinner"></div>
+    <div class="loader-text" id="loader-text">Carregando módulo…</div>
+  </div>
+
+  <!-- IFRAME -->
+  <iframe id="main-frame" src="about:blank" allowfullscreen></iframe>
+
+</div>
+
+<!-- SEARCH PALETTE -->
+<div class="palette-overlay" id="palette-overlay" onclick="if(event.target===this)closePalette()">
+  <div class="palette">
+    <div class="palette-input-wrap">
+      <i data-lucide="search"></i>
+      <input class="palette-input" id="palette-input" placeholder="Buscar módulo ou ação..." oninput="filterPalette()" onkeydown="paletteKey(event)">
+      <span class="pi-kbd">Esc</span>
+    </div>
+    <div class="palette-results" id="palette-results"></div>
+    <div class="palette-footer">
+      <span><span class="pi-kbd">↑↓</span> navegar</span>
+      <span><span class="pi-kbd">Enter</span> abrir</span>
+      <span><span class="pi-kbd">Esc</span> fechar</span>
+    </div>
+  </div>
+</div>
+
+
+<!-- USER MODAL -->
+<div class="modal-overlay" id="user-modal">
+  <div class="modal-box">
+    <div class="modal-header">
+      <h3>Perfil do Usuário</h3>
+      <button class="icon-btn" onclick="closeUserModal()"><i data-lucide="x"></i></button>
+    </div>
+    <div class="modal-body">
+      <div>
+        <div class="modal-label">Nome completo</div>
+        <input class="modal-input" id="input-username" placeholder="Ex: Dr. João Silva" maxlength="40">
+      </div>
+      <div>
+        <div class="modal-label">Cargo / Função</div>
+        <input class="modal-input" id="input-userrole" placeholder="Ex: Sócio Titular" maxlength="30">
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeUserModal()">Cancelar</button>
+      <button class="btn btn-primary" onclick="saveUser()">Salvar</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast-wrap" id="toast-wrap"></div>
+
+<script>
+// ============================================================
+// MODULES REGISTRY
+// ============================================================
+const MODULES = [
+  {id:'dashboard', name:'Dashboard', desc:'Visão geral — KPIs, processos urgentes, agenda do dia', file:'lexcontrol-parte1.html', icon:'layout-dashboard', color:'mi-navy'},
+  {id:'processos', name:'Processos', desc:'Gestão de processos judiciais, partes e movimentações', file:'lexcontrol-parte2-processos.html', icon:'briefcase', color:'mi-blue'},
+  {id:'financeiro', name:'Financeiro', desc:'Fluxo de caixa, receitas, despesas e metas mensais', file:'lexcontrol-parte3-financeiro.html', icon:'dollar-sign', color:'mi-gold'},
+  {id:'agenda',    name:'Agenda',    desc:'Audiências, prazos, reuniões e perícias', file:'lexcontrol-parte4-agenda.html', icon:'calendar', color:'mi-red'},
+  {id:'clientes',  name:'Clientes',  desc:'Carteira de clientes, perfis e histórico processual', file:'lexcontrol-parte5-clientes.html', icon:'users', color:'mi-green'},
+  {id:'honorarios',name:'Honorários',desc:'Contratos de honorários, parcelas e recebimentos', file:'lexcontrol-parte6-honorarios.html', icon:'file-text', color:'mi-warn'},
+  {id:'relatorios',name:'Relatórios',desc:'Análises financeiras, processuais e gráficos gerenciais', file:'lexcontrol-parte7-relatorios.html', icon:'bar-chart-2', color:'mi-purple'},
+];
+
+let activeModule = null;
+let dark = matchMedia('(prefers-color-scheme:dark)').matches;
+let paletteIdx = -1;
+let paletteFiltered = [...MODULES];
+
+// ============================================================
+// INIT
+// ============================================================
+// Expose navigation to iframes
+window.lexNavigate = function(id){ navigate(id); };
+
+document.addEventListener('DOMContentLoaded',()=>{
+  lucide.createIcons();
+  document.getElementById('topbar-date').textContent = new Date().toLocaleDateString('pt-BR',{weekday:'short',day:'numeric',month:'short',year:'numeric'});
+  applyTheme();
+  renderPaletteResults('');
+  loadUser();
+
+  
+// Sync tema from iframe modules
+window.addEventListener('message', e => {
+  if(e.data && e.data.type === 'lex-tema'){
+    document.documentElement.setAttribute('data-theme', e.data.tema);
+    dark = e.data.tema === 'dark';
+    applyTheme();
+  }
+});
+
+  // Keyboard shortcuts
+  document.addEventListener('keydown', e=>{
+    if((e.ctrlKey||e.metaKey)&&e.key==='k'){e.preventDefault();openPalette();}
+    if(e.key==='Escape'){closePalette();}
+    // number shortcuts 1-7
+    if(!e.ctrlKey&&!e.metaKey&&!e.altKey&&e.key>='1'&&e.key<='7'){
+      const idx=parseInt(e.key)-1;
+      if(MODULES[idx]) navigate(MODULES[idx].id);
+    }
+  });
+
+  // handle iframe load
+  document.getElementById('main-frame').addEventListener('load',()=>{
+    document.getElementById('loader').classList.remove('show');
+    document.getElementById('main-frame').classList.remove('loading');
+  });
+});
+
+// ============================================================
+// NAVIGATION
+// ============================================================
+function navigate(id){
+  const mod = MODULES.find(m=>m.id===id);
+  if(!mod) return;
+  activeModule = id;
+
+  // Pills
+  document.querySelectorAll('.nav-pill').forEach(p=>p.classList.remove('active'));
+  const pill = document.getElementById('pill-'+id);
+  if(pill) pill.classList.add('active');
+  document.getElementById('pill-home').classList.remove('active');
+
+  // Welcome hide
+  const welcome = document.getElementById('welcome');
+  welcome.classList.add('hidden');
+
+  // Breadcrumb
+  const bc = document.getElementById('breadcrumb');
+  bc.classList.add('visible');
+  document.getElementById('bc-current').textContent = mod.name;
+
+  // Loader
+  document.getElementById('loader').classList.add('show');
+  document.getElementById('loader-text').textContent = 'Carregando '+mod.name+'…';
+  document.getElementById('main-frame').classList.add('loading');
+
+  // Load iframe
+  document.getElementById('main-frame').src = mod.file;
+
+  showToast(mod.name+' carregado','success');
+}
+
+function goHome(){
+  activeModule = null;
+  document.querySelectorAll('.nav-pill').forEach(p=>p.classList.remove('active'));
+  document.getElementById('pill-home').classList.add('active');
+  document.getElementById('welcome').classList.remove('hidden');
+  document.getElementById('breadcrumb').classList.remove('visible');
+  document.getElementById('main-frame').src='about:blank';
+  document.getElementById('loader').classList.remove('show');
+}
+
+function openInNewTab(){
+  if(!activeModule) return;
+  const mod = MODULES.find(m=>m.id===activeModule);
+  if(mod) window.open(mod.file,'_blank');
+}
+
+// ============================================================
+// PALETTE
+// ============================================================
+function openPalette(){
+  document.getElementById('palette-overlay').classList.add('open');
+  document.getElementById('palette-input').value='';
+  renderPaletteResults('');
+  setTimeout(()=>document.getElementById('palette-input').focus(),50);
+}
+function closePalette(){
+  document.getElementById('palette-overlay').classList.remove('open');
+  paletteIdx=-1;
+}
+function filterPalette(){
+  const q=document.getElementById('palette-input').value.toLowerCase();
+  renderPaletteResults(q);
+}
+function renderPaletteResults(q){
+  paletteFiltered = q ? MODULES.filter(m=>m.name.toLowerCase().includes(q)||m.desc.toLowerCase().includes(q)) : MODULES;
+  paletteIdx=-1;
+  const el=document.getElementById('palette-results');
+  if(!paletteFiltered.length){el.innerHTML='<div style="padding:2rem;text-align:center;font-size:var(--sm);color:var(--txm)">Nenhum resultado.</div>';return;}
+  el.innerHTML=paletteFiltered.map((m,i)=>`
+    <div class="palette-item" id="pi-${i}" onclick="paletteSelect(${i})">
+      <div class="pi-icon ${m.color}"><i data-lucide="${m.icon}"></i></div>
+      <div class="pi-info">
+        <div class="pi-name">${m.name}</div>
+        <div class="pi-desc">${m.desc}</div>
+      </div>
+      <span class="pi-kbd">${MODULES.indexOf(m)+1}</span>
+    </div>`).join('');
+  lucide.createIcons();
+}
+function paletteSelect(i){
+  if(paletteFiltered[i]){navigate(paletteFiltered[i].id);closePalette();}
+}
+function paletteKey(e){
+  const items=document.querySelectorAll('.palette-item');
+  if(e.key==='ArrowDown'){e.preventDefault();paletteIdx=Math.min(paletteIdx+1,items.length-1);}
+  else if(e.key==='ArrowUp'){e.preventDefault();paletteIdx=Math.max(paletteIdx-1,0);}
+  else if(e.key==='Enter'){e.preventDefault();paletteSelect(paletteIdx>=0?paletteIdx:0);return;}
+  items.forEach((el,i)=>el.classList.toggle('hl',i===paletteIdx));
+  if(paletteIdx>=0) items[paletteIdx].scrollIntoView({block:'nearest'});
+}
+
+// ============================================================
+// THEME
+// ============================================================
+function applyTheme(){
+  document.documentElement.setAttribute('data-theme',dark?'dark':'light');
+  const btn=document.getElementById('theme-btn');
+  if(btn) btn.innerHTML=dark
+    ?'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>'
+    :'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>';
+}
+function toggleTheme(){dark=!dark;applyTheme();}
+
+// ============================================================
+// TOAST
+// ============================================================
+function showToast(msg,type=''){
+  const t=document.createElement('div');
+  t.className='toast '+type;t.textContent=msg;
+  document.getElementById('toast-wrap').appendChild(t);
+  setTimeout(()=>t.remove(),2500);
+}
+
+// ============================================================
+// USER PERSONALIZATION
+// ============================================================
+function loadUser(){
+  const name = localStorage.getItem('lex_username') || 'Dr. Advogado';
+  const role = localStorage.getItem('lex_userrole') || 'Sócio Titular';
+  const initials = name.replace('Dr. ','').replace('Dra. ','').split(' ').map(w=>w[0]).join('').substring(0,2).toUpperCase();
+  document.querySelector('.u-name').textContent = name;
+  document.querySelector('.u-av').textContent = initials;
+}
+function openUserModal(){
+  document.getElementById('input-username').value = localStorage.getItem('lex_username')||'';
+  document.getElementById('input-userrole').value = localStorage.getItem('lex_userrole')||'';
+  document.getElementById('user-modal').classList.add('open');
+  lucide.createIcons();
+  setTimeout(()=>document.getElementById('input-username').focus(),80);
+}
+function closeUserModal(){ document.getElementById('user-modal').classList.remove('open'); }
+function saveUser(){
+  const name = document.getElementById('input-username').value.trim() || 'Dr. Advogado';
+  const role = document.getElementById('input-userrole').value.trim() || 'Sócio Titular';
+  localStorage.setItem('lex_username', name);
+  localStorage.setItem('lex_userrole', role);
+  loadUser();
+  closeUserModal();
+  showToast('Perfil atualizado!','success');
+}
+
+</script>
+</body>
+</html>
