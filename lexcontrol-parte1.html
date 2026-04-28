@@ -1268,8 +1268,8 @@ function renderDashboardProcessos() {
   if(!tb) return;
   tb.innerHTML = processos.slice(0,5).map(p => `
     <tr>
-      <td><span class="process-num">${p.num.substring(0,14)}…</span></td>
-      <td><span class="process-client">${p.cliente}</span></td>
+      <td><span class="process-num">${p.numero.substring(0,14)}…</span></td>
+      <td><span class="process-client">${p.clienteNome}</span></td>
       <td><span class="process-area">${p.area}</span></td>
       <td>${statusBadge(p.status)}</td>
       <td><span style="font-size:var(--text-xs);font-variant-numeric:tabular-nums;">${p.prazo}</span></td>
@@ -1281,8 +1281,8 @@ function renderProcessosFull() {
   if(!tb) return;
   tb.innerHTML = processos.map(p => `
     <tr>
-      <td><span class="process-num">${p.num}</span></td>
-      <td><span class="process-client">${p.cliente}</span></td>
+      <td><span class="process-num">${p.numero}</span></td>
+      <td><span class="process-client">${p.clienteNome}</span></td>
       <td><span class="process-area">${p.area}</span></td>
       <td>${statusBadge(p.status)}</td>
       <td>${p.prazo}</td>

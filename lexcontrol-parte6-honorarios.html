@@ -466,7 +466,6 @@ let contratos = [];
 function loadContratos(){ contratos = LexData.getHonorarios(); }
 function persistContrato(h){ LexData.saveHonorario(h); loadContratos(); }
 function removeContrato(id){ LexData.deleteHonorario(id); loadContratos(); }
-let nextId = 7;
 let currentView = 'contratos';
 let currentPage = 1;
 const PER_PAGE = 10;
@@ -613,7 +612,7 @@ function renderParcelas(list){
         <td><span class="badge ${sClass}">${p.status}</span></td>
         <td style="font-size:var(--xs);color:var(--txm)">${p.pgto?new Date(p.pgto+'T12:00:00').toLocaleDateString('pt-BR'):'—'}</td>
         <td>
-          ${p.status!=='Pago'?`<button class="btn btn-ghost btn-sm" onclick="marcarPago(${p.contratoId},${p.num})" title="Marcar como pago"><i data-lucide="check" style="width:13px;height:13px"></i></button>`:'<span style="color:var(--ok);font-size:var(--xs)">✓</span>'}
+          ${p.status!=='Pago'?`<button class="btn btn-ghost btn-sm" onclick="marcarPago(${p.contratoId},${p.numero})" title="Marcar como pago"><i data-lucide="check" style="width:13px;height:13px"></i></button>`:'<span style="color:var(--ok);font-size:var(--xs)">✓</span>'}
         </td>
       </tr>`;
     }).join('');
@@ -656,7 +655,7 @@ function openDrawer(id){
   const parcsHTML = c.parts.map(p=>{
     const cls = p.status==='Pago'?'p-ok':p.status==='Atrasado'?'p-atras':'p-pend';
     const icon = p.status==='Pago'?'✓':p.status==='Atrasado'?'!':'○';
-    return `<div class="parcela-row" onclick="event.stopPropagation();marcarPago(${c.id},${p.num});renderDrawerParcelas(${c.id})">
+    return `<div class="parcela-row" onclick="event.stopPropagation();marcarPago(${c.id},${p.numero});renderDrawerParcelas(${c.id})">
       <div class="parc-num ${cls}">${icon}</div>
       <div class="parc-info">
         <div class="parc-desc">${p.desc}</div>
@@ -694,7 +693,7 @@ function renderDrawerParcelas(id){
   const parcsHTML = c.parts.map(p=>{
     const cls = p.status==='Pago'?'p-ok':p.status==='Atrasado'?'p-atras':'p-pend';
     const icon = p.status==='Pago'?'✓':p.status==='Atrasado'?'!':'○';
-    return `<div class="parcela-row" onclick="event.stopPropagation();marcarPago(${c.id},${p.num});renderDrawerParcelas(${c.id})">
+    return `<div class="parcela-row" onclick="event.stopPropagation();marcarPago(${c.id},${p.numero});renderDrawerParcelas(${c.id})">
       <div class="parc-num ${cls}">${icon}</div>
       <div class="parc-info">
         <div class="parc-desc">${p.desc}</div>
@@ -787,7 +786,7 @@ function salvar(){
     if(idx>=0) contratos[idx]={...contratos[idx],...obj};
     showToast('Contrato atualizado!','success');
   } else {
-    persistContrato({id:nextId++,...obj});
+    persistContrato({id:LexData.uid(),...obj});
     showToast('Contrato criado!','success');
   }
   closeModal(); render();

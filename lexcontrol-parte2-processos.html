@@ -518,7 +518,6 @@ function loadProcessos(){ processos = LexData.getProcessos(); }
 function persistProcesso(p){ LexData.saveProcesso(p); loadProcessos(); }
 function removeProcesso(id){ LexData.deleteProcesso(id); loadProcessos(); }
 
-let nextId = 9;
 let activeFilter = 'Todos';
 let sortField = 'prazoRaw';
 let sortDir = 1;
@@ -563,7 +562,7 @@ function applyFilters() {
   let list = processos.filter(p => {
     const matchStat = activeFilter === 'Todos' || p.status === activeFilter;
     const matchArea = !area || p.area === area;
-    const matchQ = !q || p.num.toLowerCase().includes(q) || p.cliente.toLowerCase().includes(q) || p.vara.toLowerCase().includes(q) || p.parte.toLowerCase().includes(q);
+    const matchQ = !q || p.numero.toLowerCase().includes(q) || p.clienteNome.toLowerCase().includes(q) || p.vara.toLowerCase().includes(q) || p.parte.toLowerCase().includes(q);
     return matchStat && matchArea && matchQ;
   });
 
@@ -605,8 +604,8 @@ function renderTable(list) {
     const badge = statusBadge(p.status);
     const prazoHtml = prazoCell(p.prazoRaw);
     return `<tr>
-      <td><span class="proc-num">${p.num.substring(0,20)}…</span></td>
-      <td><span class="proc-client">${p.cliente}</span></td>
+      <td><span class="proc-num">${p.numero.substring(0,20)}…</span></td>
+      <td><span class="proc-client">${p.clienteNome}</span></td>
       <td><span class="area-chip">${p.area}</span></td>
       <td>${badge}</td>
       <td>${prazoHtml}</td>
@@ -674,12 +673,12 @@ function openDrawer(id) {
   const p = processos.find(x=>x.id===id);
   if(!p) return;
   drawerProcId = id;
-  document.getElementById('drawer-title').textContent = p.area + ' — ' + p.num.substring(0,14)+'…';
+  document.getElementById('drawer-title').textContent = p.area + ' — ' + p.numero.substring(0,14)+'…';
   document.getElementById('drawer-body').innerHTML = `
     <div class="detail-section">
       <div class="detail-section-title"><i data-lucide="user"></i> Cliente</div>
       <div class="detail-grid">
-        <div class="detail-field"><label>Nome</label><span>${p.cliente}</span></div>
+        <div class="detail-field"><label>Nome</label><span>${p.clienteNome}</span></div>
         <div class="detail-field"><label>CPF/CNPJ</label><span>${p.doc||'—'}</span></div>
         <div class="detail-field"><label>Parte Contrária</label><span>${p.parte||'—'}</span></div>
         <div class="detail-field"><label>Comarca</label><span>${p.comarca||'—'}</span></div>
@@ -688,7 +687,7 @@ function openDrawer(id) {
     <div class="detail-section">
       <div class="detail-section-title"><i data-lucide="briefcase"></i> Processo</div>
       <div class="detail-grid">
-        <div class="detail-field full"><label>Número</label><span style="word-break:break-all">${p.num}</span></div>
+        <div class="detail-field full"><label>Número</label><span style="word-break:break-all">${p.numero}</span></div>
         <div class="detail-field"><label>Vara/Tribunal</label><span>${p.vara}</span></div>
         <div class="detail-field"><label>Área</label><span>${p.area}</span></div>
         <div class="detail-field"><label>Status</label><span>${statusBadge(p.status)}</span></div>
@@ -763,18 +762,18 @@ function editProcesso(id) {
   clearForm();
   document.getElementById('edit-id').value = id;
   document.getElementById('modal-proc-title').textContent = 'Editar Processo';
-  document.getElementById('f-num').value = p.num;
+  document.getElementById('f-num').value = p.numero;
   document.getElementById('f-area').value = p.area;
-  document.getElementById('f-cliente').value = p.cliente;
+  document.getElementById('f-cliente').value = p.clienteNome;
   document.getElementById('f-doc').value = p.doc||'';
   document.getElementById('f-vara').value = p.vara;
-  document.getElementById('f-comarca').value = p.comarca||'';
+  document.getElementById('f-comarca').value = p.cidade||'';
   document.getElementById('f-parte').value = p.parte||'';
   document.getElementById('f-status').value = p.status;
-  document.getElementById('f-data').value = p.data||'';
-  document.getElementById('f-prazo').value = p.prazoRaw||'';
+  document.getElementById('f-data').value = p.criadoEm||'';
+  document.getElementById('f-prazo').value = p.proximoPrazo||'';
   document.getElementById('f-valor').value = p.valor||'';
-  document.getElementById('f-obs').value = p.obs||'';
+  document.getElementById('f-obs').value = p.descricao||'';
   openModal('modal-processo');
 }
 
@@ -791,12 +790,12 @@ function salvarProcesso() {
   if(editId) {
     const p = processos.find(x=>x.id===editId);
     if(p) {
-      Object.assign(p, {num,cliente,vara,area:document.getElementById('f-area').value,status:document.getElementById('f-status').value,doc:document.getElementById('f-doc').value,comarca:document.getElementById('f-comarca').value,parte:document.getElementById('f-parte').value,data:document.getElementById('f-data').value,prazoRaw:document.getElementById('f-prazo').value,valor:document.getElementById('f-valor').value,obs:document.getElementById('f-obs').value});
+      Object.assign(p, {numero:num,clienteNome:cliente,vara,area:document.getElementById('f-area').value,status:document.getElementById('f-status').value,doc:document.getElementById('f-doc').value,cidade:document.getElementById('f-comarca').value,parte:document.getElementById('f-parte').value,criadoEm:document.getElementById('f-data').value||LexData.today(),proximoPrazo:document.getElementById('f-prazo').value,valor:document.getElementById('f-valor').value,descricao:document.getElementById('f-obs').value});
       showToast('Processo atualizado!','success');
     }
   } else {
     const movs = movDesc&&movData ? [{data:movData,desc:movDesc}] : [];
-    processos.unshift({id:nextId++,num,cliente,vara,area:document.getElementById('f-area').value,status:document.getElementById('f-status').value,doc:document.getElementById('f-doc').value,comarca:document.getElementById('f-comarca').value,parte:document.getElementById('f-parte').value,data:document.getElementById('f-data').value,prazoRaw:document.getElementById('f-prazo').value,valor:document.getElementById('f-valor').value,obs:document.getElementById('f-obs').value,movs});
+    processos.unshift({id:LexData.uid(),numero:num,clienteNome:cliente,vara,area:document.getElementById('f-area').value,status:document.getElementById('f-status').value,doc:document.getElementById('f-doc').value,cidade:document.getElementById('f-comarca').value,parte:document.getElementById('f-parte').value,criadoEm:document.getElementById('f-data').value||LexData.today(),proximoPrazo:document.getElementById('f-prazo').value,valor:document.getElementById('f-valor').value,descricao:document.getElementById('f-obs').value,movs});
     showToast('Processo cadastrado!','success');
   }
   closeModal('modal-processo');
@@ -809,7 +808,7 @@ function salvarProcesso() {
 // ============================================================
 function confirmDelete(id) {
   const p = processos.find(x=>x.id===id);
-  document.getElementById('confirm-msg').textContent = `Deseja excluir o processo de ${p?p.cliente:''}? Esta ação não pode ser desfeita.`;
+  document.getElementById('confirm-msg').textContent = `Deseja excluir o processo de ${p?p.clienteNome:''}? Esta ação não pode ser desfeita.`;
   document.getElementById('confirm-ok-btn').onclick = () => { deleteProcesso(id); closeModal('modal-confirm'); };
   openModal('modal-confirm');
 }
@@ -825,7 +824,7 @@ function deleteProcesso(id) {
 // ============================================================
 function exportCSV() {
   const rows = [['ID','Numero','Cliente','Area','Status','Vara','Comarca','Parte','Data','Prazo','Valor']];
-  processos.forEach(p => rows.push([p.id,p.num,p.cliente,p.area,p.status,p.vara,p.comarca||'',p.parte||'',p.data||'',p.prazoRaw||'',p.valor||'']));
+  processos.forEach(p => rows.push([p.id,p.numero,p.clienteNome,p.area,p.status,p.vara,p.cidade||'',p.parte||'',p.criadoEm||'',p.proximoPrazo||'',p.valor||'']));
   const csv = rows.map(r=>r.map(v=>'"'+String(v).replace(/"/g,'""')+'"').join(',')).join('\n');
   const a = document.createElement('a');
   a.href = 'data:text/csv;charset=utf-8,\uFEFF'+encodeURIComponent(csv);

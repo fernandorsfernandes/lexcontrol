@@ -483,7 +483,6 @@ let eventos = [];
 function loadEventos(){ eventos = LexData.getEventos(); }
 function persistEvento(e){ LexData.saveEvento(e); loadEventos(); }
 function removeEvento(id){ LexData.deleteEvento(id); loadEventos(); }
-let nextId = 11;
 
 let calYear = TODAY.getFullYear();
 let calMonth = TODAY.getMonth();
@@ -734,7 +733,7 @@ function salvar(){
     if(idx>=0) eventos[idx]={...eventos[idx],...obj};
     showToast('Evento atualizado!','success');
   } else {
-    persistEvento({id:nextId++,...obj});
+    persistEvento({id:LexData.uid(),...obj});
     showToast('Evento agendado!','success');
   }
   closeModal();
@@ -748,7 +747,7 @@ function deleteFromModal(){
 }
 function deleteEvento(id){
   if(!confirm('Excluir este evento?')) return;
-  eventos=eventos.filter(x=>x.id!==id);
+  removeEvento(id);
   render();
   showToast('Evento excluído.','');
 }

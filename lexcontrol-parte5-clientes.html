@@ -514,7 +514,6 @@ let clientes = [];
 function loadClientes(){ clientes = LexData.getClientes(); }
 function persistCliente(c){ LexData.saveCliente(c); loadClientes(); }
 function removeCliente(id){ LexData.deleteCliente(id); loadClientes(); }
-let nextId=11;
 let currentView='cards';
 let currentPage=1;
 const PER_PAGE=8;
@@ -675,7 +674,7 @@ function openDrawer(id){
   const c=clientes.find(x=>x.id===id); if(!c) return;
   document.getElementById('drawer-title').textContent=c.nome;
   document.getElementById('drawer-edit-btn').onclick=()=>{closeDrawer();editCliente(id);};
-  document.getElementById('drawer-del-btn').onclick=()=>{if(confirm('Excluir este cliente?')){clientes=clientes.filter(x=>x.id!==id);closeDrawer();render();showToast('Cliente excluído.','');}};
+  document.getElementById('drawer-del-btn').onclick=()=>{if(confirm('Excluir este cliente?')){removeCliente(id);closeDrawer();render();showToast('Cliente excluído.','');}};
 
   const procs=c.processos.map(p=>`
     <div class="proc-mini-item">
@@ -791,7 +790,7 @@ function salvar(){
     if(idx>=0) clientes[idx]={...clientes[idx],...obj};
     showToast('Cliente atualizado!','success');
   } else {
-    persistCliente({id:nextId++,...obj,processos:[]});
+    persistCliente({id:LexData.uid(),...obj,processos:[]});
     showToast('Cliente cadastrado!','success');
   }
   closeModal();render();

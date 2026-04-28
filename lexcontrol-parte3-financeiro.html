@@ -505,7 +505,6 @@ function loadLancamentos(){ lancamentos = LexData.getLancamentos(); }
 function persistLancamento(l){ LexData.saveLancamento(l); loadLancamentos(); }
 function removeLancamento(id){ LexData.deleteLancamento(id); loadLancamentos(); }
 
-let nextId = 17;
 let currentPeriod = 'abril';
 let currentPage = 1;
 const PER_PAGE = 8;
@@ -572,7 +571,7 @@ function atualizarMeta() {
   const list = getLancPeriodo();
   const totalRec = list.filter(l=>l.tipo==='Receita').reduce((s,l)=>s+l.valor,0);
   const totalDesp = list.filter(l=>l.tipo==='Despesa').reduce((s,l)=>s+l.valor,0);
-  const honorPago = list.filter(l=>l.tipo==='Receita'&&l.status==='Pago'&&l.cat==='Honorários').reduce((s,l)=>s+l.valor,0);
+  const honorPago = list.filter(l=>l.tipo==='Receita'&&l.status==='Pago'&&l.categoria==='Honorários').reduce((s,l)=>s+l.valor,0);
 
   const pRec = Math.min(100, Math.round(totalRec/20000*100));
   const pDesp = Math.min(100, Math.round(totalDesp/8000*100));
@@ -595,7 +594,7 @@ function renderTable() {
   const status = document.getElementById('filter-status').value;
 
   const base = getLancPeriodo().filter(l => {
-    const mq = !q || l.desc.toLowerCase().includes(q) || (l.pessoa||'').toLowerCase().includes(q) || (l.cat||'').toLowerCase().includes(q);
+    const mq = !q || l.descricao.toLowerCase().includes(q) || (l.pessoa||'').toLowerCase().includes(q) || (l.categoria||'').toLowerCase().includes(q);
     const mt = !tipo || l.tipo === tipo;
     const ms = !status || l.status === status;
     return mq && mt && ms;
@@ -617,8 +616,8 @@ function renderTable() {
       <tr>
         <td style="font-variant-numeric:tabular-nums;white-space:nowrap;font-size:var(--text-xs)">${new Date(l.data+'T12:00:00').toLocaleDateString('pt-BR')}</td>
         <td><span class="badge ${l.tipo==='Receita'?'b-receita':'b-despesa'}">${l.tipo}</span></td>
-        <td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${l.desc}</td>
-        <td><span class="cat-chip ${l.tipo==='Despesa'?'despesa':''}">${l.cat}</span></td>
+        <td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${l.descricao}</td>
+        <td><span class="cat-chip ${l.tipo==='Despesa'?'despesa':''}">${l.categoria}</span></td>
         <td style="font-size:var(--text-xs);color:var(--color-text-muted)">${l.pessoa||'—'}</td>
         <td class="${l.tipo==='Receita'?'val-rec':'val-desp'}">${l.tipo==='Receita'?'+':'−'} ${fmtBRL(l.valor)}</td>
         <td><span class="badge ${statusBadgeClass(l.status)}">${l.status}</span></td>
@@ -688,7 +687,7 @@ function buildFluxoChart() {
 
 function buildCatChart() {
   const cats = {};
-  lancamentos.filter(l=>l.tipo==='Despesa').forEach(l=>{ cats[l.cat]=(cats[l.cat]||0)+l.valor; });
+  lancamentos.filter(l=>l.tipo==='Despesa').forEach(l=>{ cats[l.categoria]=(cats[l.categoria]||0)+l.valor; });
   const labels = Object.keys(cats);
   const values = Object.values(cats);
   const colors = ['#1e3a5f','#b8860b','#166534','#991b1b','#1e40af','#4f46e5','#0891b2','#7c3aed'];
@@ -755,10 +754,10 @@ function editLanc(id) {
   document.getElementById('f-edit-id').value = id;
   document.getElementById('modal-title').textContent = 'Editar Lançamento';
   setTipo(l.tipo);
-  document.getElementById('f-desc').value = l.desc;
+  document.getElementById('f-desc').value = l.descricao;
   document.getElementById('f-valor').value = fmtBRL(l.valor);
   document.getElementById('f-data').value = l.data;
-  document.getElementById('f-cat').value = l.cat;
+  document.getElementById('f-cat').value = l.categoria;
   document.getElementById('f-status').value = l.status;
   document.getElementById('f-pessoa').value = l.pessoa||'';
   document.getElementById('f-proc').value = l.proc||'';
@@ -777,8 +776,8 @@ function salvar() {
   const editId = parseInt(document.getElementById('f-edit-id').value)||0;
   const obj = {
     tipo: document.getElementById('f-tipo').value,
-    desc,valor,data,
-    cat: document.getElementById('f-cat').value,
+    descricao:desc,valor,data,
+    categoria: document.getElementById('f-cat').value,
     status: document.getElementById('f-status').value,
     pessoa: document.getElementById('f-pessoa').value,
     proc: document.getElementById('f-proc').value,
@@ -790,7 +789,7 @@ function salvar() {
     if(idx>=0) lancamentos[idx] = {...lancamentos[idx],...obj};
     showToast('Lançamento atualizado!','success');
   } else {
-    persistLancamento({id:nextId++,...obj});
+    persistLancamento({id:LexData.uid(),...obj});
     showToast(obj.tipo==='Receita'?'Receita registrada!':'Despesa registrada!','success');
   }
   closeModal();
@@ -799,7 +798,7 @@ function salvar() {
 
 function deleteLanc(id) {
   if(!confirm('Excluir este lançamento?')) return;
-  lancamentos = lancamentos.filter(x=>x.id!==id);
+  removeLancamento(id);
   atualizarTudo();
   showToast('Lançamento excluído.','');
 }
@@ -809,7 +808,7 @@ function deleteLanc(id) {
 // ============================================================
 function exportCSV() {
   const rows = [['ID','Tipo','Data','Descrição','Categoria','Pessoa','Valor','Status','Processo']];
-  getLancPeriodo().forEach(l => rows.push([l.id,l.tipo,l.data,l.desc,l.cat,l.pessoa||'',l.valor,l.status,l.proc||'']));
+  getLancPeriodo().forEach(l => rows.push([l.id,l.tipo,l.data,l.descricao,l.categoria,l.pessoa||'',l.valor,l.status,l.proc||'']));
   const csv = rows.map(r=>r.map(v=>'"'+String(v).replace(/"/g,'""')+'"').join(',')).join('\n');
   const a = document.createElement('a');
   a.href='data:text/csv;charset=utf-8,\uFEFF'+encodeURIComponent(csv);
