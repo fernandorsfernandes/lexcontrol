@@ -206,8 +206,15 @@ const LexData = (() => {
   };
 })();
 
-// Auto-init tema ao carregar
-document.addEventListener('DOMContentLoaded', () => {
-  LexData.initTema();
-  LexData.seed();
-});
+// Auto-init immediately (not waiting for DOMContentLoaded)
+(function(){
+  // Apply theme immediately to prevent flash
+  const t = localStorage.getItem('lex_tema') || 'light';
+  document.documentElement && document.documentElement.setAttribute('data-theme', t);
+  // Seed on first load
+  if(document.readyState === 'loading'){
+    document.addEventListener('DOMContentLoaded', () => { LexData.seed(); });
+  } else {
+    LexData.seed();
+  }
+})();
