@@ -782,10 +782,11 @@ function goTo(v){ if(window.parent && window.parent.lexNavigate){ window.parent.
 // ============================================================
 // THEME
 // ============================================================
-function initTheme(){ LexData.initTema(); };
-  set();
+(function(){
+  LexData.initTema();
+  const btn = document.getElementById('btn-theme');
   if(btn) btn.addEventListener('click',()=>{LexData.setTema(LexData.getTema()==='dark'?'light':'dark');});
-}
+})()
 </script>
 </body>
 </html>

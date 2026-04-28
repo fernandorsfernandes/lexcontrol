@@ -823,10 +823,11 @@ function showToast(msg,type=''){
 }
 function goTo(v){ if(window.parent && window.parent.lexNavigate){ window.parent.lexNavigate(v); } else { showToast('Abra pelo index.html',''); } }
 
-function initTheme(){ LexData.initTema(); };
-  set();
+(function(){
+  LexData.initTema();
+  const btn = document.getElementById('btn-theme');
   if(btn) btn.addEventListener('click',()=>{LexData.setTema(LexData.getTema()==='dark'?'light':'dark');});
-}
+})()
 </script>
 </body>
 </html>
