@@ -784,6 +784,7 @@ p { text-wrap: pretty; }
   .kpi-grid { grid-template-columns: 1fr 1fr; }
 }
 </style>
+<script src="lexdata.js"></script>
 </head>
 <body>
 
@@ -1222,20 +1223,10 @@ p { text-wrap: pretty; }
 // ============================================================
 // DATA
 // ============================================================
-let processos = [
-  { id:1, num:'0012345-67.2024.8.09.0051', cliente:'Maria das Graças', area:'Consumidor', status:'Ativo',   prazo:'25/04/2026', vara:'3ª Vara Cível' },
-  { id:2, num:'0009821-33.2023.8.09.0051', cliente:'João Pereira',      area:'Trabalhista', status:'Pendente', prazo:'28/04/2026', vara:'2ª VT Goiânia' },
-  { id:3, num:'0031122-44.2025.8.09.0051', cliente:'Empresa XYZ Ltda',  area:'Cível',    status:'Ativo',   prazo:'02/05/2026', vara:'1ª Vara Cível' },
-  { id:4, num:'0044567-12.2022.8.09.0051', cliente:'Ana Rodrigues',     area:'Família',  status:'Ativo',   prazo:'05/05/2026', vara:'Vara de Família' },
-  { id:5, num:'0055678-99.2024.8.09.0051', cliente:'Pedro Alves',       area:'Criminal', status:'Pendente',prazo:'30/04/2026', vara:'1ª Vara Criminal' },
-];
+let processos = [];
+function loadDashData(){ processos = LexData.getProcessos(); eventos = LexData.getEventos(); }
 
-let eventos = [
-  { id:1, titulo:'Audiência de Instrução', tipo:'Audiência', data:'2026-04-23', hora:'09:00', proc:'0012345-67', local:'3ª Vara Cível' },
-  { id:2, titulo:'Reunião com cliente',    tipo:'Reunião',   data:'2026-04-23', hora:'14:30', proc:'0009821-33', local:'Escritório' },
-  { id:3, titulo:'Contrarrazões — prazo final', tipo:'Prazo', data:'2026-04-23', hora:'17:59', proc:'0044567-12', local:'' },
-  { id:4, titulo:'Perícia contábil',       tipo:'Perícia',   data:'2026-04-25', hora:'10:00', proc:'0055678-99', local:'Fórum Goiânia' },
-];
+let eventos = [];
 
 // ============================================================
 // NAVIGATION
@@ -1424,7 +1415,7 @@ function showToast(msg, type='') {
       : '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>';
   };
   set();
-  if(btn) btn.addEventListener('click', () => { dark = !dark; set(); });
+  if(btn) btn.addEventListener('click', () => { LexData.setTema(LexData.getTema()==='dark'?'light':'dark'); });
 })();
 
 // ============================================================
@@ -1449,9 +1440,11 @@ function initDate(){ const d=new Date(); document.getElementById('current-date')
 document.addEventListener('DOMContentLoaded', () => {
   lucide.createIcons();
   initDate();
+  loadDashData();
   renderDashboardProcessos();
   renderAgendaHoje();
   navigate('dashboard', document.querySelector('.nav-item'));
+  window.addEventListener('storage', e=>{ if(['lex_processos','lex_eventos'].includes(e.key)){ loadDashData(); renderDashboardProcessos(); renderAgendaHoje(); } });
 });
 </script>
 </body>

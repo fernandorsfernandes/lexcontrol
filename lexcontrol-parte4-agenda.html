@@ -247,6 +247,7 @@ table{border-collapse:collapse;width:100%}
 @media(max-width:1050px){.agenda-layout{grid-template-columns:1fr}.kpi-row{grid-template-columns:repeat(2,1fr)}.page-content{padding:var(--sp4)}}
 @media(max-width:600px){.kpi-row{grid-template-columns:1fr 1fr}.tipo-selector{grid-template-columns:repeat(3,1fr)}.form-row{grid-template-columns:1fr}}
 </style>
+<script src="lexdata.js"></script>
 </head>
 <body>
 
@@ -477,18 +478,11 @@ const TODAY = new Date(); TODAY.setHours(0,0,0,0);
 const toISO = d => d.toISOString().slice(0,10);
 const todayISO = toISO(TODAY);
 
-let eventos = [
-  {id:1,tipo:'Audiência',titulo:'Audiência de Instrução',data:'2026-04-23',hora:'09:00',proc:'0012345-67',cliente:'Maria das Graças',local:'3ª Vara Cível — Goiânia',obs:'Levar documentos bancários'},
-  {id:2,tipo:'Reunião',titulo:'Reunião com cliente — João Pereira',data:'2026-04-23',hora:'14:30',proc:'0009821-33',cliente:'João Pereira',local:'Escritório',obs:''},
-  {id:3,tipo:'Prazo',titulo:'Contrarrazões de Apelação',data:'2026-04-23',hora:'17:59',proc:'0044567-12',cliente:'Ana Rodrigues',local:'',obs:'Prazo fatal — não prorrogável'},
-  {id:4,tipo:'Audiência',titulo:'Audiência de Conciliação',data:'2026-04-25',hora:'10:00',proc:'0031122-44',cliente:'Empresa XYZ',local:'1ª Vara Cível',obs:''},
-  {id:5,tipo:'Prazo',titulo:'Impugnação aos cálculos',data:'2026-04-28',hora:'23:59',proc:'0009821-33',cliente:'João Pereira',local:'',obs:''},
-  {id:6,tipo:'Perícia',titulo:'Perícia contábil',data:'2026-04-30',hora:'10:00',proc:'0055678-99',cliente:'Pedro Alves',local:'Fórum de Aparecida de Goiânia',obs:''},
-  {id:7,tipo:'Reunião',titulo:'Reunião de planejamento estratégico',data:'2026-05-05',hora:'15:00',proc:'',cliente:'',local:'Escritório',obs:'Reunião interna de equipe'},
-  {id:8,tipo:'Audiência',titulo:'Audiência de Julgamento — Apelação',data:'2026-05-12',hora:'14:00',proc:'0067890-11',cliente:'Cooperativa Agrícola Sul',local:'TRF1 — Brasília',obs:'Viagem necessária'},
-  {id:9,tipo:'Prazo',titulo:'Alegações finais',data:'2026-05-20',hora:'23:59',proc:'0055678-99',cliente:'Pedro Alves',local:'',obs:''},
-  {id:10,tipo:'Reunião',titulo:'Reunião com perito',data:'2026-04-29',hora:'11:00',proc:'0012345-67',cliente:'Maria das Graças',local:'Escritório do perito',obs:''},
-];
+// ── DATA (via LexData central) ──────────────────────────────
+let eventos = [];
+function loadEventos(){ eventos = LexData.getEventos(); }
+function persistEvento(e){ LexData.saveEvento(e); loadEventos(); }
+function removeEvento(id){ LexData.deleteEvento(id); loadEventos(); }
 let nextId = 11;
 
 let calYear = TODAY.getFullYear();
@@ -503,8 +497,10 @@ let tipoAtual = '';
 document.addEventListener('DOMContentLoaded',()=>{
   lucide.createIcons();
   document.getElementById('topbar-date').textContent = TODAY.toLocaleDateString('pt-BR',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
-  initTheme();
+  LexData.initTema();
+  loadEventos();
   render();
+  window.addEventListener('storage', e=>{ if(e.key==='lex_eventos'){ loadEventos(); render(); } });
 });
 
 function render(){
@@ -738,7 +734,7 @@ function salvar(){
     if(idx>=0) eventos[idx]={...eventos[idx],...obj};
     showToast('Evento atualizado!','success');
   } else {
-    eventos.push({id:nextId++,...obj});
+    persistEvento({id:nextId++,...obj});
     showToast('Evento agendado!','success');
   }
   closeModal();
@@ -786,18 +782,9 @@ function goTo(v){ if(window.parent && window.parent.lexNavigate){ window.parent.
 // ============================================================
 // THEME
 // ============================================================
-function initTheme(){
-  const btn=document.querySelector('[data-theme-toggle]');
-  const html=document.documentElement;
-  let dark=matchMedia('(prefers-color-scheme:dark)').matches;
-  const set=()=>{
-    html.setAttribute('data-theme',dark?'dark':'light');
-    if(btn) btn.innerHTML=dark
-      ? '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>'
-      : '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>';
-  };
+function initTheme(){ LexData.initTema(); };
   set();
-  if(btn) btn.addEventListener('click',()=>{dark=!dark;set();});
+  if(btn) btn.addEventListener('click',()=>{LexData.setTema(LexData.getTema()==='dark'?'light':'dark');});
 }
 </script>
 </body>

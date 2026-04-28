@@ -162,6 +162,7 @@ table{border-collapse:collapse;width:100%}
 @media(max-width:1100px){.charts-row{grid-template-columns:1fr}.charts-row-3{grid-template-columns:1fr 1fr}.insights-grid{grid-template-columns:1fr 1fr}.kpi-grid{grid-template-columns:repeat(2,1fr)}.page-content{padding:var(--s4)}}
 @media(max-width:700px){.kpi-grid{grid-template-columns:1fr 1fr}.charts-row-3,.charts-row-2,.insights-grid{grid-template-columns:1fr}}
 </style>
+<script src="lexdata.js"></script>
 </head>
 <body>
 
@@ -402,11 +403,71 @@ let charts = {};
 // ============================================================
 // INIT
 // ============================================================
+
+// ── Dynamic data from LexData ─────────────────────────────
+function loadRelatorioData(){
+  const lancamentos = LexData.getLancamentos();
+  const processos   = LexData.getProcessos();
+  const clientes    = LexData.getClientes();
+  const honorarios  = LexData.getHonorarios();
+
+  // Build monthly receitas/despesas for 2026
+  const meses = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
+  const rec2026 = new Array(12).fill(0);
+  const dep2026 = new Array(12).fill(0);
+  lancamentos.forEach(l => {
+    if(!l.data) return;
+    const d = new Date(l.data);
+    if(d.getFullYear() !== 2026) return;
+    const m = d.getMonth();
+    if(l.tipo === 'Receita') rec2026[m] += parseFloat(l.valor)||0;
+    else dep2026[m] += parseFloat(l.valor)||0;
+  });
+  // trim trailing zeros
+  let lastMonth = 0;
+  rec2026.forEach((v,i)=>{ if(v||dep2026[i]) lastMonth=i; });
+  const sliceEnd = Math.max(lastMonth+1, 4);
+
+  DATA['2026'] = { meses: meses.slice(0,sliceEnd), receitas: rec2026.slice(0,sliceEnd), despesas: dep2026.slice(0,sliceEnd), novosProc: new Array(sliceEnd).fill(0) };
+
+  // Q1/Q2
+  DATA['q1'] = { meses: meses.slice(0,3), receitas: rec2026.slice(0,3), despesas: dep2026.slice(0,3), novosProc: [0,0,0] };
+  DATA['q2'] = { meses: meses.slice(3,6), receitas: rec2026.slice(3,6), despesas: dep2026.slice(3,6), novosProc: [0,0,0] };
+
+  // Processos por area e status
+  const areaCount = {};
+  const statusCount = {};
+  processos.forEach(p=>{
+    areaCount[p.area||'Outros'] = (areaCount[p.area||'Outros']||0)+1;
+    statusCount[p.status||'Ativo'] = (statusCount[p.status||'Ativo']||0)+1;
+  });
+  PROCESSOS.area   = Object.keys(areaCount).length   ? areaCount   : PROCESSOS.area;
+  PROCESSOS.status = Object.keys(statusCount).length ? statusCount : PROCESSOS.status;
+
+  // Top clientes by honorários
+  const cliTotals = {};
+  honorarios.forEach(h=>{
+    cliTotals[h.cliente] = (cliTotals[h.cliente]||0) + (parseFloat(h.valor)||0);
+  });
+  const sorted = Object.entries(cliTotals).sort((a,b)=>b[1]-a[1]).slice(0,5);
+  if(sorted.length) CLIENTES_TOP.length = 0, sorted.forEach(([nome,val])=>CLIENTES_TOP.push({nome,val}));
+
+  // Tipo honorários
+  const tipoTotals = {};
+  honorarios.forEach(h=>{ tipoTotals[h.tipo||'Fixo'] = (tipoTotals[h.tipo||'Fixo']||0)+(parseFloat(h.valor)||0); });
+  if(Object.keys(tipoTotals).length){ Object.keys(TIPO_HON).forEach(k=>delete TIPO_HON[k]); Object.assign(TIPO_HON, tipoTotals); }
+
+  // kpi processos
+  document.getElementById('kpi-proc-ativos').textContent = processos.length;
+}
+
 document.addEventListener('DOMContentLoaded',()=>{
   lucide.createIcons();
   document.getElementById('topbar-date').textContent = new Date().toLocaleDateString('pt-BR',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
-  initTheme();
+  LexData.initTema();
+  loadRelatorioData();
   buildAll();
+  window.addEventListener('storage', e=>{ const keys=['lex_processos','lex_clientes','lex_honorarios','lex_financeiro']; if(keys.includes(e.key)){ loadRelatorioData(); buildAll(); } });
 });
 
 // ============================================================
@@ -719,20 +780,9 @@ function showToast(msg,type=''){
 }
 function goTo(v){ if(window.parent && window.parent.lexNavigate){ window.parent.lexNavigate(v); } else { showToast('Abra pelo index.html',''); } }
 
-function initTheme(){
-  const btn=document.querySelector('[data-theme-toggle]');
-  const html=document.documentElement;
-  let dark=matchMedia('(prefers-color-scheme:dark)').matches;
-  const set=()=>{
-    html.setAttribute('data-theme',dark?'dark':'light');
-    if(btn) btn.innerHTML=dark
-      ?'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>'
-      :'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>';
-    // rebuild charts on theme toggle
-    if(Object.keys(charts).length) buildAll();
-  };
+function initTheme(){ LexData.initTema(); };
   set();
-  if(btn) btn.addEventListener('click',()=>{dark=!dark;set();});
+  if(btn) btn.addEventListener('click',()=>{LexData.setTema(LexData.getTema()==='dark'?'light':'dark');});
 }
 </script>
 </body>

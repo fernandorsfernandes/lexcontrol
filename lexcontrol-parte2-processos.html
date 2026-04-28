@@ -241,6 +241,7 @@ table{border-collapse:collapse;width:100%}
 @media(max-width:900px){.stats-row{grid-template-columns:repeat(3,1fr)}.page-content{padding:var(--space-4)}}
 @media(max-width:680px){.stats-row{grid-template-columns:repeat(2,1fr)}.form-row,.form-row-3{grid-template-columns:1fr}.detail-grid{grid-template-columns:1fr}.detail-field.full{grid-column:span 1}}
 </style>
+<script src="lexdata.js"></script>
 </head>
 <body>
 
@@ -511,16 +512,11 @@ table{border-collapse:collapse;width:100%}
 // ============================================================
 // DATA SEED
 // ============================================================
-let processos = [
-  {id:1,num:'0012345-67.2024.8.09.0051',cliente:'Maria das Graças Oliveira',doc:'123.456.789-00',area:'Consumidor',vara:'3ª Vara Cível',comarca:'Goiânia',parte:'Banco Alfa S/A',status:'Ativo',data:'2024-03-10',prazoRaw:'2026-04-25',valor:'R$ 15.000,00',obs:'Revisão contratual com cobrança indevida de tarifas. Cliente prejudicada desde 2022.',movs:[{data:'2024-03-10',desc:'Petição inicial protocolada'},{data:'2024-05-14',desc:'Audiência de conciliação — sem acordo'},{data:'2025-01-20',desc:'Perícia contábil determinada'}]},
-  {id:2,num:'0009821-33.2023.8.09.0051',cliente:'João Pereira da Silva',doc:'987.654.321-00',area:'Trabalhista',vara:'2ª VT Goiânia',comarca:'Goiânia',parte:'Construtora Beta Ltda',status:'Pendente',data:'2023-08-01',prazoRaw:'2026-04-28',valor:'R$ 42.000,00',obs:'Verbas rescisórias não pagas. Horas extras e adicional de insalubridade.',movs:[{data:'2023-08-01',desc:'Reclamação trabalhista distribuída'},{data:'2023-11-15',desc:'Audiência inaugural'}]},
-  {id:3,num:'0031122-44.2025.8.09.0051',cliente:'Empresa XYZ Ltda',doc:'12.345.678/0001-99',area:'Cível',vara:'1ª Vara Cível',comarca:'Goiânia',parte:'Fornecedor Gama Eireli',status:'Ativo',data:'2025-01-05',prazoRaw:'2026-05-02',valor:'R$ 78.000,00',obs:'Cobrança de inadimplemento contratual. Entrega de mercadorias com defeito.',movs:[{data:'2025-01-05',desc:'Petição inicial — ação de cobrança'},{data:'2025-03-20',desc:'Contestação recebida'}]},
-  {id:4,num:'0044567-12.2022.8.09.0051',cliente:'Ana Rodrigues Faria',doc:'456.789.123-00',area:'Família',vara:'Vara de Família',comarca:'Goiânia',parte:'Carlos Roberto Faria',status:'Ativo',data:'2022-06-15',prazoRaw:'2026-05-05',valor:'R$ 0,00',obs:'Divórcio litigioso com partilha de bens e guarda compartilhada.',movs:[{data:'2022-06-15',desc:'Petição inicial distribuída'},{data:'2023-02-10',desc:'Audiência de mediação'},{data:'2023-09-08',desc:'Laudo de avaliação de imóvel juntado'}]},
-  {id:5,num:'0055678-99.2024.8.09.0051',cliente:'Pedro Alves Mendes',doc:'321.654.987-00',area:'Criminal',vara:'1ª Vara Criminal',comarca:'Aparecida de Goiânia',parte:'MP-GO',status:'Pendente',data:'2024-07-22',prazoRaw:'2026-04-30',valor:'R$ 0,00',obs:'Defesa em ação penal — artigo 155 CP. Cliente preso em flagrante.',movs:[{data:'2024-07-22',desc:'Habeas corpus impetrado'},{data:'2024-08-05',desc:'HC denegado — réu solto após pagamento de fiança'}]},
-  {id:6,num:'0067890-11.2023.8.09.0051',cliente:'Cooperativa Agrícola Sul',doc:'98.765.432/0001-11',area:'Tributário',vara:'1ª Vara Federal',comarca:'Goiânia',parte:'União Federal',status:'Ativo',data:'2023-04-18',prazoRaw:'2026-06-10',valor:'R$ 234.000,00',obs:'Ação anulatória de auto de infração fiscal — COFINS.',movs:[{data:'2023-04-18',desc:'Ação anulatória distribuída'},{data:'2023-07-01',desc:'Liminar deferida suspendendo a exigibilidade'}]},
-  {id:7,num:'0078901-55.2021.8.09.0051',cliente:'Fernanda Costa Lima',doc:'654.321.987-00',area:'Cível',vara:'4ª Vara Cível',comarca:'Goiânia',parte:'Seguradora Delta',status:'Ganho',data:'2021-09-01',prazoRaw:'',valor:'R$ 28.000,00',obs:'Indenização por sinistro recusado indevidamente.',movs:[{data:'2021-09-01',desc:'Petição inicial'},{data:'2022-11-30',desc:'Sentença favorável — R$ 28.000 + danos morais'},{data:'2023-02-15',desc:'Trânsito em julgado — execução iniciada'}]},
-  {id:8,num:'0089012-77.2020.8.09.0051',cliente:'Roberto Nascimento',doc:'789.012.345-00',area:'Trabalhista',vara:'5ª VT Goiânia',comarca:'Goiânia',parte:'Supermercado Omega S/A',status:'Arquivado',data:'2020-03-10',prazoRaw:'',valor:'R$ 12.000,00',obs:'Acordo homologado em audiência.',movs:[{data:'2020-03-10',desc:'Reclamação trabalhista'},{data:'2021-06-20',desc:'Acordo homologado — R$ 9.500'}]},
-];
+// ── DATA (via LexData central) ──────────────────────────────
+let processos = [];
+function loadProcessos(){ processos = LexData.getProcessos(); }
+function persistProcesso(p){ LexData.saveProcesso(p); loadProcessos(); }
+function removeProcesso(id){ LexData.deleteProcesso(id); loadProcessos(); }
 
 let nextId = 9;
 let activeFilter = 'Todos';
@@ -536,8 +532,11 @@ let drawerProcId = null;
 document.addEventListener('DOMContentLoaded', () => {
   lucide.createIcons();
   setDate();
+  loadProcessos();
   applyFilters();
-  initTheme();
+  LexData.initTema();
+  // sync when other modules update data
+  window.addEventListener('storage', e => { if(e.key==='lex_processos'){ loadProcessos(); applyFilters(); } });
 });
 
 function setDate() {
@@ -858,18 +857,9 @@ function goTo(v){ if(window.parent && window.parent.lexNavigate){ window.parent.
 // ============================================================
 // THEME
 // ============================================================
-function initTheme() {
-  const btn = document.querySelector('[data-theme-toggle]');
-  const html = document.documentElement;
-  let dark = matchMedia('(prefers-color-scheme:dark)').matches;
-  const set = () => {
-    html.setAttribute('data-theme',dark?'dark':'light');
-    if(btn) btn.innerHTML = dark
-      ? '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>'
-      : '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>';
-  };
+function initTheme(){ LexData.initTema(); };
   set();
-  if(btn) btn.addEventListener('click',()=>{dark=!dark;set();});
+  if(btn) btn.addEventListener('click',()=>{LexData.setTema(LexData.getTema()==='dark'?'light':'dark');});
 }
 </script>
 </body>

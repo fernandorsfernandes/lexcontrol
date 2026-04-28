@@ -230,6 +230,7 @@ table{border-collapse:collapse;width:100%}
 @media(max-width:1000px){.kpi-grid{grid-template-columns:repeat(2,1fr)}.charts-row{grid-template-columns:1fr}.page-content{padding:var(--sp4)}}
 @media(max-width:600px){.kpi-grid{grid-template-columns:1fr 1fr}.form-row{grid-template-columns:1fr}}
 </style>
+<script src="lexdata.js"></script>
 </head>
 <body>
 
@@ -498,28 +499,11 @@ table{border-collapse:collapse;width:100%}
 // ============================================================
 // DATA
 // ============================================================
-let lancamentos = [
-  {id:1,tipo:'Receita',desc:'Honorários contratuais — Maria das Graças',cat:'Honorários',pessoa:'Maria das Graças Oliveira',valor:3500,data:'2026-04-05',status:'Pago',proc:'0012345-67'},
-  {id:2,tipo:'Receita',desc:'Honorários contratuais — Empresa XYZ',cat:'Honorários',pessoa:'Empresa XYZ Ltda',valor:8000,data:'2026-04-08',status:'Pago',proc:'0031122-44'},
-  {id:3,tipo:'Receita',desc:'Consulta jurídica — Pedro Alves',cat:'Consultoria',pessoa:'Pedro Alves Mendes',valor:800,data:'2026-04-10',status:'Pago',proc:''},
-  {id:4,tipo:'Receita',desc:'Honorários — Cooperativa Agrícola Sul',cat:'Honorários',pessoa:'Cooperativa Agrícola Sul',valor:6100,data:'2026-04-15',status:'Pendente',proc:'0067890-11'},
-  {id:5,tipo:'Despesa',desc:'Aluguel do escritório — Abril',cat:'Aluguel',pessoa:'Imobiliária Centro',valor:3200,data:'2026-04-01',status:'Pago',proc:''},
-  {id:6,tipo:'Despesa',desc:'Salário secretária',cat:'Pessoal',pessoa:'Funcionária Júlia',valor:1800,data:'2026-04-05',status:'Pago',proc:''},
-  {id:7,tipo:'Despesa',desc:'Custas processuais — Fórum',cat:'Custas',pessoa:'TJ-GO',valor:450,data:'2026-04-12',status:'Pago',proc:'0044567-12'},
-  {id:8,tipo:'Despesa',desc:'Plano de TI e software',cat:'TI',pessoa:'Legal Tech BR',valor:350,data:'2026-04-14',status:'Pago',proc:''},
-
-  // Março
-  {id:9,tipo:'Receita',desc:'Honorários — João Pereira',cat:'Honorários',pessoa:'João Pereira da Silva',valor:4200,data:'2026-03-05',status:'Pago',proc:'0009821-33'},
-  {id:10,tipo:'Receita',desc:'Honorários de êxito — Fernanda Costa',cat:'Êxito',pessoa:'Fernanda Costa Lima',valor:5600,data:'2026-03-20',status:'Pago',proc:'0078901-55'},
-  {id:11,tipo:'Despesa',desc:'Aluguel escritório — Março',cat:'Aluguel',pessoa:'Imobiliária Centro',valor:3200,data:'2026-03-01',status:'Pago',proc:''},
-  {id:12,tipo:'Despesa',desc:'Marketing e redes sociais',cat:'Marketing',pessoa:'Agência Digital',valor:900,data:'2026-03-10',status:'Pago',proc:''},
-
-  // Fevereiro
-  {id:13,tipo:'Receita',desc:'Consulta jurídica — Ana Rodrigues',cat:'Consultoria',pessoa:'Ana Rodrigues Faria',valor:600,data:'2026-02-10',status:'Pago',proc:''},
-  {id:14,tipo:'Receita',desc:'Honorários contratuais — Empresa ABC',cat:'Honorários',pessoa:'Empresa ABC S/A',valor:7500,data:'2026-02-18',status:'Pago',proc:''},
-  {id:15,tipo:'Despesa',desc:'Aluguel escritório — Fevereiro',cat:'Aluguel',pessoa:'Imobiliária Centro',valor:3200,data:'2026-02-01',status:'Pago',proc:''},
-  {id:16,tipo:'Despesa',desc:'Salário secretária',cat:'Pessoal',pessoa:'Funcionária Júlia',valor:1800,data:'2026-02-05',status:'Pago',proc:''},
-];
+// ── DATA (via LexData central) ──────────────────────────────
+let lancamentos = [];
+function loadLancamentos(){ lancamentos = LexData.getLancamentos(); }
+function persistLancamento(l){ LexData.saveLancamento(l); loadLancamentos(); }
+function removeLancamento(id){ LexData.deleteLancamento(id); loadLancamentos(); }
 
 let nextId = 17;
 let currentPeriod = 'abril';
@@ -539,8 +523,10 @@ const periodos = {
 document.addEventListener('DOMContentLoaded', () => {
   lucide.createIcons();
   document.getElementById('topbar-date').textContent = new Date().toLocaleDateString('pt-BR',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
-  initTheme();
+  LexData.initTema();
+  loadLancamentos();
   atualizarTudo();
+  window.addEventListener('storage', e=>{ if(e.key==='lex_financeiro'){ loadLancamentos(); atualizarTudo(); } });
 });
 
 function setPeriod(p, el) {
@@ -804,7 +790,7 @@ function salvar() {
     if(idx>=0) lancamentos[idx] = {...lancamentos[idx],...obj};
     showToast('Lançamento atualizado!','success');
   } else {
-    lancamentos.push({id:nextId++,...obj});
+    persistLancamento({id:nextId++,...obj});
     showToast(obj.tipo==='Receita'?'Receita registrada!':'Despesa registrada!','success');
   }
   closeModal();
@@ -854,19 +840,9 @@ function goTo(v){ if(window.parent && window.parent.lexNavigate){ window.parent.
 // ============================================================
 // THEME
 // ============================================================
-function initTheme() {
-  const btn=document.querySelector('[data-theme-toggle]');
-  const html=document.documentElement;
-  let dark=matchMedia('(prefers-color-scheme:dark)').matches;
-  const set=()=>{
-    html.setAttribute('data-theme',dark?'dark':'light');
-    if(btn) btn.innerHTML=dark
-      ? '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>'
-      : '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>';
-    setTimeout(()=>buildCharts(),50);
-  };
+function initTheme(){ LexData.initTema(); };
   set();
-  if(btn) btn.addEventListener('click',()=>{dark=!dark;set();});
+  if(btn) btn.addEventListener('click',()=>{LexData.setTema(LexData.getTema()==='dark'?'light':'dark');});
 }
 </script>
 </body>

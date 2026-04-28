@@ -242,6 +242,7 @@ table{border-collapse:collapse;width:100%}
 @media(max-width:1000px){.kpi-grid{grid-template-columns:repeat(2,1fr)}.page-content{padding:var(--sp4)}}
 @media(max-width:600px){.kpi-grid{grid-template-columns:1fr 1fr}.form-row,.form-row-3{grid-template-columns:1fr}.clients-grid{grid-template-columns:1fr}.detail-grid{grid-template-columns:1fr}.detail-field.full{grid-column:span 1}}
 </style>
+<script src="lexdata.js"></script>
 </head>
 <body>
 
@@ -508,18 +509,11 @@ table{border-collapse:collapse;width:100%}
 // ============================================================
 const AVATAR_COLORS = ['av-1','av-2','av-3','av-4','av-5','av-6','av-7','av-8','av-9'];
 
-let clientes = [
-  {id:1,tipo:'PF',nome:'Maria das Graças Oliveira',doc:'123.456.789-00',doc2:'MG-12.345.678',tel:'(62) 9 9999-1234',email:'maria@email.com',cidade:'Goiânia',estado:'GO',area:'Consumidor',status:'Ativo',indicado:'Google',obs:'Revisão contratual bancária',processos:['0012345-67.2024.8.09.0051']},
-  {id:2,tipo:'PF',nome:'João Pereira da Silva',doc:'987.654.321-00',doc2:'GO-23.456.789',tel:'(62) 9 8888-5678',email:'joao@email.com',cidade:'Aparecida de Goiânia',estado:'GO',area:'Trabalhista',status:'Ativo',indicado:'',obs:'',processos:['0009821-33.2023.8.09.0051']},
-  {id:3,tipo:'PJ',nome:'Empresa XYZ Ltda',doc:'12.345.678/0001-99',doc2:'',tel:'(62) 3333-4444',email:'contato@xyz.com.br',cidade:'Goiânia',estado:'GO',area:'Cível',status:'Ativo',indicado:'Indicação de cliente',obs:'Diretor: Carlos Mendes',processos:['0031122-44.2025.8.09.0051']},
-  {id:4,tipo:'PF',nome:'Ana Rodrigues Faria',doc:'456.789.123-00',doc2:'GO-34.567.890',tel:'(62) 9 7777-9012',email:'ana@email.com',cidade:'Goiânia',estado:'GO',area:'Família',status:'Ativo',indicado:'',obs:'Processo de divórcio litigioso',processos:['0044567-12.2022.8.09.0051']},
-  {id:5,tipo:'PF',nome:'Pedro Alves Mendes',doc:'321.654.987-00',doc2:'GO-45.678.901',tel:'(62) 9 6666-3456',email:'pedro@email.com',cidade:'Aparecida de Goiânia',estado:'GO',area:'Criminal',status:'Ativo',indicado:'',obs:'',processos:['0055678-99.2024.8.09.0051']},
-  {id:6,tipo:'PJ',nome:'Cooperativa Agrícola Sul',doc:'98.765.432/0001-11',doc2:'',tel:'(62) 3222-5555',email:'juridico@coopsul.com.br',cidade:'Rio Verde',estado:'GO',area:'Tributário',status:'Ativo',indicado:'OAB-GO',obs:'Contrato de consultoria anual',processos:['0067890-11.2023.8.09.0051']},
-  {id:7,tipo:'PF',nome:'Fernanda Costa Lima',doc:'654.321.987-00',doc2:'GO-56.789.012',tel:'(62) 9 5555-7890',email:'fernanda@email.com',cidade:'Goiânia',estado:'GO',area:'Cível',status:'Inativo',indicado:'',obs:'Processo encerrado com êxito',processos:['0078901-55.2021.8.09.0051']},
-  {id:8,tipo:'PF',nome:'Roberto Nascimento',doc:'789.012.345-00',doc2:'GO-67.890.123',tel:'(62) 9 4444-2345',email:'roberto@email.com',cidade:'Goiânia',estado:'GO',area:'Trabalhista',status:'Inativo',indicado:'',obs:'Acordo realizado',processos:['0089012-77.2020.8.09.0051']},
-  {id:9,tipo:'PJ',nome:'Indústria Beta S/A',doc:'11.222.333/0001-44',doc2:'',tel:'(62) 3111-6666',email:'juridico@beta.com.br',cidade:'Anápolis',estado:'GO',area:'Tributário',status:'Prospect',indicado:'Evento OAB',obs:'Aguardando proposta de contrato',processos:[]},
-  {id:10,tipo:'PF',nome:'Carla Souza Braga',doc:'111.222.333-44',doc2:'GO-78.901.234',tel:'(62) 9 3333-4567',email:'carla@email.com',cidade:'Goiânia',estado:'GO',area:'Família',status:'Prospect',indicado:'Maria das Graças',obs:'Consulta inicial realizada',processos:[]},
-];
+// ── DATA (via LexData central) ──────────────────────────────
+let clientes = [];
+function loadClientes(){ clientes = LexData.getClientes(); }
+function persistCliente(c){ LexData.saveCliente(c); loadClientes(); }
+function removeCliente(id){ LexData.deleteCliente(id); loadClientes(); }
 let nextId=11;
 let currentView='cards';
 let currentPage=1;
@@ -531,8 +525,10 @@ const PER_PAGE=8;
 document.addEventListener('DOMContentLoaded',()=>{
   lucide.createIcons();
   document.getElementById('topbar-date').textContent=new Date().toLocaleDateString('pt-BR',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
-  initTheme();
+  LexData.initTema();
+  loadClientes();
   render();
+  window.addEventListener('storage', e=>{ if(e.key==='lex_clientes'||e.key==='lex_processos'){ loadClientes(); render(); } });
 });
 
 // ============================================================
@@ -795,7 +791,7 @@ function salvar(){
     if(idx>=0) clientes[idx]={...clientes[idx],...obj};
     showToast('Cliente atualizado!','success');
   } else {
-    clientes.unshift({id:nextId++,...obj,processos:[]});
+    persistCliente({id:nextId++,...obj,processos:[]});
     showToast('Cliente cadastrado!','success');
   }
   closeModal();render();
@@ -827,18 +823,9 @@ function showToast(msg,type=''){
 }
 function goTo(v){ if(window.parent && window.parent.lexNavigate){ window.parent.lexNavigate(v); } else { showToast('Abra pelo index.html',''); } }
 
-function initTheme(){
-  const btn=document.querySelector('[data-theme-toggle]');
-  const html=document.documentElement;
-  let dark=matchMedia('(prefers-color-scheme:dark)').matches;
-  const set=()=>{
-    html.setAttribute('data-theme',dark?'dark':'light');
-    if(btn) btn.innerHTML=dark
-      ?'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>'
-      :'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>';
-  };
+function initTheme(){ LexData.initTema(); };
   set();
-  if(btn) btn.addEventListener('click',()=>{dark=!dark;set();});
+  if(btn) btn.addEventListener('click',()=>{LexData.setTema(LexData.getTema()==='dark'?'light':'dark');});
 }
 </script>
 </body>

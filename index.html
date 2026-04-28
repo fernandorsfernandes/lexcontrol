@@ -370,6 +370,16 @@ document.addEventListener('DOMContentLoaded',()=>{
   renderPaletteResults('');
   loadUser();
 
+  
+// Sync tema from iframe modules
+window.addEventListener('message', e => {
+  if(e.data && e.data.type === 'lex-tema'){
+    document.documentElement.setAttribute('data-theme', e.data.tema);
+    dark = e.data.tema === 'dark';
+    applyTheme();
+  }
+});
+
   // Keyboard shortcuts
   document.addEventListener('keydown', e=>{
     if((e.ctrlKey||e.metaKey)&&e.key==='k'){e.preventDefault();openPalette();}
