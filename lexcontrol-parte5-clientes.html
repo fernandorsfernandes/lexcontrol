@@ -802,8 +802,7 @@ function salvar(){
 function exportCSV(){
   const rows=[['ID','Tipo','Nome','CPF/CNPJ','Telefone','Email','Cidade','Estado','Área','Status','Processos']];
   clientes.forEach(c=>rows.push([c.id,c.tipo,c.nome,c.doc,c.tel||'',c.email||'',c.cidade||'',c.estado||'',c.area,c.status,c.processos.length]));
-  const csv=rows.map(r=>r.map(v=>'"'+String(v).replace(/"/g,'""')+'"').join(',')).join('
-');
+  const csv=rows.map(r=>r.map(v=>'"'+String(v).replace(/"/g,'""')+'"').join(',')).join('\n');
   const a=document.createElement('a');
   a.href='data:text/csv;charset=utf-8,﻿'+encodeURIComponent(csv);
   a.download='clientes_lexcontrol.csv';

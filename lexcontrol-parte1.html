@@ -1429,10 +1429,6 @@ function toggleSidebar() {
 // DATE
 // ============================================================
 function initDate(){ const d=new Date(); document.getElementById('current-date').textContent=d.toLocaleDateString('pt-BR',{weekday:'long',day:'numeric',month:'long',year:'numeric'}); };
-  document.getElementById('topbar-date').textContent = now.toLocaleDateString('pt-BR', opts);
-  const meses = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
-  document.getElementById('mes-atual').textContent = meses[now.getMonth()] + ' ' + now.getFullYear();
-}
 
 // ============================================================
 // INIT

@@ -758,8 +758,7 @@ function deleteEvento(id){
 function exportCSV(){
   const rows=[['ID','Tipo','Título','Data','Hora','Processo','Cliente','Local','Obs']];
   eventos.forEach(e=>rows.push([e.id,e.tipo,e.titulo,e.data,e.hora||'',e.proc||'',e.cliente||'',e.local||'',e.obs||'']));
-  const csv=rows.map(r=>r.map(v=>'"'+String(v).replace(/"/g,'""')+'"').join(',')).join('
-');
+  const csv=rows.map(r=>r.map(v=>'"'+String(v).replace(/"/g,'""')+'"').join(',')).join('\n');
   const a=document.createElement('a');
   a.href='data:text/csv;charset=utf-8,﻿'+encodeURIComponent(csv);
   a.download='agenda_lexcontrol.csv';
