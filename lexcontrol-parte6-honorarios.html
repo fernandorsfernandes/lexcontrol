@@ -490,8 +490,8 @@ document.addEventListener('DOMContentLoaded',()=>{
 function updateKPIs(){
   const ativos = contratos.filter(c=>c.status==='Ativo');
   const totalContrat = contratos.reduce((a,c)=>a+c.valor,0);
-  const recebido = contratos.reduce((a,c)=>a+c.parts.filter(p=>p.status==='Pago').reduce((x,p)=>x+p.valor,0),0);
-  const pendente = contratos.reduce((a,c)=>a+c.parts.filter(p=>p.status!=='Pago').reduce((x,p)=>x+p.valor,0),0);
+  const recebido = contratos.reduce((a,c)=>a+c.parcelas.filter(p=>p.status==='Pago').reduce((x,p)=>x+p.valor,0),0);
+  const pendente = contratos.reduce((a,c)=>a+c.parcelas.filter(p=>p.status!=='Pago').reduce((x,p)=>x+p.valor,0),0);
   document.getElementById('kpi-contratos').textContent = ativos.length;
   document.getElementById('kpi-total-contrat').textContent = fmt(totalContrat);
   document.getElementById('kpi-recebido').textContent = fmt(recebido);
@@ -550,10 +550,10 @@ function renderContratos(list){
   if(!list.length){grid.innerHTML='';empty.style.display='block';return;}
   empty.style.display='none';
   grid.innerHTML = list.map(c=>{
-    const recebido = c.parts.filter(p=>p.status==='Pago').reduce((a,p)=>a+p.valor,0);
+    const recebido = c.parcelas.filter(p=>p.status==='Pago').reduce((a,p)=>a+p.valor,0);
     const pct = Math.round((recebido/c.valor)*100);
     const pbClass = pct>=100?'pb-green':pct>=50?'pb-gold':'pb-red';
-    const proxPend = c.parts.find(p=>p.status==='Pendente'||p.status==='Atrasado');
+    const proxPend = c.parcelas.find(p=>p.status==='Pendente'||p.status==='Atrasado');
     return `
     <div class="contrato-card" onclick="openDrawer(${c.id})">
       <div class="cc-top">
@@ -582,7 +582,7 @@ function renderContratos(list){
 function renderParcelas(list){
   const allParcs = [];
   list.forEach(c=>{
-    c.parts.forEach(p=>{allParcs.push({...p,contratoId:c.id,cliente:c.cliente,proc:c.proc});});
+    c.parcelas.forEach(p=>{allParcs.push({...p,contratoId:c.id,cliente:c.cliente,proc:c.proc});});
   });
   allParcs.sort((a,b)=>a.venc.localeCompare(b.venc));
   const total = allParcs.length;
@@ -632,7 +632,7 @@ function goPage(p){currentPage=p;render();}
 
 function marcarPago(cid,num){
   const c = contratos.find(x=>x.id===cid); if(!c) return;
-  const p = c.parts.find(x=>x.num===num); if(!p) return;
+  const p = c.parcelas.find(x=>x.num===num); if(!p) return;
   p.status='Pago'; p.pgto=todayISO;
   showToast('Parcela marcada como paga!','success');
   render();
@@ -648,11 +648,11 @@ function openDrawer(id){
   document.getElementById('drawer-edit').onclick = ()=>{closeDrawer();editContrato(id);};
   document.getElementById('drawer-del').onclick = ()=>{if(confirm('Excluir este contrato?')){contratos=contratos.filter(x=>x.id!==id);closeDrawer();render();showToast('Contrato excluído.','');}};
 
-  const recebido = c.parts.filter(p=>p.status==='Pago').reduce((a,p)=>a+p.valor,0);
+  const recebido = c.parcelas.filter(p=>p.status==='Pago').reduce((a,p)=>a+p.valor,0);
   const pct = Math.round((recebido/c.valor)*100);
   const pbClass = pct>=100?'pb-green':pct>=50?'pb-gold':'pb-red';
 
-  const parcsHTML = c.parts.map(p=>{
+  const parcsHTML = c.parcelas.map(p=>{
     const cls = p.status==='Pago'?'p-ok':p.status==='Atrasado'?'p-atras':'p-pend';
     const icon = p.status==='Pago'?'✓':p.status==='Atrasado'?'!':'○';
     return `<div class="parcela-row" onclick="event.stopPropagation();marcarPago(${c.id},${p.numero});renderDrawerParcelas(${c.id})">
@@ -681,7 +681,7 @@ function openDrawer(id){
       ${c.obs?`<div style="grid-column:span 2"><label style="font-size:.68rem;font-weight:600;color:var(--txf);text-transform:uppercase;letter-spacing:.06em;display:block;margin-bottom:2px">Obs</label><span style="font-size:var(--xs)">${c.obs}</span></div>`:''}
     </div>
     <div>
-      <div class="parcelas-title"><i data-lucide="list" style="width:14px;height:14px"></i> Parcelas (${c.parts.length}) — clique para marcar como pago</div>
+      <div class="parcelas-title"><i data-lucide="list" style="width:14px;height:14px"></i> Parcelas (${c.parcelas.length}) — clique para marcar como pago</div>
       <div id="drawer-parcelas">${parcsHTML}</div>
     </div>`;
   document.getElementById('drawer-overlay').classList.add('open');
@@ -690,7 +690,7 @@ function openDrawer(id){
 
 function renderDrawerParcelas(id){
   const c = contratos.find(x=>x.id===id); if(!c) return;
-  const parcsHTML = c.parts.map(p=>{
+  const parcsHTML = c.parcelas.map(p=>{
     const cls = p.status==='Pago'?'p-ok':p.status==='Atrasado'?'p-atras':'p-pend';
     const icon = p.status==='Pago'?'✓':p.status==='Atrasado'?'!':'○';
     return `<div class="parcela-row" onclick="event.stopPropagation();marcarPago(${c.id},${p.numero});renderDrawerParcelas(${c.id})">
@@ -798,7 +798,7 @@ function salvar(){
 function exportCSV(){
   const rows=[['ID','Tipo','Cliente','Processo','Descrição','Valor Total','Recebido','Parcelas','Status']];
   contratos.forEach(c=>{
-    const rec = c.parts.filter(p=>p.status==='Pago').reduce((a,p)=>a+p.valor,0);
+    const rec = c.parcelas.filter(p=>p.status==='Pago').reduce((a,p)=>a+p.valor,0);
     rows.push([c.id,c.tipo,c.cliente,c.proc||'',c.desc||'',c.valor,rec.toFixed(2),c.parcelas,c.status]);
   });
   const csv = rows.map(r=>r.map(v=>'"'+String(v).replace(/"/g,'""')+'"').join(',')).join('\n');

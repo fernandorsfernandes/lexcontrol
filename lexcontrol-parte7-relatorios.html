@@ -763,8 +763,7 @@ function exportRelatorio(){
     const r=d.receitas[i],dp=d.despesas[i],res=r-dp,mg=r?Math.round(res/r*100):0;
     rows.push([m,r,dp,res,mg+'%']);
   });
-  const csv = rows.map(r=>r.map(v=>'"'+String(v).replace(/"/g,'""')+'"').join(',')).join('
-');
+  const csv = rows.map(r=>r.map(v=>'"'+String(v).replace(/"/g,'""')+'"').join(',')).join('\n');
   const a = document.createElement('a');
   a.href = 'data:text/csv;charset=utf-8,﻿'+encodeURIComponent(csv);
   a.download = `relatorio_lexcontrol_${activePeriod}.csv`;
