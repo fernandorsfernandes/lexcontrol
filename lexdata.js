@@ -27,6 +27,11 @@ const today  = () => new Date().toISOString().slice(0,10);
 // ── BROADCAST (sync between modules) ─────────────────────
 const broadcast = (key) => {
   try { window.dispatchEvent(new StorageEvent('storage', { key })); } catch(e){}
+  try {
+    if(window.parent && window.parent !== window){
+      window.parent.dispatchEvent(new StorageEvent('storage', { key }));
+    }
+  } catch(e){}
 };
 
 // ── TEMA ──────────────────────────────────────────────────
@@ -34,11 +39,10 @@ const getTema = () => localStorage.getItem(K.tema) || 'light';
 const setTema = (v) => { localStorage.setItem(K.tema, v); applyTema(v); broadcast(K.tema); };
 const applyTema = (v) => {
   document.documentElement.setAttribute('data-theme', v || getTema());
-  // notify parent if in iframe
   if(window.parent && window.parent !== window){
     try { window.parent.postMessage({type:'lex-tema', tema: v||getTema()}, '*'); } catch(e){}
   }
-}; // ✅ FIX: fechamento correto do if e da arrow function applyTema
+};
 const initTema = () => applyTema(getTema());
 
 // ── USER ──────────────────────────────────────────────────
@@ -135,7 +139,7 @@ const saveLancamento = (lan) => {
   if(!lan.data) lan.data = today();
   const idx = list.findIndex(l=>l.id===lan.id);
   if(idx>=0) list[idx]=lan; else list.unshift(lan);
-  set(K.financeiro, lan);
+  set(K.financeiro, list);
   return lan;
 };
 const deleteLancamento = (id) => set(K.financeiro, get(K.financeiro).filter(l=>l.id!==id));
@@ -198,10 +202,10 @@ return {
 // Auto-init immediately (not waiting for DOMContentLoaded)
 (function(){
   const t = localStorage.getItem('lex_tema') || 'light';
-  document.documentElement && document.documentElement.setAttribute('data-theme', t);
+  if(document.documentElement) document.documentElement.setAttribute('data-theme', t);
   if(document.readyState === 'loading'){
     document.addEventListener('DOMContentLoaded', () => { LexData.seed(); });
   } else {
     LexData.seed();
-  } // ✅ FIX: fechamento correto do else e da IIFE
+  }
 })();
