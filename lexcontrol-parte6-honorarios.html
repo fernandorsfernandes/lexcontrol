@@ -555,7 +555,7 @@ function renderContratos(list){
     const pbClass = pct>=100?'pb-green':pct>=50?'pb-gold':'pb-red';
     const proxPend = c.parcelas.find(p=>p.status==='Pendente'||p.status==='Atrasado');
     return `
-    <div class="contrato-card" onclick="openDrawer('\${c.id}')">
+    <div class="contrato-card" onclick="openDrawer(this.dataset.id)" data-id="${c.id}">
       <div class="cc-top">
         <div style="display:flex;gap:var(--s2);margin-bottom:var(--s2)">${tipoBadge(c.tipo)} ${statusBadge(c.status)}</div>
         <div class="cc-nome">${c.cliente}</div>

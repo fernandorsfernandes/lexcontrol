@@ -589,7 +589,7 @@ function renderCards(list){
   if(!list.length){grid.innerHTML='';empty.style.display='flex';lucide.createIcons();return;}
   empty.style.display='none';
   grid.innerHTML=list.map(c=>`
-    <div class="client-card" onclick="openDrawer('\${c.id}')">
+    <div class="client-card" onclick="openDrawer(this.dataset.id)" data-id="${c.id}">
       <div class="client-card-header">
         <div class="client-avatar ${avatarColor(c.id)}">${initials(c.nome)}</div>
         <div class="client-info">
@@ -646,7 +646,7 @@ function renderTable(list){
         <td>${statusBadge(c.status)}</td>
         <td>
           <div style="display:flex;gap:var(--sp2)">
-            <button class="btn btn-ghost btn-sm" onclick="openDrawer('\${c.id}')"><i data-lucide="eye" style="width:13px;height:13px"></i></button>
+            <button class="btn btn-ghost btn-sm" onclick="openDrawer(this.dataset.id)" data-id="${c.id}"><i data-lucide="eye" style="width:13px;height:13px"></i></button>
             <button class="btn btn-ghost btn-sm" onclick="editCliente('\${c.id}')"><i data-lucide="pencil" style="width:13px;height:13px"></i></button>
           </div>
         </td>
