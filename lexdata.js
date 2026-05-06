@@ -26,6 +26,7 @@ const today  = () => new Date().toISOString().slice(0,10);
 
 // ── BROADCAST (sync between modules) ─────────────────────
 const broadcast = (key) => {
+  try { if(window.parent && window.parent !== window) window.parent.dispatchEvent(new StorageEvent("storage",{key})); } catch(e){}
   try { window.dispatchEvent(new StorageEvent('storage', { key })); } catch(e){}
   try {
     if(window.parent && window.parent !== window){
