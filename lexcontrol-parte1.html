@@ -1224,9 +1224,38 @@ p { text-wrap: pretty; }
 // DATA
 // ============================================================
 let processos = [];
-function loadDashData(){ processos = LexData.getProcessos(); eventos = LexData.getEventos(); }
+function loadDashData(){
+  processos = LexData.getProcessos().map(p => ({movs:[], ...p}));
+  eventos = LexData.getEventos();
+  lancamentos = LexData.getLancamentos();
+  honorarios = LexData.getHonorarios();
+}
 
 let eventos = [];
+
+
+let lancamentos = [];
+let honorarios = [];
+
+function renderKPIs() {
+  const hoje = new Date().toISOString().slice(0,7); // YYYY-MM
+  const ativos = processos.filter(p => p.status === 'Ativo' || p.status === 'Pendente').length;
+  const prazos = processos.filter(p => {
+    if(!p.proximoPrazo) return false;
+    const d = new Date(p.proximoPrazo);
+    const diff = Math.round((d - new Date())/(1000*60*60*24));
+    return diff >= 0 && diff <= 7;
+  }).length;
+  const receitaMes = lancamentos.filter(l => l.tipo==='Receita' && l.data && l.data.startsWith(hoje))
+    .reduce((s,l) => s + (parseFloat(l.valor)||0), 0);
+  const totalHon = honorarios.reduce((s,h) => s + (parseFloat(h.valor)||0), 0);
+
+  const el = id => document.getElementById(id);
+  if(el('kpi-processos')) el('kpi-processos').textContent = ativos;
+  if(el('kpi-honorarios')) el('kpi-honorarios').textContent = 'R$ ' + totalHon.toLocaleString('pt-BR',{minimumFractionDigits:0});
+  if(el('kpi-recebido')) el('kpi-recebido').textContent = 'R$ ' + receitaMes.toLocaleString('pt-BR',{minimumFractionDigits:0});
+  if(el('kpi-prazos')) el('kpi-prazos').textContent = prazos;
+}
 
 // ============================================================
 // NAVIGATION
@@ -1272,7 +1301,7 @@ function renderDashboardProcessos() {
       <td><span class="process-client">${p.clienteNome}</span></td>
       <td><span class="process-area">${p.area}</span></td>
       <td>${statusBadge(p.status)}</td>
-      <td><span style="font-size:var(--text-xs);font-variant-numeric:tabular-nums;">${p.prazo}</span></td>
+      <td><span style="font-size:var(--text-xs);font-variant-numeric:tabular-nums;">${p.proximoPrazo||'—'}</span></td>
     </tr>`).join('');
 }
 
@@ -1285,7 +1314,7 @@ function renderProcessosFull() {
       <td><span class="process-client">${p.clienteNome}</span></td>
       <td><span class="process-area">${p.area}</span></td>
       <td>${statusBadge(p.status)}</td>
-      <td>${p.prazo}</td>
+      <td>${p.proximoPrazo||'—'}</td>
       <td><button class="btn btn-ghost" style="padding:var(--space-1) var(--space-3);font-size:var(--text-xs)">Ver</button></td>
     </tr>`).join('');
 }
@@ -1353,15 +1382,16 @@ function salvarProcesso() {
   const cliente = document.getElementById('proc-cliente').value.trim();
   if(!num || !cliente) { showToast('Preencha o nº do processo e o cliente.', 'error'); return; }
   const novo = {
-    id: processos.length + 1,
-    num, cliente,
+    numero: num,
+    clienteNome: cliente,
     area: document.getElementById('proc-area').value,
     status: document.getElementById('proc-status').value,
-    prazo: document.getElementById('proc-prazo').value || '—',
+    proximoPrazo: document.getElementById('proc-prazo').value || '',
     vara: document.getElementById('proc-vara').value
   };
-  processos.unshift(novo);
-  document.getElementById('kpi-processos').textContent = processos.filter(p => p.status === 'Ativo').length;
+  LexData.saveProcesso(novo);
+  loadDashData();
+  renderKPIs();
   renderDashboardProcessos();
   closeModal('modal-processo');
   showToast('Processo cadastrado com sucesso!', 'success');
@@ -1375,14 +1405,14 @@ function salvarEvento() {
   const hora   = document.getElementById('ev-hora').value;
   if(!titulo || !data || !hora) { showToast('Preencha título, data e horário.', 'error'); return; }
   const novo = {
-    id: eventos.length + 1,
     titulo, data, hora,
     tipo: document.getElementById('ev-tipo').value,
-    proc: document.getElementById('ev-proc').value,
-    local: document.getElementById('ev-local').value
+    processo: document.getElementById('ev-proc').value,
+    local: document.getElementById('ev-local').value,
+    status: 'Confirmado'
   };
-  eventos.push(novo);
-  eventos.sort((a,b) => (a.data+a.hora).localeCompare(b.data+b.hora));
+  LexData.saveEvento(novo);
+  loadDashData();
   renderAgendaHoje();
   closeModal('modal-evento');
   showToast('Evento agendado!', 'success');
@@ -1418,6 +1448,35 @@ function showToast(msg, type='') {
   if(btn) btn.addEventListener('click', () => { LexData.setTema(LexData.getTema()==='dark'?'light':'dark'); });
 })();
 
+
+document.addEventListener('DOMContentLoaded', () => {
+  lucide.createIcons();
+  loadDashData();
+  renderKPIs();
+  renderDashboardProcessos();
+  renderAgendaHoje();
+  LexData.initTema();
+
+  // Data no topbar
+  const opts = {weekday:'short',day:'numeric',month:'short',year:'numeric'};
+  const dateEl = document.getElementById('topbar-date');
+  if(dateEl) dateEl.textContent = new Date().toLocaleDateString('pt-BR', opts);
+
+  // Sync
+  window.addEventListener('lex-storage', e => {
+    if(!e.detail) return;
+    loadDashData(); renderKPIs(); renderDashboardProcessos(); renderAgendaHoje();
+  });
+  window.addEventListener('message', e => {
+    if(e.data && e.data.type === 'lex-storage'){ loadDashData(); renderKPIs(); renderDashboardProcessos(); renderAgendaHoje(); }
+    if(e.data && e.data.type === 'lex-tema'){ LexData.setTema(e.data.tema); }
+  });
+  window.addEventListener('storage', e => {
+    if(['lex_processos','lex_eventos','lex_financeiro','lex_honorarios'].includes(e.key)){
+      loadDashData(); renderKPIs(); renderDashboardProcessos(); renderAgendaHoje();
+    }
+  });
+});
 // ============================================================
 // SIDEBAR TOGGLE
 // ============================================================
