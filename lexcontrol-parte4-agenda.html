@@ -612,7 +612,7 @@ function renderUrgentes(){
     const d=new Date(e.data+'T12:00:00'); d.setHours(0,0,0,0);
     const diff=Math.round((d-TODAY)/86400000);
     return diff>=0&&diff<=7;
-  }).sort((a,b)=>a.data.localeCompare(b.data)||a.hora.localeCompare(b.hora));
+  }).sort((a,b)=>a.data.localeCompare(b.data)||String(a.hora||a.venc||a.data).localeCompare(String(b.hora||b.venc||b.data)));
 
   const el = document.getElementById('urgentes-list');
   if(!list.length){el.innerHTML='<div style="padding:var(--sp4);font-size:var(--text-sm);color:var(--color-text-muted);text-align:center">Nenhum evento urgente</div>';return;}
@@ -640,7 +640,7 @@ function setFilter(f,el){
 
 function renderTable(){
   const list = eventos.filter(e=>activeFilter==='Todos'||e.tipo===activeFilter)
-    .sort((a,b)=>a.data.localeCompare(b.data)||a.hora.localeCompare(b.hora));
+    .sort((a,b)=>a.data.localeCompare(b.data)||String(a.hora||a.venc||a.data).localeCompare(String(b.hora||b.venc||b.data)));
   const tbody=document.getElementById('ev-tbody');
   const empty=document.getElementById('ev-empty');
   document.getElementById('ev-table-label').textContent=(list.length)+' evento'+(list.length!==1?'s':'');
