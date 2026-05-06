@@ -676,11 +676,11 @@ function openDrawer(id){
   document.getElementById('drawer-edit-btn').onclick=()=>{closeDrawer();editCliente(id);};
   document.getElementById('drawer-del-btn').onclick=()=>{if(confirm('Excluir este cliente?')){removeCliente(id);closeDrawer();render();showToast('Cliente excluído.','');}};
 
-  const procs=c.processos.map(p=>`
+  const procs=LexData.getProcessos().filter(p=>p.clienteNome===c.nome).map(p=>`
     <div class="proc-mini-item">
       <div>
-        <div class="proc-mini-num">${p.substring(0,20)}…</div>
-        <div class="proc-mini-area">${c.area}</div>
+        <div class="proc-mini-num">${p.numero.substring(0,20)}…</div>
+        <div class="proc-mini-area">${p.area}</div>
       </div>
       ${statusBadge('Ativo')}
     </div>`).join('');
