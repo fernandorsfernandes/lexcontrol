@@ -514,7 +514,7 @@ table{border-collapse:collapse;width:100%}
 // ============================================================
 // ── DATA (via LexData central) ──────────────────────────────
 let processos = [];
-function loadProcessos(){ processos = LexData.getProcessos(); }
+function loadProcessos(){ processos = LexData.getProcessos().map(p => ({movs:[], ...p})); }
 function persistProcesso(p){ LexData.saveProcesso(p); loadProcessos(); }
 function removeProcesso(id){ LexData.deleteProcesso(id); loadProcessos(); }
 
@@ -719,6 +719,8 @@ function openDrawer(id) {
       </div>
     </div>
   `;
+  // garante campo movs
+  if (!p.movs) p.movs = [];
   document.getElementById('drawer-edit-btn').onclick = () => { closeDrawer(); editProcesso(id); };
   document.getElementById('drawer-delete-btn').onclick = () => confirmDelete(id);
   document.getElementById('drawer-overlay').classList.add('open');
@@ -795,7 +797,7 @@ function salvarProcesso() {
     }
   } else {
     const movs = movDesc&&movData ? [{data:movData,desc:movDesc}] : [];
-    processos.unshift({id:LexData.uid(),numero:num,clienteNome:cliente,vara,area:document.getElementById('f-area').value,status:document.getElementById('f-status').value,doc:document.getElementById('f-doc').value,cidade:document.getElementById('f-comarca').value,parte:document.getElementById('f-parte').value,criadoEm:document.getElementById('f-data').value||LexData.today(),proximoPrazo:document.getElementById('f-prazo').value,valor:document.getElementById('f-valor').value,descricao:document.getElementById('f-obs').value,movs});
+    const novoProc = {id:LexData.uid(),numero:num,clienteNome:cliente,vara,area:document.getElementById('f-area').value,status:document.getElementById('f-status').value,doc:document.getElementById('f-doc').value,cidade:document.getElementById('f-comarca').value,parte:document.getElementById('f-parte').value,criadoEm:document.getElementById('f-data').value||LexData.today(),proximoPrazo:document.getElementById('f-prazo').value,valor:document.getElementById('f-valor').value,descricao:document.getElementById('f-obs').value,movs});
     showToast('Processo cadastrado!','success');
   }
   closeModal('modal-processo');
@@ -810,6 +812,7 @@ function confirmDelete(id) {
   const p = processos.find(x=>x.id===id);
   document.getElementById('confirm-msg').textContent = `Deseja excluir o processo de ${p?p.clienteNome:''}? Esta ação não pode ser desfeita.`;
   document.getElementById('confirm-ok-btn').onclick = () => { deleteProcesso(id); closeModal('modal-confirm'); };
+    persistProcesso(novoProc);
   openModal('modal-confirm');
 }
 function deleteProcesso(id) {
