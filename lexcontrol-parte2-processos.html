@@ -534,8 +534,20 @@ document.addEventListener('DOMContentLoaded', () => {
   loadProcessos();
   applyFilters();
   LexData.initTema();
-  // sync when other modules update data
-  window.addEventListener('storage', e => { if(e.key==='lex_processos'){ loadProcessos(); applyFilters(); } });
+
+  // sync via CustomEvent (mesmo documento/iframe)
+  window.addEventListener('lex-storage', e => {
+    if(e.detail && e.detail.key === 'lex_processos'){ loadProcessos(); applyFilters(); }
+  });
+  // sync via postMessage do pai
+  window.addEventListener('message', e => {
+    if(e.data && e.data.type === 'lex-storage' && e.data.key === 'lex_processos'){ loadProcessos(); applyFilters(); }
+    if(e.data && e.data.type === 'lex-tema'){ LexData.setTema(e.data.tema); }
+  });
+  // sync via storage event (outras abas)
+  window.addEventListener('storage', e => {
+    if(e.key === 'lex_processos'){ loadProcessos(); applyFilters(); }
+  });
 });
 
 function setDate() {
@@ -612,8 +624,8 @@ function renderTable(list) {
       <td style="font-size:var(--text-xs);color:var(--color-text-muted);max-width:150px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${p.vara}</td>
       <td>
         <div class="td-actions">
-          <button class="btn btn-ghost btn-sm" onclick="openDrawer('\${p.id}')"><i data-lucide="eye" style="width:14px;height:14px"></i> Ver</button>
-          <button class="btn btn-ghost btn-sm" onclick="editProcesso('\${p.id}')"><i data-lucide="pencil" style="width:14px;height:14px"></i></button>
+          <button class="btn btn-ghost btn-sm" onclick="openDrawer(this.dataset.id)" data-id="${p.id}"><i data-lucide="eye" style="width:14px;height:14px"></i> Ver</button>
+          <button class="btn btn-ghost btn-sm" onclick="editProcesso(this.dataset.id)" data-id="${p.id}"><i data-lucide="pencil" style="width:14px;height:14px"></i></button>
         </div>
       </td>
     </tr>`;
