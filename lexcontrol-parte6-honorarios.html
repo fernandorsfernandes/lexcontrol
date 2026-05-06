@@ -386,7 +386,7 @@ table{border-collapse:collapse;width:100%}
       </div>
 
       <div class="fr">
-        <div class="fg"><label>Cliente *</label><input class="fc" id="f-cliente" placeholder="Nome do cliente"></div>
+        <div class="fg" style="position:relative">abel>Cliente *</label><input class="fc" id="f-cliente" placeholder="Nome do cliente" autocomplete="off"><div id="cliente-suggestions" style="display:none;position:absolute;top:100%;left:0;right:0;background:var(--color-surface);border:1px solid var(--color-border);border-radius:var(--radius-md);box-shadow:var(--shadow-md);z-index:999;max-height:180px;overflow-y:auto"></div></div>
         <div class="fg"><label>Processo</label><input class="fc" id="f-proc" placeholder="Nº do processo"></div>
       </div>
       <div class="fg"><label>Descrição do Serviço</label><input class="fc" id="f-desc" placeholder="Ex: Ação de indenização por danos morais"></div>
