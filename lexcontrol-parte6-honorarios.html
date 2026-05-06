@@ -476,6 +476,14 @@ let tipoAtual = '';
 // INIT
 // ============================================================
 document.addEventListener('DOMContentLoaded',()=>{
+  // Garante autocomplete no input de cliente
+  const fCliente = document.getElementById('f-cliente');
+  if(fCliente) {
+    fCliente.setAttribute('autocomplete','off');
+    fCliente.addEventListener('input', filterClientes);
+    fCliente.addEventListener('focus', filterClientes);
+    fCliente.addEventListener('keydown', clienteKey);
+  }
   lucide.createIcons();
   document.getElementById('topbar-date').textContent = new Date().toLocaleDateString('pt-BR',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
   LexData.initTema();
