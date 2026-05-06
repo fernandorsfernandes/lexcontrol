@@ -623,8 +623,8 @@ function renderTable() {
         <td><span class="badge ${statusBadgeClass(l.status)}">${l.status}</span></td>
         <td>
           <div style="display:flex;gap:var(--sp2)">
-            <button class="btn btn-ghost btn-sm" onclick="editLanc(${l.id})"><i data-lucide="pencil" style="width:13px;height:13px"></i></button>
-            <button class="btn btn-ghost btn-sm" onclick="deleteLanc(${l.id})"><i data-lucide="trash-2" style="width:13px;height:13px"></i></button>
+            <button class="btn btn-ghost btn-sm" onclick="editLanc('\${l.id}')"><i data-lucide="pencil" style="width:13px;height:13px"></i></button>
+            <button class="btn btn-ghost btn-sm" onclick="deleteLanc('\${l.id}')"><i data-lucide="trash-2" style="width:13px;height:13px"></i></button>
           </div>
         </td>
       </tr>`).join('');

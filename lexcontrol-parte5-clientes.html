@@ -512,10 +512,6 @@ const AVATAR_COLORS = ['av-1','av-2','av-3','av-4','av-5','av-6','av-7','av-8','
 // ── DATA (via LexData central) ──────────────────────────────
 let clientes = [];
 function loadClientes(){ clientes = LexData.getClientes(); }
-function getClienteProcessos(nome){
-  return LexData.getProcessos().filter(p=>p.clienteNome&&p.clienteNome.toLowerCase()===nome.toLowerCase());
-}
-
 function persistCliente(c){ LexData.saveCliente(c); loadClientes(); }
 function removeCliente(id){ LexData.deleteCliente(id); loadClientes(); }
 let currentView='cards';
@@ -593,7 +589,7 @@ function renderCards(list){
   if(!list.length){grid.innerHTML='';empty.style.display='flex';lucide.createIcons();return;}
   empty.style.display='none';
   grid.innerHTML=list.map(c=>`
-    <div class="client-card" onclick="openDrawer(${c.id})">
+    <div class="client-card" onclick="openDrawer('\${c.id}')">
       <div class="client-card-header">
         <div class="client-avatar ${avatarColor(c.id)}">${initials(c.nome)}</div>
         <div class="client-info">
@@ -604,7 +600,7 @@ function renderCards(list){
       <div class="client-card-body">
         <div class="client-meta-row"><span class="client-meta-label">Área</span><span class="client-meta-val">${c.area}</span></div>
         <div class="client-meta-row"><span class="client-meta-label">Cidade</span><span class="client-meta-val">${c.cidade||'—'} / ${c.estado||'—'}</span></div>
-        <div class="client-meta-row"><span class="client-meta-label">Processos</span><span class="client-meta-val">${getClienteProcessos(c.nome).length}</span></div>
+        <div class="client-meta-row"><span class="client-meta-label">Processos</span><span class="client-meta-val">${c.processos.length}</span></div>
         <div class="client-meta-row"><span class="client-meta-label">Telefone</span><span class="client-meta-val" style="color:var(--color-primary)">${c.tel||'—'}</span></div>
       </div>
       <div class="client-card-footer">
@@ -646,12 +642,12 @@ function renderTable(list){
         <td style="font-size:var(--text-xs);font-variant-numeric:tabular-nums">${c.doc}</td>
         <td style="font-size:var(--text-xs)">${c.area}</td>
         <td style="font-size:var(--text-xs);color:var(--color-text-muted)">${c.cidade||'—'} / ${c.estado||'—'}</td>
-        <td style="text-align:center;font-weight:700;color:var(--color-primary)">${getClienteProcessos(c.nome).length}</td>
+        <td style="text-align:center;font-weight:700;color:var(--color-primary)">${c.processos.length}</td>
         <td>${statusBadge(c.status)}</td>
         <td>
           <div style="display:flex;gap:var(--sp2)">
-            <button class="btn btn-ghost btn-sm" onclick="openDrawer(${c.id})"><i data-lucide="eye" style="width:13px;height:13px"></i></button>
-            <button class="btn btn-ghost btn-sm" onclick="editCliente(${c.id})"><i data-lucide="pencil" style="width:13px;height:13px"></i></button>
+            <button class="btn btn-ghost btn-sm" onclick="openDrawer('\${c.id}')"><i data-lucide="eye" style="width:13px;height:13px"></i></button>
+            <button class="btn btn-ghost btn-sm" onclick="editCliente('\${c.id}')"><i data-lucide="pencil" style="width:13px;height:13px"></i></button>
           </div>
         </td>
       </tr>`).join('');
@@ -680,7 +676,7 @@ function openDrawer(id){
   document.getElementById('drawer-edit-btn').onclick=()=>{closeDrawer();editCliente(id);};
   document.getElementById('drawer-del-btn').onclick=()=>{if(confirm('Excluir este cliente?')){removeCliente(id);closeDrawer();render();showToast('Cliente excluído.','');}};
 
-  const procs=getClienteProcessos(c.nome).map(p=>`
+  const procs=c.processos.map(p=>`
     <div class="proc-mini-item">
       <div>
         <div class="proc-mini-num">${p.substring(0,20)}…</div>
@@ -714,7 +710,7 @@ function openDrawer(id){
       </div>
     </div>
     <div>
-      <div class="detail-section-title"><i data-lucide="briefcase"></i> Processos (${getClienteProcessos(c.nome).length})</div>
+      <div class="detail-section-title"><i data-lucide="briefcase"></i> Processos (${c.processos.length})</div>
       <div class="proc-mini">${procs||'<p style="font-size:var(--text-sm);color:var(--color-text-muted)">Nenhum processo vinculado.</p>'}</div>
     </div>`;
   document.getElementById('drawer-overlay').classList.add('open');
@@ -805,7 +801,7 @@ function salvar(){
 // ============================================================
 function exportCSV(){
   const rows=[['ID','Tipo','Nome','CPF/CNPJ','Telefone','Email','Cidade','Estado','Área','Status','Processos']];
-  clientes.forEach(c=>rows.push([c.id,c.tipo,c.nome,c.doc,c.tel||'',c.email||'',c.cidade||'',c.estado||'',c.area,c.status,getClienteProcessos(c.nome).length]));
+  clientes.forEach(c=>rows.push([c.id,c.tipo,c.nome,c.doc,c.tel||'',c.email||'',c.cidade||'',c.estado||'',c.area,c.status,c.processos.length]));
   const csv=rows.map(r=>r.map(v=>'"'+String(v).replace(/"/g,'""')+'"').join(',')).join('\n');
   const a=document.createElement('a');
   a.href='data:text/csv;charset=utf-8,﻿'+encodeURIComponent(csv);

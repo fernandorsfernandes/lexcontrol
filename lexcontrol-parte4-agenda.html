@@ -592,7 +592,7 @@ function renderDayEvents(iso){
   const el = document.getElementById('day-ev-list');
   if(!evs.length){el.innerHTML=`<div class="day-no-ev">Nenhum evento neste dia</div>`;return;}
   el.innerHTML = evs.map(e=>`
-    <div class="day-ev-item" onclick="editEvento(${e.id})">
+    <div class="day-ev-item" onclick="editEvento('\${e.id}')">
       <div class="day-ev-time ev-${tipoClass(e.tipo)}" style="border-radius:var(--radius-sm);padding:var(--sp2) var(--sp2);min-width:44px;text-align:center">
         <div class="day-ev-hour">${e.hora||'—'}</div>
       </div>
@@ -620,7 +620,7 @@ function renderUrgentes(){
     const d=new Date(e.data+'T12:00:00'); d.setHours(0,0,0,0);
     const diff=Math.round((d-TODAY)/86400000);
     const tag = diff===0?'<span class="urgente-days dias-hoje">HOJE</span>':diff===1?'<span class="urgente-days dias-amanha">AMANHÃ</span>':`<span class="urgente-days dias-semana">Em ${diff} dias</span>`;
-    return `<div class="urgente-item" onclick="editEvento(${e.id})">
+    return `<div class="urgente-item" onclick="editEvento('\${e.id}')">
       <div class="urgente-title">${e.titulo}</div>
       <div class="urgente-meta">${e.hora||''} ${e.local?'· '+e.local:''}</div>
       ${tag}
@@ -668,8 +668,8 @@ function renderTable(){
       <td style="font-size:var(--text-xs);color:var(--color-primary)">${e.proc||'—'}</td>
       <td>
         <div style="display:flex;gap:var(--sp2)">
-          <button class="btn btn-ghost btn-sm" onclick="editEvento(${e.id})"><i data-lucide="pencil" style="width:13px;height:13px"></i></button>
-          <button class="btn btn-ghost btn-sm" onclick="deleteEvento(${e.id})"><i data-lucide="trash-2" style="width:13px;height:13px"></i></button>
+          <button class="btn btn-ghost btn-sm" onclick="editEvento('\${e.id}')"><i data-lucide="pencil" style="width:13px;height:13px"></i></button>
+          <button class="btn btn-ghost btn-sm" onclick="deleteEvento('\${e.id}')"><i data-lucide="trash-2" style="width:13px;height:13px"></i></button>
         </div>
       </td>
     </tr>`).join('');
