@@ -748,9 +748,24 @@ function addMovimentacao(id) {
   if(!desc||!data) { showToast('Preencha descrição e data.','error'); return; }
   const p = processos.find(x=>x.id===id);
   if(!p) return;
+  if(!Array.isArray(p.movs)) p.movs = [];
   p.movs.push({data,desc});
   p.movs.sort((a,b)=>a.data.localeCompare(b.data));
-  openDrawer(id);
+  persistProcesso(p);
+  const listEl = document.getElementById('movs-list-'+id);
+  if(listEl) {
+    listEl.innerHTML = (p.movs||[]).map(m=>`
+      <div class="mov-item">
+        <div class="mov-dot"></div>
+        <div>
+          <div class="mov-text">${m.desc}</div>
+          <div class="mov-date">${new Date(m.data+'T12:00:00').toLocaleDateString('pt-BR')}</div>
+        </div>
+      </div>`).join('') || '<p style="font-size:var(--text-sm);color:var(--color-text-muted)">Nenhuma movimentação.</p>';
+    lucide.createIcons();
+  }
+  document.getElementById('mov-desc-'+id).value = '';
+  document.getElementById('mov-data-'+id).value = '';
   showToast('Movimentação registrada!','success');
 }
 

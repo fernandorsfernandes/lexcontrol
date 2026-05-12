@@ -76,6 +76,8 @@ const saveProcesso = (proc) => {
   if (idx >= 0) list[idx] = proc; else list.unshift(proc);
   set(K.processos, list);
   if (proc.clienteNome) _ensureCliente(proc.clienteNome, proc.clienteEmail||'', proc.clienteTel||'');
+  if(!Array.isArray(proc.movs)) proc.movs = [];
+  if(proc.proximoPrazo) _ensurePrazoEvento(proc);
   return proc;
 };
 const deleteProcesso = (id) => set(K.processos, get(K.processos).filter(p => p.id !== id));
@@ -109,6 +111,31 @@ const saveEvento = (ev) => {
   return ev;
 };
 const deleteEvento = (id) => set(K.eventos, get(K.eventos).filter(e => e.id !== id));
+
+
+// ── SYNC PRAZO → AGENDA ───────────────────────────────────
+const _ensurePrazoEvento = (proc) => {
+const eventos = get(K.eventos);
+const existing = eventos.find(e => e.processoId === proc.id && e.tipo === 'Prazo');
+if(existing) {
+existing.data = proc.proximoPrazo;
+existing.titulo = 'Prazo — ' + proc.clienteNome;
+existing.local = proc.vara || '';
+existing.processo = proc.numero;
+set(K.eventos, eventos);
+} else {
+saveEvento({
+titulo: 'Prazo — ' + proc.clienteNome,
+tipo: 'Prazo',
+data: proc.proximoPrazo,
+hora: '23:59',
+local: proc.vara || '',
+processo: proc.numero,
+processoId: proc.id,
+status: 'Pendente',
+});
+}
+};
 
 // ── HONORÁRIOS ────────────────────────────────────────────
 const getHonorarios = () => get(K.honorarios);
