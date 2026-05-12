@@ -526,6 +526,7 @@ document.addEventListener('DOMContentLoaded', () => {
   loadLancamentos();
   atualizarTudo();
   window.addEventListener('storage', e=>{ if(e.key==='lex_financeiro'){ loadLancamentos(); atualizarTudo(); } });
+  window.addEventListener('lex-storage', e=>{ if(e.detail && e.detail.key==='lex_financeiro'){ loadLancamentos(); atualizarTudo(); } });
 });
 
 function setPeriod(p, el) {

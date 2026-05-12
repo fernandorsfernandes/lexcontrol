@@ -528,6 +528,7 @@ document.addEventListener('DOMContentLoaded',()=>{
   loadClientes();
   render();
   window.addEventListener('storage', e=>{ if(e.key==='lex_clientes'||e.key==='lex_processos'){ loadClientes(); render(); } });
+  window.addEventListener('lex-storage', e=>{ if(e.detail && (e.detail.key==='lex_clientes'||e.detail.key==='lex_processos')){ loadClientes(); render(); } });
 });
 
 // ============================================================

@@ -468,6 +468,7 @@ document.addEventListener('DOMContentLoaded',()=>{
   loadRelatorioData();
   buildAll();
   window.addEventListener('storage', e=>{ const keys=['lex_processos','lex_clientes','lex_honorarios','lex_financeiro']; if(keys.includes(e.key)){ loadRelatorioData(); buildAll(); } });
+  window.addEventListener('lex-storage', e=>{ const keys=['lex_processos','lex_clientes','lex_honorarios','lex_financeiro']; if(e.detail && keys.includes(e.detail.key)){ loadRelatorioData(); buildAll(); } });
 });
 
 // ============================================================

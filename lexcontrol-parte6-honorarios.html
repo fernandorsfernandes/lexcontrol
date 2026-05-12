@@ -490,6 +490,7 @@ document.addEventListener('DOMContentLoaded',()=>{
   loadContratos();
   render();
   window.addEventListener('storage', e=>{ if(e.key==='lex_honorarios'){ loadContratos(); render(); } });
+  window.addEventListener('lex-storage', e=>{ if(e.detail && e.detail.key==='lex_honorarios'){ loadContratos(); render(); } });
 });
 
 // ============================================================

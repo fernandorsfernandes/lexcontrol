@@ -500,6 +500,7 @@ document.addEventListener('DOMContentLoaded',()=>{
   loadEventos();
   render();
   window.addEventListener('storage', e=>{ if(e.key==='lex_eventos'){ loadEventos(); render(); } });
+  window.addEventListener('lex-storage', e=>{ if(e.detail && e.detail.key==='lex_eventos'){ loadEventos(); render(); } });
 });
 
 function render(){

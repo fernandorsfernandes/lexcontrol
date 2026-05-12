@@ -548,7 +548,7 @@ document.addEventListener('DOMContentLoaded', () => {
   window.addEventListener('storage', e => {
     if(e.key === 'lex_processos'){ loadProcessos(); applyFilters(); }
   });
-});
+  window.addEventListener('lex-storage', e=>{ if(e.detail && e.detail.key==='lex_processos'){ loadProcessos(); applyFilters(); } });
 
 function setDate() {
   const opts = {weekday:'long',day:'numeric',month:'long',year:'numeric'};

@@ -1500,6 +1500,7 @@ document.addEventListener('DOMContentLoaded', () => {
   renderAgendaHoje();
   navigate('dashboard', document.querySelector('.nav-item'));
   window.addEventListener('storage', e=>{ if(['lex_processos','lex_eventos'].includes(e.key)){ loadDashData(); renderDashboardProcessos(); renderAgendaHoje(); } });
+  window.addEventListener('lex-storage', e=>{ if(e.detail && ['lex_processos','lex_eventos'].includes(e.detail.key)){ loadDashData(); renderDashboardProcessos(); renderAgendaHoje(); } });
 });
 </script>
 </body>

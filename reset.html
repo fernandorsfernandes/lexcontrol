@@ -1,0 +1,11 @@
+<!DOCTYPE html>
+<html>
+<head><meta charset="UTF-8"><title>Reset LexControl</title></head>
+<body>
+<script>
+const keys = ['lex_processos','lex_clientes','lex_eventos','lex_honorarios','lex_financeiro','lex_tema','lex_username','lex_userrole'];
+keys.forEach(k => localStorage.removeItem(k));
+document.write('<h2 style="font-family:sans-serif;color:green">&#10003; localStorage limpo! <a href="index.html">Clique aqui para abrir o LexControl</a></h2>');
+</script>
+</body>
+</html>
