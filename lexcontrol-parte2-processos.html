@@ -528,24 +528,29 @@ let drawerProcId = null;
 // ============================================================
 // INIT
 // ============================================================
+let appReady = false;
 document.addEventListener('DOMContentLoaded', () => {
   lucide.createIcons();
   setDate();
   loadProcessos();
   applyFilters();
   LexData.initTema();
+  appReady = true;
 
   // sync via CustomEvent (mesmo documento/iframe)
   window.addEventListener('lex-storage', e => {
+    if(!appReady) return;
     if(e.detail && e.detail.key === 'lex_processos'){ loadProcessos(); applyFilters(); }
   });
   // sync via postMessage do pai
   window.addEventListener('message', e => {
+    if(!appReady) return;
     if(e.data && e.data.type === 'lex-storage' && e.data.key === 'lex_processos'){ loadProcessos(); applyFilters(); }
     if(e.data && e.data.type === 'lex-tema'){ LexData.setTema(e.data.tema); }
   });
   // sync via storage event (outras abas)
   window.addEventListener('storage', e => {
+    if(!appReady) return;
     if(e.key === 'lex_processos'){ loadProcessos(); applyFilters(); }
   });
 });
