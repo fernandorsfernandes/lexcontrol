@@ -519,8 +519,9 @@ table{border-collapse:collapse;width:100%}
 // ── DATA (via LexData central) ──────────────────────────────
 let processos = [];
 function loadProcessos(){ processos = LexData.getProcessos().map(p => ({ ...p, movs: Array.isArray(p.movs) ? p.movs : [] })); }
-let _saving = false;
-function persistProcesso(p){ _saving=true; LexData.saveProcesso(p); loadProcessos(); _saving=false; }
+let _applyTimer = null;
+function debouncedApply(){ clearTimeout(_applyTimer); _applyTimer = setTimeout(()=>{ loadProcessos(); applyFilters(); }, 80); }
+function persistProcesso(p){ LexData.saveProcesso(p); loadProcessos(); }
 function removeProcesso(id){ LexData.deleteProcesso(id); loadProcessos(); }
 
 let activeFilter = 'Todos';
@@ -545,18 +546,18 @@ document.addEventListener('DOMContentLoaded', () => {
   // sync via CustomEvent (mesmo documento/iframe)
   window.addEventListener('lex-storage', e => {
     if(!appReady) return;
-    if(e.detail && e.detail.key === 'lex_processos' && !_saving){ loadProcessos(); applyFilters(); }
+    if(e.detail && e.detail.key === 'lex_processos'){ debouncedApply(); }
   });
   // sync via postMessage do pai
   window.addEventListener('message', e => {
     if(!appReady) return;
-    if(e.data && e.data.type === 'lex-storage' && e.data.key === 'lex_processos' && !_saving){ loadProcessos(); applyFilters(); }
+    if(e.data && e.data.type === 'lex-storage' && e.data.key === 'lex_processos'){ debouncedApply(); }
     if(e.data && e.data.type === 'lex-tema'){ LexData.setTema(e.data.tema); }
   });
   // sync via storage event (outras abas)
   window.addEventListener('storage', e => {
     if(!appReady) return;
-    if(e.key === 'lex_processos' && !_saving){ loadProcessos(); applyFilters(); }
+    if(e.key === 'lex_processos'){ debouncedApply(); }
   });
 });
 
