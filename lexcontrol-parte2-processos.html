@@ -824,7 +824,7 @@ function salvarProcesso() {
   const vara = document.getElementById('f-vara').value.trim();
   if(!num||!cliente||!vara) { showToast('Preencha os campos obrigatórios (*)','error'); return; }
 
-  const editId = parseInt(document.getElementById('edit-id').value)||0;
+  const editId = document.getElementById('edit-id').value.trim();
   const movDesc = document.getElementById('f-mov-desc').value.trim();
   const movData = document.getElementById('f-mov-data').value;
 
