@@ -467,6 +467,10 @@ table{border-collapse:collapse;width:100%}
         </div>
       </div>
       <div class="form-group">
+        <label>Descrição do Prazo <span style="font-weight:400;color:var(--color-text-muted)">(aparece na Agenda)</span></label>
+        <input class="form-control" id="f-prazo-desc" placeholder="Ex: Audiência de instrução, Contestação, Perícia...">
+      </div>
+      <div class="form-group">
         <label>Resumo do Caso</label>
         <textarea class="form-control" id="f-obs" rows="3" placeholder="Objeto da ação, principais fatos..."></textarea>
       </div>
@@ -782,7 +786,7 @@ function closeModal(id) { document.getElementById(id).classList.remove('open'); 
 document.querySelectorAll('.modal-overlay').forEach(o => o.addEventListener('click', e => { if(e.target===o) o.classList.remove('open'); }));
 
 function clearForm() {
-  ['f-num','f-area','f-cliente','f-doc','f-vara','f-comarca','f-parte','f-status','f-data','f-prazo','f-valor','f-obs','f-mov-desc','f-mov-data'].forEach(id => {
+  ['f-num','f-area','f-cliente','f-doc','f-vara','f-comarca','f-parte','f-status','f-data','f-prazo','f-prazo-desc','f-valor','f-obs','f-mov-desc','f-mov-data'].forEach(id => {
     const el = document.getElementById(id);
     if(el) el.value = '';
   });
@@ -806,6 +810,7 @@ function editProcesso(id) {
   document.getElementById('f-status').value = p.status;
   document.getElementById('f-data').value = p.criadoEm||'';
   document.getElementById('f-prazo').value = p.proximoPrazo||'';
+  document.getElementById('f-prazo-desc').value = p.proximoPrazoDesc||'';
   document.getElementById('f-valor').value = p.valor||'';
   document.getElementById('f-obs').value = p.descricao||'';
   openModal('modal-processo');
@@ -824,12 +829,12 @@ function salvarProcesso() {
   if(editId) {
     const p = processos.find(x=>x.id===editId);
     if(p) {
-      Object.assign(p, {numero:num,clienteNome:cliente,vara,area:document.getElementById('f-area').value,status:document.getElementById('f-status').value,doc:document.getElementById('f-doc').value,cidade:document.getElementById('f-comarca').value,parte:document.getElementById('f-parte').value,criadoEm:document.getElementById('f-data').value||LexData.today(),proximoPrazo:document.getElementById('f-prazo').value,valor:document.getElementById('f-valor').value,descricao:document.getElementById('f-obs').value});
+      Object.assign(p, {numero:num,clienteNome:cliente,vara,area:document.getElementById('f-area').value,status:document.getElementById('f-status').value,doc:document.getElementById('f-doc').value,cidade:document.getElementById('f-comarca').value,parte:document.getElementById('f-parte').value,criadoEm:document.getElementById('f-data').value||LexData.today(),proximoPrazo:document.getElementById('f-prazo').value,proximoPrazoDesc:document.getElementById('f-prazo-desc').value.trim(),valor:document.getElementById('f-valor').value,descricao:document.getElementById('f-obs').value});
       showToast('Processo atualizado!','success');
     }
   } else {
     const movs = movDesc&&movData ? [{data:movData,desc:movDesc}] : [];
-    const novoProc = {id:LexData.uid(),numero:num,clienteNome:cliente,vara,area:document.getElementById('f-area').value,status:document.getElementById('f-status').value,doc:document.getElementById('f-doc').value,cidade:document.getElementById('f-comarca').value,parte:document.getElementById('f-parte').value,criadoEm:document.getElementById('f-data').value||LexData.today(),proximoPrazo:document.getElementById('f-prazo').value,valor:document.getElementById('f-valor').value,descricao:document.getElementById('f-obs').value,movs};
+    const novoProc = {id:LexData.uid(),numero:num,clienteNome:cliente,vara,area:document.getElementById('f-area').value,status:document.getElementById('f-status').value,doc:document.getElementById('f-doc').value,cidade:document.getElementById('f-comarca').value,parte:document.getElementById('f-parte').value,criadoEm:document.getElementById('f-data').value||LexData.today(),proximoPrazo:document.getElementById('f-prazo').value,proximoPrazoDesc:document.getElementById('f-prazo-desc').value.trim(),valor:document.getElementById('f-valor').value,descricao:document.getElementById('f-obs').value,movs};
     persistProcesso(novoProc);
     showToast('Processo cadastrado!','success');
   }

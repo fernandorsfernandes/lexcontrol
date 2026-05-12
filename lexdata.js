@@ -119,13 +119,13 @@ const eventos = get(K.eventos);
 const existing = eventos.find(e => e.processoId === proc.id && e.tipo === 'Prazo');
 if(existing) {
 existing.data = proc.proximoPrazo;
-existing.titulo = 'Prazo — ' + proc.clienteNome;
+existing.titulo = (proc.proximoPrazoDesc || 'Prazo') + ' — ' + proc.clienteNome;
 existing.local = proc.vara || '';
 existing.processo = proc.numero;
 set(K.eventos, eventos);
 } else {
 saveEvento({
-titulo: 'Prazo — ' + proc.clienteNome,
+titulo:     (proc.proximoPrazoDesc || 'Prazo') + ' — ' + proc.clienteNome,
 tipo: 'Prazo',
 data: proc.proximoPrazo,
 hora: '23:59',
