@@ -832,6 +832,7 @@ function salvarProcesso() {
     const p = processos.find(x=>x.id===editId);
     if(p) {
       Object.assign(p, {numero:num,clienteNome:cliente,vara,area:document.getElementById('f-area').value,status:document.getElementById('f-status').value,doc:document.getElementById('f-doc').value,cidade:document.getElementById('f-comarca').value,parte:document.getElementById('f-parte').value,criadoEm:document.getElementById('f-data').value||LexData.today(),proximoPrazo:document.getElementById('f-prazo').value,proximoPrazoDesc:document.getElementById('f-prazo-desc').value.trim(),valor:document.getElementById('f-valor').value,descricao:document.getElementById('f-obs').value});
+      persistProcesso(p);
       showToast('Processo atualizado!','success');
     }
   } else {
